@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
@@ -11,32 +12,35 @@
 #define GT 1
 #define ER 2
 
-static const char _op_prec[13][13] = {
-        /*  n   +   -   *   /   ^   (   )   $   f   ,   -u  c  */
-   /* n */ {ER, GT, GT, GT, GT, GT, ER, GT, GT, ER, GT, ER, ER},
-   /* + */ {LT, GT, GT, LT, LT, LT, LT, GT, GT, LT, GT, LT, LT},
-   /* - */ {LT, GT, GT, LT, LT, LT, LT, GT, GT, LT, GT, LT, LT},
-   /* * */ {LT, GT, GT, GT, GT, LT, LT, GT, GT, LT, GT, LT, LT},
-   /* / */ {LT, GT, GT, GT, GT, LT, LT, GT, GT, LT, GT, LT, LT},
-   /* ^ */ {LT, GT, GT, GT, GT, LT, LT, GT, GT, LT, GT, LT, LT},
-   /* ( */ {LT, LT, LT, LT, LT, LT, LT, EQ, ER, LT, EQ, LT, LT},
-   /* ) */ {ER, GT, GT, GT, GT, GT, ER, GT, GT, ER, GT, ER, ER},
-   /* $ */ {LT, LT, LT, LT, LT, LT, LT, ER, ER, LT, ER, LT, LT},
-   /* f */ {LT, LT, LT, LT, LT, LT, LT, EQ, ER, LT, EQ, LT, LT},
-   /* , */ {LT, LT, LT, LT, LT, LT, LT, EQ, ER, LT, EQ, LT, LT},
-   /* -u*/ {LT, GT, GT, GT, GT, GT, LT, GT, GT, LT, GT, ER, LT},
-   /* c */ {ER, GT, GT, GT, GT, GT, ER, GT, GT, ER, GT, ER, ER},
+static const char _op_prec[14][14] = {
+        /*  n   +   -   *   /   ^   (   )   $   f   ,   -u  v   = */
+   /* n */ {ER, GT, GT, GT, GT, GT, ER, GT, GT, ER, GT, ER, ER, ER},
+   /* + */ {LT, GT, GT, LT, LT, LT, LT, GT, GT, LT, GT, LT, LT, LT},
+   /* - */ {LT, GT, GT, LT, LT, LT, LT, GT, GT, LT, GT, LT, LT, LT},
+   /* * */ {LT, GT, GT, GT, GT, LT, LT, GT, GT, LT, GT, LT, LT, LT},
+   /* / */ {LT, GT, GT, GT, GT, LT, LT, GT, GT, LT, GT, LT, LT, LT},
+   /* ^ */ {LT, GT, GT, GT, GT, LT, LT, GT, GT, LT, GT, LT, LT, LT},
+   /* ( */ {LT, LT, LT, LT, LT, LT, LT, EQ, ER, LT, ER, LT, LT, LT},
+   /* ) */ {ER, GT, GT, GT, GT, GT, ER, GT, GT, ER, GT, ER, ER, ER},
+   /* $ */ {LT, LT, LT, LT, LT, LT, LT, ER, ER, LT, ER, LT, LT, LT},
+   /* f */ {LT, LT, LT, LT, LT, LT, LT, EQ, ER, LT, EQ, LT, LT, LT},
+   /* , */ {LT, LT, LT, LT, LT, LT, LT, EQ, ER, LT, EQ, LT, LT, LT},
+   /* -u*/ {LT, GT, GT, GT, GT, GT, LT, GT, GT, LT, GT, ER, LT, LT},
+   /* v */ {ER, GT, GT, GT, GT, GT, ER, GT, GT, ER, GT, ER, ER, GT},
+   /* = */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, GT, LT, LT, LT},
 };
-   /* f: with this line the opening paren isn't part of the 
-    * token. Columns are not affected */
-   /* {ER, GT, GT, GT, GT, GT, LT, GT, GT, ER, GT, ER, ER}, */
+
+static int token_strcmp(const token_t *t1, const token_t *t2) {
+  return strcmp(t1->lexem, t2->lexem);
+}
 
 parser_t *parser_create() {
   parser_t *p = (parser_t*)malloc(sizeof(parser_t));
 
-  /* p->symbol_table = list_init((void(*)(void*))token_destroy); */
-  p->parser_stack = list_init((void(*)(void*))token_destroy);
-  p->result_stack = list_init((void(*)(void*))token_destroy);
+  p->symbol_table = list_init((void(*)(void*))token_destroy, 
+                      (int(*)(const void*, const void*))token_strcmp);
+  p->parser_stack = list_init((void(*)(void*))token_destroy, NULL);
+  p->result_stack = list_init((void(*)(void*))token_destroy, NULL);
   p->operator_precedence = &_op_prec;
 
   return p;
@@ -49,14 +53,16 @@ void parser_destroy(parser_t *p) {
     list_destroy(p->parser_stack);
   if (p->result_stack)
     list_destroy(p->result_stack);
+  if (p->symbol_table)
+    list_destroy(p->symbol_table);
   /* clean up operator_precedence table if changed */
   free(p);
 }
 
 static int parser_semantics_eval(parser_t *p) {
 
-  token_t *t, *a, *b;
-  list_t *l = list_init((void(*)(void*))token_destroy);
+  token_t *t, *a, *b, *c;
+  list_t *l = list_init((void(*)(void*))token_destroy, NULL);
 
   while ((t = list_pop(p->parser_stack))->lcomp != mango_o) {
 
@@ -69,7 +75,7 @@ static int parser_semantics_eval(parser_t *p) {
       continue;
     }
 
-    a = b = NULL;
+    a = b = c = NULL;
 
     switch (t->lcomp) {
       case number:
@@ -83,9 +89,12 @@ static int parser_semantics_eval(parser_t *p) {
         else if (!strcmp("e", t->lexem))
           t->value = M_E;
         else {
-          /* TODO: free lists, token t */
-          fprintf(stderr, "Semantic error: %s not recognized.\n", t->lexem);
-          return 1;
+          /* find a previous instance of the variable or allocate it */
+          if (!(a = (token_t*)list_find(p->symbol_table, t))) {
+            a = token_init(variable, t->lexem);
+            list_push(p->symbol_table, a);
+          }
+          t->value = a->value;
         }
         list_push(p->result_stack, t);
         break;
@@ -94,6 +103,26 @@ static int parser_semantics_eval(parser_t *p) {
       case paren_open:
       case paren_close:
         token_destroy(t);
+        break;
+
+      /* asign to a variable */
+      case op_asig:
+        /* b holds the value that will be assigned */
+        b = list_pop(p->result_stack);
+        /* a holds the variable name to which we'll assign */
+        a = list_pop(p->result_stack);
+        /* find the variable in the symbol table */
+        if (!(c = (token_t*)list_find(p->symbol_table, a))) {
+          fprintf(stderr, "Semantic error: %s not in symbol table.\n",
+                          a->lexem);
+          return 5;
+        }
+        /* store the new value in the symbol table */
+        t->value = c->value = b->value;
+
+        token_destroy(a);
+        token_destroy(b);
+        list_push(p->result_stack, t);
         break;
 
       case op_add:
@@ -124,10 +153,10 @@ static int parser_semantics_eval(parser_t *p) {
           case op_neg:
             t->value = -a->value;
             break;
-					default:
-						fprintf(stderr, "Semantic error: expected an operator.\n");
-						return 2;
-						break;
+          default:
+            fprintf(stderr, "Semantic error: expected an operator.\n");
+            return 2;
+            break;
         }
         token_destroy(a); /* if NULL will be a nop */
         token_destroy(b);
@@ -168,10 +197,10 @@ static int parser_semantics_eval(parser_t *p) {
         list_push(p->result_stack, t);
         break;
 
-			default:
+      default:
         fprintf(stderr, "Semantic error: unexpected lex-comp.\n");
-				return 4;
-				break;
+        return 4;
+        break;
     }
   }
   /* destroy opening mango */
@@ -194,8 +223,8 @@ int parser_eval(parser_t *p, const char* buf, double *ret) {
    * on the tail, we should pop them from the head to keep
    * the order (maybe fix the list function names ?)) */
   list_t *tokenlist = tokenize(buf);
-	if (!tokenlist)
-		return 1;
+  if (!tokenlist)
+    return 1;
 
   token_t *stack_element, *buffr_element;
 
@@ -228,7 +257,7 @@ int parser_eval(parser_t *p, const char* buf, double *ret) {
          * instead use the implicit tree determined by mangos and the
          * result stack*/
         if (parser_semantics_eval(p))
-					return 1;
+          return 1;
         break;
 
       default:
@@ -241,7 +270,7 @@ int parser_eval(parser_t *p, const char* buf, double *ret) {
     }
   }
   *ret = ((token_t*)p->result_stack->first->data)->value;
-	return 0;
+  return 0;
 }
 
 /* vim: set sw=2 sts=2 : */

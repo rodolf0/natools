@@ -8,7 +8,7 @@
 #define ISNUM(c)   ((c>='0' && c<='9') ? 1:0)
 #define MAKES_UNARYOP(c) (c=='+' || c=='-' || c=='*' || \
                           c=='/' || c=='^' || c==',' || \
-                          c=='(' || c=='\0' ? 1:0)
+                          c=='(' || c=='=' || c=='\0' ? 1:0)
 
 
 typedef struct _scanner_t {

@@ -15,9 +15,10 @@ typedef struct _list {
 
   size_t size;
   void (*free)(void*);
+  int (*cmp)(const void*, const void*);
 } list_t;
 
-list_t *list_init(void (*free)(void*));
+list_t *list_init(void (*free)(void*), int (*cmp)(const void*, const void*));
 void list_destroy(list_t *l);
 
 /* push item at the head of the list */
@@ -31,6 +32,9 @@ list_node_t *list_queue(list_t *l, void *d);
 
 /* dequeue item from the tail of the list */
 void *list_dequeue(list_t *l);
+
+/* find data in list */
+void *list_find(list_t *l, void *d);
 
 #endif /*  _LIST_H_ */
 

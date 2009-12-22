@@ -1,15 +1,16 @@
 #include <stdlib.h>
 #include "list.h"
 
-list_t *list_init(void (*free)(void*)) {
+list_t *list_init(void (*free)(void*), int (*cmp)(const void*, const void*)) {
   list_t *l = (list_t*)malloc(sizeof(list_t));
 
   l->first = NULL;
   l->last = NULL;
   l->free = free;
+  l->cmp = cmp;
   l->size = 0;
 
-	return l;
+  return l;
 }
 
 void list_destroy(list_t *l) {
@@ -29,6 +30,20 @@ void list_destroy(list_t *l) {
   }
 
   free(l);
+}
+
+/* find data in list */
+void *list_find(list_t *l, void *d) {
+  if (!l || !l->cmp)
+    return NULL;
+
+  list_node_t *node;
+
+  for (node = l->first; node; node = node->next) {
+    if (l->cmp(node->data, d) == 0)
+      return node->data;
+  }
+  return NULL;
 }
 
 /* push item at the head of the list */

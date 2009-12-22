@@ -4,11 +4,11 @@
 #include <cnash/list.h>
 
 typedef struct _parser {
-  /* list_t *symbol_table; */ /* list of token_t's */
+  list_t *symbol_table; /* list of token_t's. in this case only keep variables */
   list_t *parser_stack;
   list_t *result_stack;
 
-  const char (*operator_precedence)[13][13];
+  const char (*operator_precedence)[14][14];
 
 } parser_t;
 

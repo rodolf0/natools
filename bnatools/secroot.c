@@ -1,22 +1,23 @@
-#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <math.h>
 #include <cnash/parser.h>
 
-#define c_epsilon 0.0001
+#define c_epsilon 0.00001
 #define c_maxiter 1000
 
 int main(int argc, char *argv[]) {
-	double f0, f1;
+  double f0, f1 ;
+  double x0 = 0.0, x1, d;
   double epsilon = c_epsilon;
-	double x0 = 0.0, x1;
   int i, max_iter = c_maxiter;
-	int ret;
+  int ret, calc_x1 = 1, verbose = 0;
+  char buf[256];
 
 
   /* parse command line */
-  while ((ret = getopt(argc, argv, "e:i:0:")) != -1) {
+  while ((ret = getopt(argc, argv, "ve:i:0:1:")) != -1) {
     switch (ret) {
       case 'e':
         epsilon = atof(optarg);
@@ -24,47 +25,78 @@ int main(int argc, char *argv[]) {
       case 'i':
         max_iter = atoi(optarg);
         break;
-			case '0':
-				x0 = atof(optarg);
-				break;
+      case '0':
+        x0 = atof(optarg);
+        break;
+      case '1':
+        x1 = atof(optarg);
+        calc_x1 = 0;
+        break;
+      case 'v':
+        verbose = 1;
+        break;
       default:
-				return 1;
+        return 1;
     }
   }
-	if (optind >= argc) {
-		fprintf(stderr, "usage: %s [-e epsilon] [-i max-iterations] -0 <x0> "
-                      "<function eg: cos(x)-x^3>\n", argv[0]);
-		return 0;
-	}
+  if (optind >= argc || argc < 2) {
+    fprintf(stderr, "usage: %s [-v] [-e epsilon] [-i max-iterations] -0 <x0> "
+                      "[-1 <x1>] <function eg: cos(x)-x^3>\n", argv[0]);
+    return 0;
+  }
 
-	ret = 0;
-	parser_t *p = parser_create();
+  ret = 0;
+  parser_t *p = parser_create();
 
-	/* secant method */
-	x1 = x0 + 0.1;
-	for (i = 0; i < max_iter; i++) {
+  /*                 f(X_n)                   |           f(X_n) - f(X_n-1) 
+   * X_n+1 = X_n - --------- (Newton's method)|f'(X_n) ~ -------------------
+   *                f'(X_n)                   |              X_n - X_n-1
+   *
+   *                   X_n - X_n-1
+   * X_n+1 = X_n - ------------------- * f(X_n)
+   *                f(X_n) - f(X_n-1)
+   * */
 
-		f0 = replace_x();
-		f1 = replace_x();
+  /* secant method */
+  x1 = calc_x1 ? x0 + 1.0 : x1;
+  for (i = 0; i < max_iter; i++) {
 
-		ret |= parser_eval(p, , &f0);
-		ret |= parser_eval(p, , &f1);
+    /* load x=x0 into the parser */
+    snprintf(buf, sizeof(buf), "x=%f", x0);
+    ret |= parser_eval(p, buf, &f0);
+    /* evaluate f(x0) */
+    ret |= parser_eval(p, argv[optind], &f0);
 
-		if () {
-			fprintf(stderr, "Couldn't eval [%s].\n", argv[optind]);
-			break;
-		}
+    /* load x=x1 into the parser */
+    snprintf(buf, sizeof(buf), "x=%f", x1);
+    ret |= parser_eval(p, buf, &f1);
+    /* evaluate f(x1) */
+    ret |= parser_eval(p, argv[optind], &f1);
 
-		d = 
-	}
+    if (ret) {
+      fprintf(stderr, "Couldn't eval [%s] x0=%f x1=%f.\n",
+              argv[optind], x0, x1);
+      break;
+    }
+
+    d = f1 * (x1 - x0) / (f1 - f0);
+    if (fabs(d) < epsilon)
+      break;
+
+    x0 = x1;
+    x1 = x1 - d;
+
+    if (verbose) {
+      fprintf(stderr, "x=%f; f(x)=%f; d=%f; xn-1=%f\n",
+                      x1, f1, d, x0);
+    }
+  }
+
+  printf("%.15g\n", x1);
   
-	parser_destroy(p);
+  parser_destroy(p);
 
   return ret;
-}
-
-char *replace_x(const char *buf, double x) {
-
 }
 
 /* vim: set sw=2 sts=2 : */

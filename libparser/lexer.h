@@ -20,6 +20,7 @@ typedef enum _lex_component {
   op_comma,
   op_neg,
   variable,
+  op_asig,
   mango_o = 50,
   mango_e,
   mango_c
