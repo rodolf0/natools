@@ -12,6 +12,7 @@ AC_CONFIG_FILES([
 Makefile
 libbaas/Makefile
 libparser/Makefile
+libcnash/Makefile
 bnatools/Makefile
 ])
 AC_OUTPUT

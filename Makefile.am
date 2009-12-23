@@ -1,1 +1,1 @@
-SUBDIRS = libbaas libparser bnatools
+SUBDIRS = libbaas libparser libcnash bnatools
