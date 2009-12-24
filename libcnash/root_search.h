@@ -1,36 +1,15 @@
 #ifndef _ROOT_SEARCH_H_
 #define _ROOT_SEARCH_H_
 
-#include <cnash/parser.h>
+#include <cnash/cnash.h>
+#include <cnash/function.h>
 
-typedef struct _roots {
-  /* the function to find the root for */
-  char *function;
-  /* x0 and x1 are initial points 
-   * some methods use both some just one */
-  double x0, x1;
-  /* the actual result */
-  double root;
+extern int root_search_verbose;
 
-  /* epsilon: max error before search stops */
-  double epsilon;
-  /* maximum iterations before giving up */
-  int max_iterations;
-
-  parser_t *parser;
-  /* output aproximations */
-  int verbose;
-} roots_t;
-
-roots_t *roots_init(const char *f, double x0, double x1,
-                    double epsilon, double max_iterations);
-
-void roots_destroy(roots_t *rs);
-
-int root_secant(roots_t *rs);
-int root_newton(roots_t *rs);
-int root_bisection(roots_t *rs);
-int root_regulafalsi(roots_t *rs);
+int root_secant(function_t *f, interval_t *i, stop_cond_t *s, double *r);
+int root_newton(function_t *f, double x0, stop_cond_t *s, double *r);
+int root_bisection(function_t *f, interval_t *i, stop_cond_t *s, double *r);
+int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, double *r);
 
 #endif /* _ROOT_SEARCH_H_ */
 

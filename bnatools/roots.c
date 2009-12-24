@@ -2,16 +2,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <cnash/cnash.h>
+#include <cnash/function.h>
 #include <cnash/root_search.h>
 
-#define c_epsilon "1.0e-15"
-#define c_maxiter "1000"
-
 int main(int argc, char *argv[]) {
-  int ret, verbose = 0;
+  int ret;
   char *x0 = NULL, *x1 = NULL;
-  char *epsilon = c_epsilon, *func = NULL;
-  char *max_iter = c_maxiter, *method = "secant";
+  char *epsilon = EPSILON, *func = NULL;
+  char *max_iter = MAXITER, *method = "secant";
+  double r;
 
   /* parse command line */
   while ((ret = getopt(argc, argv, "vm:e:i:a:b:")) != -1) {
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
         method = optarg;
         break;
       case 'v':
-        verbose = 1;
+        root_search_verbose = 1;
         break;
       default:
         return 1;
@@ -46,19 +46,18 @@ int main(int argc, char *argv[]) {
     func = argv[optind];
   }
 
-  roots_t *rs = roots_init(func, atof(x0), x1 ? atof(x1) : (atof(x0) + 1.0), 
-                           atof(epsilon), atoi(max_iter));
-
-  rs->verbose = verbose;
+  function_t *f = function_create(func);
+  interval_t *i = interval_create(atof(x0), x1 ? atof(x1) : (atof(x0) + 1.0));
+  stop_cond_t *s = stop_cond_create(atof(epsilon), atoi(max_iter));
 
   if (!strcmp(method, "secant"))
-    ret = root_secant(rs);
+    ret = root_secant(f, i, s, &r);
   else if (!strcmp(method, "bisection"))
-    ret = root_bisection(rs);
+    ret = root_bisection(f, i, s, &r);
   else if (!strcmp(method, "regulafalsi"))
-    ret = root_regulafalsi(rs);
+    ret = root_regulafalsi(f, i, s, &r);
   else if (!strcmp(method, "newton"))
-    ret = root_newton(rs);
+    ret = root_newton(f, atof(x0), s, &r);
   else {
     fprintf(stderr, "Method not recognized: %s\n", method);
     return 1;
@@ -67,10 +66,12 @@ int main(int argc, char *argv[]) {
   if (ret) {
     fprintf(stderr, "%s method failed (ret: %d)\n", method, ret);
   } else {
-    printf("%.15g\n", rs->root);
+    printf("%.15g\n", r);
   }
 
-  roots_destroy(rs);
+  function_destroy(f);
+  interval_destroy(i);
+  stop_cond_destroy(s);
   
   return ret;
 }
