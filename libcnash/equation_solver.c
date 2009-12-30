@@ -2,7 +2,8 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "root_search.h"
+#include "calculus.h"
+#include "equation_solver.h"
 
 int root_search_verbose = 0;
 
@@ -46,16 +47,14 @@ int root_secant(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
 }
 
 int root_newton(function_t *f, double x0, stop_cond_t *s, double *r) {
-  const double dx = 1.0e-7; /* infinitesim */
-  double f0, f1, df0_dx, d;
+  double f0, df0_dx, d;
   int j;
 
   for (j = 0; j < s->max_iterations; j++) {
     /* evaluate function at x0 */
     if (evaluate_function(f, x0, &f0)) return 1;
     /* evaluate f'(x) at x0 */
-    if (evaluate_function(f, x0 + dx, &f1)) return 1;
-    df0_dx = (f1 - f0) / dx;
+    if (derivate_5p(f, x0, 0.05, &df0_dx)) return 2;
     /* check stop condition */
     if (fabs(d = f0 / df0_dx) < s->epsilon) break;
 

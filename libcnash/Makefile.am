@@ -2,7 +2,9 @@ lib_LTLIBRARIES = libcnash.la
 libcnash_la_SOURCES = \
 	cnash.c cnash.h \
 	function.c function.h \
-	root_search.c root_search.h
+	equation_solver.c equation_solver.h \
+	interpolation.c interpolation.h \
+	calculus.c calculus.h
 
 libcnash_la_CPPFLAGS = -I.. -Wall
 libcnash_la_LDFLAGS = -lm -version-info 0:1:0

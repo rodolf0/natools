@@ -4,7 +4,7 @@
 
 #include <cnash/cnash.h>
 #include <cnash/function.h>
-#include <cnash/root_search.h>
+#include <cnash/equation_solver.h>
 
 int main(int argc, char *argv[]) {
   int ret;
