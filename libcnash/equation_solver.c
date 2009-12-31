@@ -168,4 +168,36 @@ int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
   return 0;
 }
 
+/* System of linear equations */
+
+/* Solve a system of linear equations using Gauss-Seidel method
+ * A: the coefficients (A[i,i] shouldn't be 0)
+ * x: sussesive aproximations
+ */
+int roots_gauss_seidel(matrix_t *A, vector_t *x, vector_t *b, stop_cond_t *s) {
+  int i, j, k;
+  double *xi, *xj, *mij, *bi, *mii, d;
+
+  for (k = 0; k < s->max_iterations; k++) {
+    for (i = 0, d = 0.0; i < A->r; i++) {
+
+      for (j = 0; j < A->r; j++) {
+        if (j == i) continue; /*  j != i */
+        mij = matrix_at(A, i, j);
+        xj = vector_at(x, j);
+        d += *mij * *xj;
+      }
+      xi = vector_at(x, i);
+      bi = vector_at(b, i);
+      mii = matrix_at(A, i, i);
+
+      *xi = (*bi - d) / *mii;
+    }
+
+    /* TODO: check stop condition */
+    /* || b - A * x || / || b || < e */
+  }
+  return 0;
+}
+
 /* vim: set sw=2 sts=2 : */

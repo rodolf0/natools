@@ -1,5 +1,7 @@
+#include <math.h>
 #include "cnash.h"
 #include "calculus.h"
+#include "interpolation.h"
 
 /* calculates de derivate of f at f(x0)
  *             _______
@@ -9,6 +11,8 @@
  * |     /
  * |______________________
  *    x0-h   x0    x0+h
+ *
+ * a good h is h = sqrt(epsilon) * x0
  * */
 int derivate_3p(function_t *f, double x0, double h, double *r) {
   double p0, p1;
@@ -29,6 +33,13 @@ int derivate_5p(function_t *f, double x0, double h, double *r) {
   if (evaluate_function(f, x0 + 2.0 * h, &p3)) return 1;
 
   *r = (p0 + 8.0 * (p2 - p1) - p3) / (12.0 * h);
+  return 0;
+}
+
+/* TODO: extend this to a 5 point aproach ? */
+int derivate(function_t *f, int n, double x0, double h, double *r) {
+  if (finite_difference(f, n, x0, h, r)) return 1;
+  *r = *r / pow(h, n);
   return 0;
 }
 

@@ -1,6 +1,7 @@
 lib_LTLIBRARIES = libcnash.la
 libcnash_la_SOURCES = \
 	cnash.c cnash.h \
+	combinatorics.c combinatorics.h \
 	function.c function.h \
 	equation_solver.c equation_solver.h \
 	interpolation.c interpolation.h \
