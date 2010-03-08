@@ -7,6 +7,7 @@ typedef struct _parser {
   list_t *symbol_table; /* list of token_t's. in this case only keep variables */
   list_t *parser_stack;
   list_t *result_stack;
+  list_t *tokenlist; /* input buffer */
 
   const char (*operator_precedence)[14][14];
 

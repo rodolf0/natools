@@ -8,6 +8,8 @@ size_t strcount(const char *where, const char *what);
 size_t strrep(char *dest, const char *source,
 							const char *what, const char *with);
 
+void chomp(char *s);
+
 #endif /* _XSTRING_H_ */
 
 /* vim: set sw=2 sts=2 : */

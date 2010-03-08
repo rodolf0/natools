@@ -57,4 +57,12 @@ size_t strrep(char *dest, const char *source,
 	return count;
 }
 
+
+/* clear new line chars from eol */
+void chomp(char *s) {
+  int l = strlen(s) - 1;
+  while (l >= 0 && (s[l] == '\n' || s[l] == '\r'))
+    s[l--] = '\0';
+}
+
 /* vim: set sw=2 sts=2 : */
