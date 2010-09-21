@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "list.h"
 
-list_t *list_init(void (*free)(void*), int (*cmp)(const void*, const void*)) {
+list_t * list_init(void (*free)(void*), int (*cmp)(const void*, const void*)) {
   list_t *l = (list_t*)malloc(sizeof(list_t));
 
   l->first = NULL;
@@ -19,13 +19,10 @@ void list_destroy(list_t *l) {
 
   list_node_t *t, *n = l->first;
   while ((t = n)) {
-
     if (l->free)
       l->free(n->data);
-
     n = n->next;
     free(t);
-
     l->size--;
   }
 
@@ -33,12 +30,11 @@ void list_destroy(list_t *l) {
 }
 
 /* find data in list */
-void *list_find(list_t *l, void *d) {
+void * list_find(list_t *l, void *d) {
   if (!l || !l->cmp)
     return NULL;
 
   list_node_t *node;
-
   for (node = l->first; node; node = node->next) {
     if (l->cmp(node->data, d) == 0)
       return node->data;
@@ -46,8 +42,8 @@ void *list_find(list_t *l, void *d) {
   return NULL;
 }
 
-/* push item at the head of the list */
-list_node_t *list_push(list_t *l, void *d) {
+/* push item at the head of the list, return the created node */
+list_node_t * list_push(list_t *l, void *d) {
   if (!l)
     return NULL;
 
@@ -69,7 +65,7 @@ list_node_t *list_push(list_t *l, void *d) {
 }
 
 /* pop item from the head of the list */
-void *list_pop(list_t *l) {
+void * list_pop(list_t *l) {
   if (!l)
     return NULL;
 
@@ -92,7 +88,7 @@ void *list_pop(list_t *l) {
 }
 
 /* enqueue item at the tail of the list */
-list_node_t *list_queue(list_t *l, void *d) {
+list_node_t * list_queue(list_t *l, void *d) {
   if (!l)
     return NULL;
 
@@ -114,7 +110,7 @@ list_node_t *list_queue(list_t *l, void *d) {
 }
 
 /* dequeue item from the tail of the list */
-void *list_dequeue(list_t *l) {
+void * list_dequeue(list_t *l) {
   if (!l)
     return NULL;
 
