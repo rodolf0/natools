@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   }
 
   parser_t *p = parser_create();
-  
+
   if (interactive) {
     char *buf = NULL;
     while ((buf = readline(">> "))) {
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
       if (verbose) {
         for (n = p->symbol_table->first; n; n = n->next)
-          fprintf(stderr, "%s = %f\n", 
+          fprintf(stderr, "%s = %f\n",
               ((token_t*)n->data)->lexem,
               ((token_t*)n->data)->value);
       }

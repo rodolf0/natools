@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 #include <cnash/cnash.h>
@@ -72,7 +73,7 @@ int main(int argc, char *argv[]) {
   function_destroy(f);
   interval_destroy(i);
   stop_cond_destroy(s);
-  
+
   return ret;
 }
 

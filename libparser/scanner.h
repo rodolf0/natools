@@ -3,9 +3,9 @@
 
 #include <sys/types.h> /* size_t */
 
-#define ISALPHA(c) ((c>='a'&& c<='z') || (c>='A'&& c<='Z') ? 1:0)
-#define ISWHITE(c) ((c==' '|| c=='\t' || c=='\n') ? 1:0)
-#define ISNUM(c)   ((c>='0' && c<='9') ? 1:0)
+#define IS_ALPHA(c) ((c>='a'&& c<='z') || (c>='A'&& c<='Z') ? 1:0)
+#define IS_WHITE(c) ((c==' '|| c=='\t' || c=='\n') ? 1:0)
+#define IS_NUM(c)   ((c>='0' && c<='9') ? 1:0)
 #define MAKES_UNARYOP(c) (c=='+' || c=='-' || c=='*' || \
                           c=='/' || c=='^' || c==',' || \
                           c=='(' || c=='=' || c=='\0' ? 1:0)
@@ -16,7 +16,7 @@ typedef struct _scanner_t {
 
   char *buffer;
   size_t b_length;
-  
+
   char current_char;
   char next_char;
 

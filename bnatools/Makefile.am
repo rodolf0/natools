@@ -1,4 +1,7 @@
+AM_CFLAGS = -I$(top_srcdir) @AM_CFLAGS@
+
 bin_PROGRAMS = aparser roots
+
 aparser_SOURCES = aparser.c
 aparser_LDADD = -lreadline ../libparser/libparser.la
 

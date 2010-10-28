@@ -48,7 +48,7 @@ parser_t *parser_create() {
   parser_t *p = (parser_t*)malloc(sizeof(parser_t));
 
   p->operator_precedence = &_op_prec;
-  p->symbol_table = list_init((void(*)(void*))token_destroy, 
+  p->symbol_table = list_init((void(*)(void*))token_destroy,
                       (int(*)(const void*, const void*))token_strcmp);
 
   p->parser_stack = NULL;
@@ -162,7 +162,7 @@ static int parser_error_check(parser_t *p) {
     case paren_close: /* ps_top = paren_close */
       /* check how many elements should the result stack have */
       for (ps_top = ps_top->next;
-           ps_top && 
+           ps_top &&
              tokenLComp(ps_top) != paren_open &&
              tokenLComp(ps_top) != function;
            ps_top = ps_top->next) {
@@ -416,7 +416,6 @@ static int parser_semantics_eval(parser_t *p) {
 }
 
 int parser_eval(parser_t *p, const char* buf, double *ret) {
-#define Token(lnode) ((token_t*)lnode->data)
 
   if (!buf || buf[0] == '\0') {
     fprintf(stderr, "Can't evaluate empty expresion.\n");
@@ -439,12 +438,12 @@ int parser_eval(parser_t *p, const char* buf, double *ret) {
 
   token_t *stack_element, *buffr_element;
 
-  for (stack_element = Token(p->parser_stack->first),
-       buffr_element = Token(p->tokenlist->first);
+  for (stack_element = list_peek_head(p->parser_stack),
+       buffr_element = list_peek_head(p->tokenlist);
        stack_element->lcomp != stack_empty ||
        buffr_element->lcomp != stack_empty;
-       stack_element = Token(p->parser_stack->first),
-       buffr_element = Token(p->tokenlist->first)
+       stack_element = list_peek_head(p->parser_stack),
+       buffr_element = list_peek_head(p->tokenlist)
       ) {
 
     switch ((*p->operator_precedence)[stack_element->lcomp]
@@ -502,7 +501,6 @@ int parser_eval(parser_t *p, const char* buf, double *ret) {
   parser_reset(p);
 
   return 0;
-#undef Token
 }
 
 /* vim: set sw=2 sts=2 : */

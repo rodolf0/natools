@@ -33,7 +33,7 @@ size_t strrep(char *dest, const char *source,
 	off_dest = dest;
 	off_source = source;
 	off_found = source;
-			
+
 	while ((off_found = strstr(off_found, what))) {
 		/* copy prefix */
 		strncpy(off_dest, off_source, off_found - off_source);
@@ -48,12 +48,12 @@ size_t strrep(char *dest, const char *source,
 
 		count++;
 	}
-	
+
 	/* copy suffix */
 	n = strlen(off_source);
 	strncpy(off_dest, off_source, n);
 	off_dest[n] = '\0';
-	
+
 	return count;
 }
 

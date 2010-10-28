@@ -25,7 +25,7 @@ list_t *tokenize(const char *buffer) {
   char tok_buf[256];
 
   while (scanner->next_char) {
-    while (ISWHITE(scanner->next_char)) {
+    while (IS_WHITE(scanner->next_char)) {
       scanner_readchar(scanner);
     }
 
@@ -90,15 +90,15 @@ lex_component scan_alphanums(scanner_t *s) {
   while (1) {
     switch (state) {
       case 0:
-        if (ISALPHA(s->next_char))
+        if (IS_ALPHA(s->next_char))
           state = 1;
         else
           return no_match;
         break;
 
       case 1:
-        if (ISALPHA(s->next_char) ||
-            ISNUM(s->next_char))
+        if (IS_ALPHA(s->next_char) ||
+            IS_NUM(s->next_char))
           state = 1;
         else if (s->next_char == '(')
           state = 2;
@@ -110,7 +110,7 @@ lex_component scan_alphanums(scanner_t *s) {
         return function;
         break;
     }
-    scanner_readchar(s);  
+    scanner_readchar(s);
   }
   return no_match;
 }
@@ -121,7 +121,7 @@ lex_component scan_numbers(scanner_t *s) {
   while (1) {
     switch (state) {
       case 0:
-        if (ISNUM(s->next_char))
+        if (IS_NUM(s->next_char))
           state = 1;
         else
           return no_match;
@@ -129,7 +129,7 @@ lex_component scan_numbers(scanner_t *s) {
 
       /* integer part */
       case 1:
-        if (ISNUM(s->next_char))
+        if (IS_NUM(s->next_char))
           state = 1;
         else if (s->next_char == '.')
           state = 2;
@@ -142,14 +142,14 @@ lex_component scan_numbers(scanner_t *s) {
 
       /* fractional part */
       case 2:
-        if (ISNUM(s->next_char))
+        if (IS_NUM(s->next_char))
           state = 3;
         else
           return no_match;
         break;
 
       case 3:
-        if (ISNUM(s->next_char))
+        if (IS_NUM(s->next_char))
           state = 3;
         else if (s->next_char == 'e' ||
                    s->next_char == 'E')
@@ -157,13 +157,13 @@ lex_component scan_numbers(scanner_t *s) {
         else
           return number;
         break;
-        
+
       /* exponent sign */
       case 4:
         if (s->next_char == '-' ||
             s->next_char == '+')
           state = 5;
-        else if (ISNUM(s->next_char))
+        else if (IS_NUM(s->next_char))
           state = 6;
         else
           return no_match;
@@ -171,14 +171,14 @@ lex_component scan_numbers(scanner_t *s) {
 
       /* exponent */
       case 5: /* at least one digit */
-        if (ISNUM(s->next_char))
+        if (IS_NUM(s->next_char))
           state = 6;
         else
           return no_match;
         break;
 
       case 6:
-        if (ISNUM(s->next_char))
+        if (IS_NUM(s->next_char))
           state = 6;
         else
           return number;
