@@ -210,7 +210,7 @@ static int parser_semantics_eval(parser_t *p) {
     if (t->lcomp == mango_e) {
       /* each mango_e may represent a function parameter if inside
        * a function. if func_params == 1 the function may take no
-       * parameters too (eg random). This should complement with 
+       * parameters too (eg random). This should complement with
        * error checking to validate */
       func_params++;
 
@@ -287,7 +287,7 @@ static int parser_semantics_eval(parser_t *p) {
         b = list_pop(p->result_stack);
       case op_neg:
         a = list_pop(p->result_stack);
-        
+
         switch (t->lcomp) {
           case op_add:
             t->value = a->value + b->value;
@@ -496,6 +496,17 @@ int parser_eval(parser_t *p, const char* buf, double *ret) {
 
   /* get result and de-allocate resources */
   t = list_pop(p->result_stack);
+
+  /* keep special symbol 'ans' with previous result */
+  token_t *sans, *ans = token_init(variable, "ans");
+  if ((sans = list_find(p->symbol_table, ans))) {
+    sans->value = t->value;
+    token_destroy(ans);
+  } else {
+    ans->value = t->value;
+    list_push(p->symbol_table, ans);
+  }
+
   *ret = t->value;
   token_destroy(t);
   parser_reset(p);
