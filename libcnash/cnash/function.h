@@ -1,7 +1,7 @@
 #ifndef _FUNCTION_H_
 #define _FUNCTION_H_
 
-#include <cnash/parser.h>
+#include <parser/parser.h>
 
 typedef struct _function {
   /* the function f(x) */

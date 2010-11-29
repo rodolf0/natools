@@ -1,8 +1,8 @@
 #ifndef _LEXER_H_
 #define _LEXER_H_
 
-#include <cnash/list.h>
-#include "scanner.h"
+#include <baas/list.h>
+#include <parser/scanner.h>
 
 /* type of tokens: lexical components */
 typedef enum _lex_component {

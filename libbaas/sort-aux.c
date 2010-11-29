@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "sort.h"
+#include <baas/sort.h>
 
 /* get to offset i of size sz from a */
 #define IDX(a, i) (a + sz * (i))

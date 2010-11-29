@@ -1,6 +1,6 @@
-#include "cnash.h"
-#include "interpolation.h"
-#include "combinatorics.h"
+#include <cnash/cnash.h>
+#include <cnash/interpolation.h>
+#include <cnash/combinatorics.h>
 
 /* Newton's interpolation polynomial:
  *

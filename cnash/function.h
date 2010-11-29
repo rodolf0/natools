@@ -1,1 +1,0 @@
-../libcnash/function.h

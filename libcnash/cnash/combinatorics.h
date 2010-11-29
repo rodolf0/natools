@@ -1,5 +1,5 @@
 #ifndef _COMBINATORICS_H_
-#define _COMBINATORICS_H_ 
+#define _COMBINATORICS_H_
 
 int factorial(int n);
 int k_combinations(int n, int k);

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../sort.h"
-#include "../sort-cmp.h"
+#include <baas/sort.h>
+#include <baas/sort-cmp.h>
 
 void print_array_s(char **a, int n) {
   int i;

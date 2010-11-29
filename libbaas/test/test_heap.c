@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "../heap.h"
+#include <baas/heap.h>
 
 int int_cmp(const int *a, const int *b) {
   return (*a > *b ? -1 : *b > *a ? 1 : 0);

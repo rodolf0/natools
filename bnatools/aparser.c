@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <unistd.h>
-#include <cnash/lexer.h>
-#include <cnash/parser.h>
-#include <cnash/list.h>
-#include <cnash/xstring.h>
+#include <parser/lexer.h>
+#include <parser/parser.h>
+#include <baas/list.h>
+#include <baas/xstring.h>
 
 int main(int argc, char *argv[]) {
   int ret = 0, verbose = 0, interactive = 0;

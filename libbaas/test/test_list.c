@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include "../list.h"
-#include "../heap.h"
+#include <baas/list.h>
+#include <baas/heap.h>
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {

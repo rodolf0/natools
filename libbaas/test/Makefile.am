@@ -1,8 +1,8 @@
-AM_CFLAGS = -I$(top_srcdir) @AM_CFLAGS@
 
 bin_PROGRAMS = test_list test_sort \
 							 test_heap test_bignum test_bits \
 							 test_modarithmetic
+
 
 test_list_SOURCES = test_list.c ../list.c
 test_sort_SOURCES = test_sort.c ../sort.c ../sort-aux.c

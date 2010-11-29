@@ -1,1 +1,0 @@
-../libcnash/equation_solver.h

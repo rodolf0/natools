@@ -15,8 +15,12 @@ typedef struct _bstree {
   free_func_t free;
 } bstree_t;
 
-bstree_t * bstree_init();
+bstree_t * bstree_init(free_func_t f, cmp_func_t c);
 void bstree_destroy(bstree_t *t);
+
+bst_node_t * bstree_insert(bstree_t *t, void *data);
+void bstree_delete(bstree_t *t, void *data);
+bst_node_t * bstree_find(bstree_t *t, void *data);
 
 #endif /* _BSTREE_H_ */
 

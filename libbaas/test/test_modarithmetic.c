@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
-#include "../mod-arithmetic.h"
+#include <baas/mod-arithmetic.h>
 
 int main(int argc, char *argv[]) {
   uint64_t prime = atoll(argv[1]);

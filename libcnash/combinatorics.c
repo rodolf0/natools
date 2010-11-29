@@ -1,4 +1,4 @@
-#include "combinatorics.h"
+#include <cnash/combinatorics.h>
 
 int factorial(int n) {
   int r = 1, i;

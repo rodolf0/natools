@@ -1,8 +1,8 @@
 #ifndef _INTERPOLATION_H_
 #define _INTERPOLATION_H_
 
-#include "cnash.h"
-#include "function.h"
+#include <cnash/cnash.h>
+#include <cnash/function.h>
 
 int interpolate_newton(vector2_t *x, int n, double x0, double *r);
 int finite_difference(function_t *f, int n, double x0, double h, double *r);

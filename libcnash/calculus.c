@@ -1,7 +1,7 @@
 #include <math.h>
-#include "cnash.h"
-#include "calculus.h"
-#include "interpolation.h"
+#include <cnash/cnash.h>
+#include <cnash/calculus.h>
+#include <cnash/interpolation.h>
 
 /* calculates de derivate of f at f(x0)
  *             _______

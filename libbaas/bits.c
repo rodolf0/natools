@@ -1,4 +1,5 @@
 #include <string.h>
+#include <baas/bits.h>
 
 /* int_to_bits: convert integer to bit-string */
 void int_to_bits(int i, char *bits, int length) {

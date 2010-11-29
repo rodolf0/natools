@@ -10,8 +10,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "parser.h"
-#include "lexer.h"
+#include <parser/parser.h>
+#include <parser/lexer.h>
 
 /* operator precedence table */
 #define LT -1

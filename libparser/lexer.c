@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lexer.h"
+#include <parser/lexer.h>
 
 /* available lex-comp scanners that the tokenize function
  * will recognize */
