@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 #include <unistd.h>
 #include <parser/lexer.h>
 #include <parser/parser.h>
@@ -35,6 +36,15 @@ int main(int argc, char *argv[]) {
 
   if (interactive) {
     char *buf = NULL;
+    char histfile[256];
+
+    snprintf(histfile, sizeof(histfile),
+             "%s/.aparser_history", getenv("HOME"));
+
+    using_history();
+    read_history(histfile);
+    stifle_history(50);
+
     while ((buf = readline(">> "))) {
       chomp(buf);
 
@@ -49,8 +59,11 @@ int main(int argc, char *argv[]) {
               ((token_t*)n->data)->lexem,
               ((token_t*)n->data)->value);
       }
+      add_history(buf);
       free(buf);
     }
+    printf("\n");
+    write_history(histfile);
 
   } else if (optind < argc) {
     if ((ret = parser_eval(p, argv[optind], &r)))
