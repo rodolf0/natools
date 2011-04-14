@@ -19,18 +19,18 @@ AC_SUBST(ac_aux_dir)
 AC_SUBST([abs_srcdir], ["`cd $srcdir && pwd`"])
 AC_SUBST([abs_builddir], ["`pwd`"])
 
-AM_CFLAGS="-g -Wall -Werror -Wno-uninitialized -O0"
-AC_SUBST([AM_CFLAGS])
+#AM_CFLAGS="-g -Wall -Werror -Wno-uninitialized -O0"
+#AC_SUBST([AM_CFLAGS])
 #AC_SUBST([AM_LDFLAGS])
 
 # check for C preprocessor and compiler, libtool, install, ...
-OLD_CFLAGS=$CXXFLAGS
+OLD_CFLAGS=$CFLAGS
 AC_PROG_CPP
 AC_PROG_CC
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 # reset compiler flags to initial flags
-CFLAGS=$OLD_CXXFLAGS
+CFLAGS=$OLD_CFLAGS
 
 # use the C compiler for the following checks
 AC_LANG([C])

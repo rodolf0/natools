@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+cleanfiles=(
+  Makefile.in
+  aclocal.m4
+  bnatools/Makefile.in
+  configure
+  build/
+  libbaas/Makefile.in
+  libbaas/test/.deps/
+  libbaas/test/Makefile
+  libbaas/test/Makefile.in
+  libcnash/Makefile.in
+  libparser/Makefile.in
+)
+
+wdir="$(dirname $0)"
+
+for f in ${cleanfiles[@]}; do
+  if [ "$wdir" = "$wdir/$f" ]; then
+    continue
+  elif [ -d "$wdir/$f" ]; then
+    rm -rf "$wdir/$f"
+  elif [ -f "$wdir/$f" ]; then
+    rm -f "$wdir/$f"
+  fi
+done
