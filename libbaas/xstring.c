@@ -1,7 +1,7 @@
 /* Extended string functions */
 
 #include <string.h>
-#include <baas/xstring.h>
+#include "baas/xstring.h"
 
 /* return occurrences of what in where */
 size_t strcount(const char *where, const char *what) {

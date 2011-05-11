@@ -7,13 +7,13 @@
 
 int root_search_verbose = 0;
 
-/*                 f(X_n)                   
+/*                 f(X_n)
  * X_n+1 = X_n - --------- (Newton's method)
- *                f'(X_n)                   
+ *                f'(X_n)
  *
- *            f(X_n) - f(X_n-1) 
+ *            f(X_n) - f(X_n-1)
  * f'(X_n) ~ -------------------
- *               X_n - X_n-1    
+ *               X_n - X_n-1
  *
  *                   X_n - X_n-1
  * X_n+1 = X_n - ------------------- * f(X_n)  (Secant method)
@@ -116,7 +116,7 @@ int root_bisection(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
 /* x0 and x1 are the endpoints for the search interval
  * Aproximate the the root of the function by finding
  * the root of the secant.
- * 
+ *
  * down-weighting is applied to improve method and
  * make it suprlinear convergent.
  * */
@@ -151,7 +151,7 @@ int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
       i->x0 = m; f0 = fm;
       side = -1;
     } else if (fm > 0.0) {
-      /* down-weight x0 side to avoid 
+      /* down-weight x0 side to avoid
        * linear convergence because of choosing
        * always the same side */
       if (side == 1) f0 /= 2.0;

@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <baas/mod-arithmetic.h>
+#include "baas/mod-arithmetic.h"
 
 int gcd(int a, int b) {
   if (b == 0)

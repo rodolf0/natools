@@ -21,39 +21,40 @@ typedef struct _list {
   cmp_func_t cmp;
 } list_t;
 
+/* constructor / destructor */
 list_t * list_init(free_func_t, cmp_func_t);
 void list_destroy(list_t *l);
 
-/* concatenate the 2nd list to the 1st one, l2 will be destroyed */
-void list_concat(list_t *l1, list_t *l2);
-
-/* merge 2 lists into a new list, old lists will be destroyed */
-list_t * list_merge(list_t *l1, list_t *l2);
-
-/* split l in half returning left and right lists */
-void list_split_half(list_t *l, list_t **r);
-
-/* sort the list using mergesort algorithm, original will be destroyed */
-list_t * list_mergesort(list_t *l);
-
-/* push item at the head of the list */
+/* push and pop items at the head of the list */
 list_node_t * list_push(list_t *l, void *d);
-
-/* pop item from the head of the list */
 void * list_pop(list_t *l);
+
+/* queue and dequeue items at the tail of the list */
+list_node_t * list_queue(list_t *l, void *d);
+void * list_dequeue(list_t *l);
 
 /* peek elements without removing them */
 void * list_peek_head(list_t *l);
 void * list_peek_tail(list_t *l);
 
-/* enqueue item at the tail of the list */
-list_node_t * list_queue(list_t *l, void *d);
-
-/* dequeue item from the tail of the list */
-void * list_dequeue(list_t *l);
+/* execute f with each element of the list */
+void list_foreach(list_t *l, void (*f)(void *));
+/* run f on each element of l and return a result list. INFO: no cmp/free  */
+list_t * list_map(list_t *l, void * (*f)(void *));
 
 /* find data in list */
 void * list_find(list_t *l, void *d);
+
+/* return the concat of both lists, l1 and l2 will be destroyed */
+list_t * list_concat(list_t *l1, list_t *l2);
+/* return a copy of the list. INFO: data elements will point to the same */
+list_t * list_dup(list_t *l);
+/* merge 2 lists into a new list, old lists will be destroyed */
+list_t * list_merge(list_t *l1, list_t *l2);
+/* split l in half returning left and right lists, l is destroyed */
+void list_split_half(list_t *l, list_t **a, list_t **b);
+/* sort the list using mergesort algorithm, original will be destroyed */
+list_t * list_mergesort(list_t *l);
 
 #endif /*  _LIST_H_ */
 

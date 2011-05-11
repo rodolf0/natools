@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
-#include <baas/sort.h>
+#include "baas/sort.h"
 
 /* mergesort: sorts n elements of size s using cmp function to compare them.
  *  Elements must be adjacent in memory */
