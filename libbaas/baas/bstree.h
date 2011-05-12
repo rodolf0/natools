@@ -1,6 +1,8 @@
 #ifndef _BSTREE_H_
 #define _BSTREE_H_
 
+#include "common.h"
+
 typedef struct _bst_node {
   bst_node_t *parent;
   bst_node_t *r;

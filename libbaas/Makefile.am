@@ -4,6 +4,7 @@ libbaas_la_SOURCES = \
 
 libbaas_includedir = $(includedir)/baas
 libbaas_include_HEADERS = \
+	baas/common.h \
 	baas/list.h \
 	baas/xstring.h \
 	baas/sort-cmp.h \

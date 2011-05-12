@@ -1,10 +1,7 @@
 #ifndef _LIST_H_
 #define _LIST_H_
 
-#include <sys/types.h> /* size_t */
-
-typedef int (*cmp_func_t)(const void *, const void *);
-typedef void (*free_func_t)(void *);
+#include "common.h"
 
 typedef struct _list_node {
   struct _list_node *prev;

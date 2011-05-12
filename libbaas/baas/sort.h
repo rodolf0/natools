@@ -1,7 +1,7 @@
 #ifndef _SORT_H_
 #define _SORT_H_
 
-typedef int (*cmp_func_t)(const void *, const void *);
+#include "common.h"
 
 /* merge: merge to list of elements (adjacent in memory) into a new list
  *        elements in each list are assumed to be sorted
