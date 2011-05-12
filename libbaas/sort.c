@@ -4,13 +4,16 @@
 
 /* mergesort: sorts n elements of size s using cmp function to compare them.
  *  Elements must be adjacent in memory */
+
 void * mergesort(const void *a, size_t n, size_t sz, cmp_func_t cmp) {
   if (n == 1)
     return merge(a, 1, NULL, 0, sz, cmp); // let merge malloc
-  else
-    return merge( mergesort(a, n/2, sz, cmp), n/2,
-                  mergesort(a + sz*(int)(n/2), n-n/2, sz, cmp),
-                  n-n/2, sz, cmp);
+
+  void *left = mergesort(a, n/2, sz, cmp);
+  void *right = mergesort(a + sz*(int)(n/2), n-n/2, sz, cmp);
+  void *all = merge(left, n/2, right, n-n/2, sz, cmp);
+  free(left); free(right);
+  return all;
 }
 
 
@@ -37,6 +40,10 @@ void quicksort3(void *a, size_t n, size_t sz, cmp_func_t cmp) {
 }
 
 
+void heapsort();
+
+
+/* select the n'th smallest element from a according to cmp */
 void * selection(void *a, size_t n, size_t k, size_t sz, cmp_func_t cmp) {
   size_t b, c;
   size_t v = (n-1) * random() / RAND_MAX;

@@ -111,7 +111,11 @@ void partition32(void *a, size_t n, int kth, size_t *b,
   free(t);
 }
 
-/* merge: merge to list of elements (adjacent in memory) into a new list
+#undef IDX
+#undef SWAP
+
+
+/* merge: merge two list of elements (adjacent in memory) into a new list
  *        elements in each list are assumed to be sorted
  *        na/nb:   size of list a / b
  *        sz:    size of each element
@@ -143,8 +147,5 @@ void * merge(const void *a, size_t na,
   }
   return r;
 }
-
-#undef IDX
-#undef SWAP
 
 /* vim: set sw=2 sts=2 : */
