@@ -3,6 +3,24 @@
 
 #include "common.h"
 
+/* mergesort: sorts n elements of size s using cmp function to compare them.
+ *  Elements must be adjacent in memory */
+void * mergesort(const void *a, size_t n, size_t sz, cmp_func_t cmp);
+
+/* quicksort: sort an array of contiguous elements
+ *            quicksort3 uses a 3 way partition (no n^2 worst case) */
+void quicksort(void *a, size_t n, size_t sz, cmp_func_t cmp);
+void quicksort3(void *a, size_t n, size_t sz, cmp_func_t cmp);
+
+/* selection: select the k-th smallest element
+ *            eg: k=0 -> min, k=n/2 -> median */
+void * selection(void *a, size_t n, size_t k, size_t sz, cmp_func_t cmp);
+
+
+/*
+ * sort helper functions mainly for internal use
+ */
+
 /* merge: merge to list of elements (adjacent in memory) into a new list
  *        elements in each list are assumed to be sorted
  *        na/nb:   size of list a / b
@@ -23,19 +41,6 @@ void partition3(void *a, size_t n, int kth, size_t *b,
                 size_t *c, size_t sz, cmp_func_t cmp);
 void partition32(void *a, size_t n, int kth, size_t *b,
                  size_t *c, size_t sz, cmp_func_t cmp);
-
-/* mergesort: sorts n elements of size s using cmp function to compare them.
- *  Elements must be adjacent in memory */
-void * mergesort(const void *a, size_t n, size_t sz, cmp_func_t cmp);
-
-/* quicksort: sort an array of contiguous elements
- *            quicksort3 uses a 3 way partition (no n^2 worst case) */
-void quicksort(void *a, size_t n, size_t sz, cmp_func_t cmp);
-void quicksort3(void *a, size_t n, size_t sz, cmp_func_t cmp);
-
-/* selection: select the k-th smallest element
- *            eg: k=0 -> min, k=n/2 -> median */
-void * selection(void *a, size_t n, size_t k, size_t sz, cmp_func_t cmp);
 
 #endif
 

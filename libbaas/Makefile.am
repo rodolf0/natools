@@ -7,7 +7,6 @@ libbaas_include_HEADERS = \
 	baas/common.h \
 	baas/list.h \
 	baas/xstring.h \
-	baas/sort-cmp.h \
 	baas/sort.h \
 	baas/heap.h \
 	baas/graph.h \

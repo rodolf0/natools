@@ -1,84 +1,115 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <baas/sort.h>
-#include <baas/sort-cmp.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#include "../baas/sort.h"
 
-void print_array_s(char **a, int n) {
-  int i;
-
-  for (i = 0; i < n; i++)
-    printf("%s ", a[i]);
-  printf("\n");
+/* mostly usefull for argv[...] */
+int str_cmp(char **a, char **b) {
+  return strcmp(*a, *b);
+}
+int int_cmp(const int *a, const int *b) {
+  return (*a == *b ? 0 : *a < *b ? -1 : 1);
 }
 
-void print_array(int *a, int n) {
-  int i;
-
+/****** Data generation ********/
+int * generate_random_ints(int n) {
+  int i, *r = malloc(sizeof(int) * n);
   for (i = 0; i < n; i++)
-    printf("%d ", a[i]);
-  printf("\n");
+    r[i] = random() % 1024;
+  return r;
 }
 
-int main(int argc, char *argv[]) {
-  if (argc < 3) {
-    fprintf(stderr, "%s: <algorithm> <input list>\n", argv[0]);
-    return 1;
-  }
+void free_random_ints(int *r) {
+  free(r);
+}
 
-  int i, n = argc-2;
-  int *ints = malloc(n * sizeof(int));
-  char **chars = malloc(n * sizeof(char*));
-  char *algorithm = argv[1];
+char ** generate_random_strings(int n) {
+  int i, j;
+  char *alphanums = "abcdefghijklmnopqrstuvwxyz1234567890";
+  int alphalen = strlen(alphanums);
 
-  /* parse input list */
+  char **r = malloc(sizeof(char*) * n);
   for (i = 0; i < n; i++) {
-    ints[i] = atoi(argv[i+2]);
-    chars[i] = argv[i+2];
+    int len = 1 + random() % 255;
+    r[i] = malloc(sizeof(char) * len);
+    for (j = 0; j < len; j++)
+      r[i][j] = alphanums[random() % alphalen];
+    r[i][len-1] = '\0';
   }
+  return r;
+}
 
-  if (strcmp(algorithm, "mergesort") == 0) {
-    int *ri = mergesort(ints, n, sizeof(int), (cmp_func_t)int_cmp);
-    char **rc = mergesort(chars, n, sizeof(char*), (cmp_func_t)str_cmp);
-    print_array(ri, n);
-    print_array_s(rc, n);
-    free(ri);
-    free(rc);
-  } else if (strcmp(algorithm, "quicksort") == 0) {
-    quicksort(ints, n, sizeof(int), (cmp_func_t)int_cmp);
-    quicksort(chars, n, sizeof(char*), (cmp_func_t)str_cmp);
-    print_array(ints, n);
-    print_array_s(chars, n);
-  } else if (strcmp(algorithm, "quicksort3") == 0) {
-    quicksort3(ints, n, sizeof(int), (cmp_func_t)int_cmp);
-    quicksort3(chars, n, sizeof(char*), (cmp_func_t)str_cmp);
-    print_array(ints, n);
-    print_array_s(chars, n);
-  } else if (strcmp(algorithm, "partition") == 0) {
-    size_t kth = ints[0];
-    size_t pi = partition(ints+1, n-1, kth, sizeof(int), (cmp_func_t)int_cmp);
-    size_t pc = partition2(chars+1, n-1, kth, sizeof(char*), (cmp_func_t)str_cmp);
-    print_array(ints+1, n-1);
-    print_array_s(chars+1, n-1);
-    printf("piv-ints: %lu, piv-chars: %lu\n", pi, pc);
-  } else if (strcmp(algorithm, "partition3") == 0) {
-    size_t kth = ints[0];
-    size_t m, g;
-    partition3(ints+1, n-1, kth, &m, &g, sizeof(int), (cmp_func_t)int_cmp);
-    printf("eq-ints: %lu, gt-ints: %lu\n", m, g);
-    partition32(chars+1, n-1, kth, &m, &g, sizeof(char*), (cmp_func_t)str_cmp);
-    printf("eq-chars: %lu, gt-chars: %lu\n", m, g);
-    print_array(ints+1, n-1);
-    print_array_s(chars+1, n-1);
-  } else if (strcmp(algorithm, "selection") == 0) {
-    size_t kth = ints[0];
-    int *pi = selection(ints+1, n-1, kth, sizeof(int), (cmp_func_t)int_cmp);
-    char **pc = selection(chars+1, n-1, kth, sizeof(char*), (cmp_func_t)str_cmp);
-    printf("kth-ints: %d, kth-chars: %s\n", *pi, *pc);
+void free_random_strings(char **s, int n) {
+  int i;
+  for (i = 0; i < n; i++)
+    free(s[i]);
+  free(s);
+}
+/*******************************/
+
+/* check elements are truly ordered */
+void check_ordered(void *elems, int n, int sz, cmp_func_t cmp) {
+  int j; void *min = elems+0*sz;
+  for (j = 0; j < n; j++) {
+    assert(cmp(min, elems+j*sz) <= 0);
+    min = elems+j*sz;
   }
+}
 
-  /* free resources */
-  free(ints);
-  free(chars);
+#define NUM_ELEMS 1000
+void test_mergesort() {
+  /* test with ints */
+  int *ints = generate_random_ints(NUM_ELEMS);
+  int *sorted_i = mergesort(ints, NUM_ELEMS, sizeof(int), (cmp_func_t)int_cmp);
+  check_ordered(sorted_i, NUM_ELEMS, sizeof(int), (cmp_func_t)int_cmp);
+  free(sorted_i);
+  free_random_ints(ints);
+  /* test with chars */
+  char **chars = generate_random_strings(NUM_ELEMS);
+  char **sorted_c = mergesort(chars, NUM_ELEMS, sizeof(char*),
+                              (cmp_func_t)str_cmp);
+  check_ordered(sorted_c, NUM_ELEMS, sizeof(char*), (cmp_func_t)str_cmp);
+  free(sorted_c);
+  free_random_strings(chars, NUM_ELEMS);
+}
+
+
+void test_quicksort(void (*qs)(void *a, size_t n, size_t sz, cmp_func_t cmp)) {
+  /* test with ints */
+  int *ints = generate_random_ints(NUM_ELEMS);
+  (*qs)(ints, NUM_ELEMS, sizeof(int), (cmp_func_t)int_cmp);
+  check_ordered(ints, NUM_ELEMS, sizeof(int), (cmp_func_t)int_cmp);
+  free_random_ints(ints);
+  /* test with chars */
+  char **chars = generate_random_strings(NUM_ELEMS);
+  (*qs)(chars, NUM_ELEMS, sizeof(char*), (cmp_func_t)str_cmp);
+  check_ordered(chars, NUM_ELEMS, sizeof(char*), (cmp_func_t)str_cmp);
+  free_random_strings(chars, NUM_ELEMS);
+}
+
+
+void test_selection() {
+  /* test with ints */
+  int *ints = generate_random_ints(NUM_ELEMS);
+  int k = random() % NUM_ELEMS; /* select the k'th elem */
+  int *e = selection(ints, NUM_ELEMS, k, sizeof(int), (cmp_func_t)int_cmp);
+  assert(ints[k] == *e);
+  free_random_ints(ints);
+}
+
+
+#define ITERATIONS 350
+int main(int argc, char *argv[]) {
+  int i;
+  for (i = 1; i <= ITERATIONS; i++) {
+    fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);
+    test_mergesort();
+    test_quicksort(quicksort);
+    test_quicksort(quicksort3);
+    test_selection();
+  }
+  fprintf(stderr, "\n");
   return 0;
 }
 

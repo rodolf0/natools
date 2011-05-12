@@ -40,9 +40,6 @@ void quicksort3(void *a, size_t n, size_t sz, cmp_func_t cmp) {
 }
 
 
-void heapsort();
-
-
 /* select the n'th smallest element from a according to cmp */
 void * selection(void *a, size_t n, size_t k, size_t sz, cmp_func_t cmp) {
   size_t b, c;
