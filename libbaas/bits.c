@@ -1,15 +1,16 @@
 #include <string.h>
 #include "baas/bits.h"
 
-/* int_to_bits: convert integer to bit-string */
-void int_to_bits(int i, char *bits, int length) {
-  int power, tmp;
+/* int_to_bits: convert integer to bit-string return valid length */
+int int_to_bits(int i, char *bits, int length) {
+  int power = 0, tmp;
   /* set all bits to 0 */
   memset(bits, '0', length);
   bits[length-1] = '\0';
   /* calc powers of 2 */
   while (i > 0) {
     power = 0; tmp = i;
+    /* find the next turned on bit */
     while (tmp > 1) {
       tmp >>= 1;
       power++;
@@ -18,6 +19,8 @@ void int_to_bits(int i, char *bits, int length) {
     bits[length-2 - power] = '1';
     i -= 1L << power;
   }
+  char *leading1 = strchr(bits, '1');
+  return  (leading1 ? bits + length - 1 - leading1 : 1);
 }
 
 
