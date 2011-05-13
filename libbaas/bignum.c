@@ -4,6 +4,7 @@
 
 static const char digit[] = "0123456789";
 
+
 /* adds to numbers with no presicion limit */
 char * big_add(const char *x, const char *y) {
   int xlen = strlen(x);
@@ -25,6 +26,7 @@ char * big_add(const char *x, const char *y) {
   ret[rlen] = '\0';
   return ret;
 }
+
 
 /* multiplies to numbers with no presicion limit */
 char * big_mul(const char *x, const char *y) {

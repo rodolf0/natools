@@ -20,6 +20,7 @@ void int_to_bits(int i, char *bits, int length) {
   }
 }
 
+
 /* count how many 1's in binary representation of number */
 int bitcount(int i) {
   int count = 0;
@@ -29,6 +30,8 @@ int bitcount(int i) {
   }
   return count;
 }
+
+
 /* slower version */
 int bitcount2(int i) {
   int count = 0;

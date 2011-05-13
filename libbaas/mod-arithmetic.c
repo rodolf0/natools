@@ -8,6 +8,7 @@ int gcd(int a, int b) {
     return gcd(b, a % b);
 }
 
+
 /* if d divides a and b, and d = xa + by =>  d = gcd(a, b) */
 void extended_euclid(int a, int b, int *x, int *y, int *d) {
   int t;
@@ -21,6 +22,7 @@ void extended_euclid(int a, int b, int *x, int *y, int *d) {
   }
 }
 
+
 /* exponentiation modulo N */
 uint64_t modexp(uint64_t x, uint64_t y, uint64_t N) {
   uint64_t z;
@@ -33,6 +35,7 @@ uint64_t modexp(uint64_t x, uint64_t y, uint64_t N) {
   else      // y is even
     return (z * z) % N;
 }
+
 
 // Use Fermat's little theorem to prove p is prime
 // with proba of false positive <= 1/2 (ignoring Carmichael's nums)
