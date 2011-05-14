@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include "baas/list.h"
 
-list_t * list_init(free_func_t free, cmp_func_t cmp) {
+list_t * list_init(free_func_t lfree, cmp_func_t cmp) {
   list_t *l = (list_t*)malloc(sizeof(list_t));
   l->first = NULL;
   l->last = NULL;
-  l->free = free;
+  l->free = lfree;
   l->cmp = cmp;
   l->size = 0;
   return l;
