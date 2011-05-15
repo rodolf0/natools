@@ -58,7 +58,7 @@ void generate_test_heap() {
   heap_destroy(h);
 }
 
-#define LOTS_OF_INTS 10000
+#define LOTS_OF_INTS 1000
 void test_heapify() {
   size_t i;
   /* initialize data */

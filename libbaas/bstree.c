@@ -17,10 +17,19 @@ bstree_t * bstree_init(free_func_t tfree, cmp_func_t cmp) {
 void bstree_destroy(bstree_t *t) {
   if (!t)
     return;
-
-  // TODO: free all nodes
-
+  if (t->free)
+    bsstree_foreach(t->root, t->free, inorder);
+  bstree_destroy_childs(t->root, free);
   free(t);
+}
+
+/* can't use bstree_foreach cause it acts directly on data */
+void bstree_destroy_childs(bst_node_t *n, free_func_t nfree) {
+  if (!n || !nfree)
+    return;
+  bstree_destroy_childs(n->l, nfree);
+  bstree_destroy_childs(n->r, nfree);
+  nfree(n);
 }
 
 
@@ -241,7 +250,7 @@ bst_node_t * bstree_find(bstree_t *t, void *data) {
 }
 
 
-/* call */
+/* call f on each node */
 void bstree_foreach(bstree_t *t, void (*f)(void *), traversal_t order) {
   if (!t || !f)
     return;

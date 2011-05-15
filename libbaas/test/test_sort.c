@@ -99,7 +99,7 @@ void test_selection() {
 }
 
 
-#define ITERATIONS 350
+#define ITERATIONS 250
 int main(int argc, char *argv[]) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {

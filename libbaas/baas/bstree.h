@@ -34,6 +34,8 @@ typedef struct _bstree {
 /* constructor / destructor */
 bstree_t * bstree_init(free_func_t f, cmp_func_t c);
 void bstree_destroy(bstree_t *t);
+/* destroy whole descendence of n */
+void bstree_destroy_childs(bst_node_t *n, free_func_t nfree);
 
 /* remove a node (previously find with bstree_find */
 void bstree_remove(bstree_t *t, bst_node_t *n);

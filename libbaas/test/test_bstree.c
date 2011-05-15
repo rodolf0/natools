@@ -18,12 +18,6 @@ void check_set_min(int *x) {
   minimum = *x;
 }
 
-int foundcount, elem;
-void count_found(int *x) {
-  if (*x == elem)
-    foundcount++;
-}
-
 
 void generate_test_tree() {
   int n = 0, i, sum = 0, *e=NULL;
@@ -71,13 +65,9 @@ void generate_test_tree() {
         }
         free(e);
         break;
-
-      case 4: // not reachable, think about it later
-        //bstree_create_child();
-        break;
     }
   }
-  fprintf(stderr, " \ti: %d, r: %d, rl: %d, rr:%d",
+  fprintf(stderr, "    i: %d, r: %d, rl: %d, rr:%d",
           inserted, removed, leftrot, rightrot);
 
   /* check all elements are correct */
@@ -90,21 +80,8 @@ void generate_test_tree() {
   minimum = 0;
   bstree_foreach(t, (void (*)(void*))check_set_min, inorder);
 
-#if 1
-  /* check we find all elements */
-  for (elem = 0; elem < 512; elem++) {
-    foundcount = 0;
-    bstree_foreach(t, (void (*)(void*))count_found, inorder);
-    while ((node = bstree_find(t, &elem))) {
-      bstree_remove(t, node);
-      foundcount--;
-    }
-    assert(foundcount == 0);
-  }
-#endif
   bstree_destroy(t);
 }
-
 
 #define ITERATIONS 1000
 int main(int argc, char *argv[]) {
