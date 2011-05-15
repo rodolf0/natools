@@ -147,14 +147,14 @@ list_t * list_map(list_t *l, void * (*f)(void *)) {
 }
 
 /* find data in list */
-void * list_find(list_t *l, void *d) {
+list_node_t * list_find(list_t *l, void *d) {
   if (!l || !l->cmp)
     return NULL;
 
   list_node_t *node;
   for (node = l->first; node; node = node->next) {
     if (l->cmp(node->data, d) == 0)
-      return node->data;
+      return node;
   }
   return NULL;
 }
@@ -163,7 +163,7 @@ void * list_find(list_t *l, void *d) {
 /* return the concat of both lists, l1 and l2 will be destroyed */
 list_t * list_concat(list_t *l1, list_t *l2) {
   if (!l1 || !l2)
-    return;
+    return NULL;
   /* result list */
   list_t *r = list_init(l1->free, l1->cmp);
   /* glue lists together */

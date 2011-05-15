@@ -198,6 +198,7 @@ static int parser_error_check(parser_t *p) {
 
 /* parser reduce: add semantic value if right hand production found */
 static int parser_semantics_eval(parser_t *p) {
+  list_node_t *ln;
   token_t *t, *a, *b, *c;
   int func_params = 0;
 
@@ -235,10 +236,12 @@ static int parser_semantics_eval(parser_t *p) {
           t->value = M_E;
         else {
           /* find a previous instance of the variable or allocate it */
-          if (!(a = (token_t*)list_find(p->symbol_table, t))) {
+          ln = list_find(p->symbol_table, t);
+          if (!ln) {
             a = token_init(variable, t->lexem);
             list_push(p->symbol_table, a);
-          }
+          } else
+            a = (token_t*)(ln->data);
           t->value = a->value;
         }
         list_push(p->result_stack, t);
@@ -260,7 +263,8 @@ static int parser_semantics_eval(parser_t *p) {
         /* a holds the variable name to which we'll assign */
         a = list_pop(p->result_stack);
         /* find the variable in the symbol table */
-        if (!(c = (token_t*)list_find(p->symbol_table, a))) {
+        ln = list_find(p->symbol_table, a);
+        if (!ln) {
           fprintf(stderr,
                   "Semantic error: variable [%s] not in symbol table.\n",
                   a->lexem);
@@ -269,7 +273,8 @@ static int parser_semantics_eval(parser_t *p) {
           token_destroy(b);
           token_destroy(t);
           return 5;
-        }
+        } else
+          c = (token_t*)(ln->data);
         /* store the new value in the symbol table */
         t->value = c->value = b->value;
 
@@ -498,9 +503,10 @@ int parser_eval(parser_t *p, const char* buf, double *ret) {
   t = list_pop(p->result_stack);
 
   /* keep special symbol 'ans' with previous result */
-  token_t *sans, *ans = token_init(variable, "ans");
-  if ((sans = list_find(p->symbol_table, ans))) {
-    sans->value = t->value;
+  token_t *ans = token_init(variable, "ans");
+  list_node_t *sans = list_find(p->symbol_table, ans);
+  if (sans) {
+    ((token_t*)sans->data)->value = t->value;
     token_destroy(ans);
   } else {
     ans->value = t->value;

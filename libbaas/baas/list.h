@@ -40,7 +40,7 @@ void list_foreach(list_t *l, void (*f)(void *));
 list_t * list_map(list_t *l, void * (*f)(void *));
 
 /* find data in list */
-void * list_find(list_t *l, void *d);
+list_node_t * list_find(list_t *l, void *d);
 
 /* return the concat of both lists, l1 and l2 will be destroyed */
 list_t * list_concat(list_t *l1, list_t *l2);
