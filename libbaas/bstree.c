@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "baas/bstree.h"
 
 /* http://eternallyconfuzzled.com/tuts/datastructures/jsw_tut_bst1.aspx */
@@ -14,6 +15,9 @@ bstree_t * bstree_init(free_func_t tfree, cmp_func_t cmp) {
 }
 
 void bstree_destroy(bstree_t *t) {
+  if (!t)
+    return;
+
   // TODO: free all nodes
 
   free(t);
@@ -165,6 +169,61 @@ void bstree_remove(bstree_t *t, bst_node_t *n) {
 }
 
 
+/* make node n the right child of n's left child
+ * http://en.wikipedia.org/wiki/Tree_rotation */
+void bstree_rotate_right(bstree_t *t, bst_node_t *n) {
+  if (!t || !n || !n->l) /* can't rotate right if no n->l */
+    return;
+  bst_node_t *left = n->l;
+  /* link n's parent to left (new subroot) */
+  if (n->parent) {
+    if (n == n->parent->l)
+      n->parent->l = left;
+    if (n == n->parent->r)
+      n->parent->r = left;
+  } else
+    t->root = left;
+  /* update left to point to new parent */
+  left->parent = n->parent;
+  /* update n to point to new parent (left) */
+  n->parent = left;
+  /* if left has a right child, it'll become n's left */
+  n->l = left->r;
+  if (left->r)
+    left->r->parent = n;
+  /* finally link n as left's new right son */
+  left->r = n;
+  // TODO: update heaviness
+}
+
+
+/* make node n the left child of n's right child */
+void bstree_rotate_left(bstree_t *t, bst_node_t *n) {
+  if (!t || !n || !n->r) /* can't rotate left if no n->r */
+    return;
+  bst_node_t *right= n->r;
+  /* link n's parent to right (new subroot) */
+  if (n->parent) {
+    if (n == n->parent->l)
+      n->parent->l = right;
+    if (n == n->parent->r)
+      n->parent->r = right;
+  } else
+    t->root = right;
+  /* update right to point to new parent */
+  right->parent = n->parent;
+  /* update n to point to new parent (right) */
+  n->parent = right;
+  /* if right has a left child, it'll become n's right */
+  n->r = right->l;
+  if (right->l)
+    right->l->parent = n;
+  /* finally link n as right's new left son */
+  right->l = n;
+  // TODO: update heaviness
+}
+
+
 bst_node_t * bstree_find(bstree_t *t, void *data) {
   if (!t)
     return NULL;
@@ -181,5 +240,39 @@ bst_node_t * bstree_find(bstree_t *t, void *data) {
   return cur;
 }
 
+
+/* call */
+void bstree_foreach(bstree_t *t, void (*f)(void *), traversal_t order) {
+  if (!t || !f)
+    return;
+  bsstree_foreach(t->root, f, order);
+}
+
+void bsstree_foreach(bst_node_t *n, void (*f)(void *), traversal_t order) {
+  if (!n || !f)
+    return;
+  switch (order) {
+    case preorder:
+      f(n->data); // calls the function on itself, then on children
+      bsstree_foreach(n->l, f, order);
+      bsstree_foreach(n->r, f, order);
+      break;
+    case inorder:
+      bsstree_foreach(n->l, f, order);
+      f(n->data);
+      bsstree_foreach(n->r, f, order);
+      break;
+    case postorder:
+      bsstree_foreach(n->l, f, order);
+      bsstree_foreach(n->r, f, order);
+      f(n->data); // call function on children, then itself
+      break;
+    case breadthfirst:
+      //
+      //TODO
+      //
+      break;
+  }
+}
 
 /* vim: set sw=2 sts=2 : */

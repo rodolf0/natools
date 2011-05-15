@@ -1,13 +1,23 @@
 SUBDIRS = . test
 
+CFLAGS += -Wall -Werror
+
 lib_LTLIBRARIES = libbaas.la
 libbaas_la_SOURCES = \
-	list.c xstring.c sort.c sort-aux.c heap.c graph.c bits.c bignum.c 
+	list.c \
+	bstree.c \
+	heap.c \
+	sort.c sort-aux.c \
+	graph.c \
+	bits.c \
+	bignum.c \
+	xstring.c
 
 libbaas_includedir = $(includedir)/baas
 libbaas_include_HEADERS = \
 	baas/common.h \
 	baas/list.h \
+	baas/bstree.h \
 	baas/xstring.h \
 	baas/sort.h \
 	baas/heap.h \

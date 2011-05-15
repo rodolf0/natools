@@ -6,6 +6,7 @@ int int_to_bits(int i, char *bits, int length);
 
 /* bitcount: count how many 1's in binary representation of number */
 int bitcount(int i);
+int bitcount2(int i);
 
 #endif
 
