@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include "baas/heap-list.h"
+
 /* creates a heap out of a list */
 heap_t * heap_heapify_list(list_t *l) {
   heap_t *h = malloc(sizeof(heap_t));
@@ -15,6 +18,5 @@ heap_t * heap_heapify_list(list_t *l) {
     heap_sift_down(h, h->data[i], i);
   return h;
 }
-
 
 /* vim: set sw=2 sts=2 : */

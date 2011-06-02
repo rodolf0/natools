@@ -19,9 +19,9 @@ AC_SUBST(ac_aux_dir)
 AC_SUBST([abs_srcdir], ["`cd $srcdir && pwd`"])
 AC_SUBST([abs_builddir], ["`pwd`"])
 
-#AM_CFLAGS="-g -Wall -Werror -Wno-uninitialized -O0"
-#AC_SUBST([AM_CFLAGS])
-#AC_SUBST([AM_LDFLAGS])
+AM_CFLAGS="-Wall -Werror -Wno-uninitialized"
+AC_SUBST([AM_CFLAGS])
+AC_SUBST([AM_LDFLAGS])
 
 # check for C preprocessor and compiler, libtool, install, ...
 OLD_CFLAGS=$CFLAGS

@@ -6,7 +6,7 @@ lib_LTLIBRARIES = libbaas.la
 libbaas_la_SOURCES = \
 	list.c \
 	bstree.c \
-	heap.c \
+	heap.c heap-list.c \
 	sort.c sort-aux.c \
 	graph.c \
 	bits.c \
@@ -20,7 +20,7 @@ libbaas_include_HEADERS = \
 	baas/bstree.h \
 	baas/xstring.h \
 	baas/sort.h \
-	baas/heap.h \
+	baas/heap.h baas/heap-list.h \
 	baas/graph.h \
 	baas/bits.h \
 	baas/bignum.h
