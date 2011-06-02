@@ -3,25 +3,32 @@
 
 #include "common.h"
 
+#define _BALANCED_TREE_
+
+#ifdef _BALANCED_TREE_
 typedef enum {
-  leftheavy,
-  balanced,
-  rightheavy
-} bst_balance_t;
+  red,
+  black,
+  double_black,
+  negative_black
+} bst_color_t;
+#endif
 
 typedef enum {
   preorder,     /* depth first, visit children after node */
   inorder,      /* depth first symmetric */
   postorder,    /* depth first, visit node after children */
   breadthfirst
-} traversal_t;
+} bst_traversal_t;
 
 typedef struct _bst_node_t {
   struct _bst_node_t *parent;
   struct _bst_node_t *r;
   struct _bst_node_t *l;
   void *data;
-  bst_balance_t balance;
+#ifdef _BALANCED_TREE_
+  bst_color_t color;
+#endif
 } bst_node_t;
 
 typedef struct _bstree {
@@ -34,24 +41,13 @@ typedef struct _bstree {
 /* constructor / destructor */
 bstree_t * bstree_init(free_func_t f, cmp_func_t c);
 void bstree_destroy(bstree_t *t);
-/* destroy whole descendence of n */
-void bstree_destroy_childs(bst_node_t *n, free_func_t nfree);
 
 /* remove a node (previously find with bstree_find */
 void bstree_remove(bstree_t *t, bst_node_t *n);
 bst_node_t * bstree_insert(bstree_t *t, void *data);
-/* inset a child into a subtree, mainly used by bstree_insert internally */
-bst_node_t * bstree_create_child(bstree_t *t, bst_node_t *b, void *data);
-
-/* subtree rotations */
-void bstree_rotate_right(bstree_t *t, bst_node_t *n);
-void bstree_rotate_left(bstree_t *t, bst_node_t *n);
 
 bst_node_t * bstree_find(bstree_t *t, void *data);
-void bstree_foreach(bstree_t *t, void (*f)(void *), traversal_t order);
-/* iterate on a subtree */
-void bsstree_foreach(bst_node_t *t, void (*f)(void *), traversal_t order);
-
+void bstree_foreach(bstree_t *t, void (*f)(void *), bst_traversal_t order);
 
 #endif /* _BSTREE_H_ */
 
