@@ -44,6 +44,7 @@ Makefile
 libbaas/Makefile
 libbaas/test/Makefile
 libparser/Makefile
+libparser/test/Makefile
 libcnash/Makefile
 bnatools/Makefile
 ])

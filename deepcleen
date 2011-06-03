@@ -12,6 +12,7 @@ cleanfiles=(
   libbaas/test/Makefile.in
   libcnash/Makefile.in
   libparser/Makefile.in
+  libparser/test/Makefile.in
 )
 
 wdir="$(dirname $0)"

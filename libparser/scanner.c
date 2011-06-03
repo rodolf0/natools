@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <parser/scanner.h>
+#include "parser/scanner.h"
 
 scanner_t *scanner_init(const char *buffer) {
 

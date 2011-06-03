@@ -2,7 +2,7 @@
 #define _LEXER_H_
 
 #include <baas/list.h>
-#include <parser/scanner.h>
+#include "scanner.h"
 
 /* type of tokens: lexical components */
 typedef enum _lex_component {
