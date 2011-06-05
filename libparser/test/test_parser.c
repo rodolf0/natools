@@ -35,6 +35,9 @@ void test_parser() {
   ASSERT_EVAL("-45.2*sum(0.1, 0.2, 0.3, 0.4)^log(atan(3.0))",
               -45.2*pow((0.1+0.2+0.3+0.4), log(atan(3.0))));
 
+  ASSERT_EVAL("sin(1.4e-2)/tan(pi/3.0)^(0.5+0.45)",
+              sin(1.4e-2)/pow(tan(M_PI/3.0), 0.5+0.45));
+
   parser_destroy(p);
 }
 

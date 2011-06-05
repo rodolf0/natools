@@ -4,11 +4,10 @@
 #include "parser/scanner.h"
 
 scanner_t *scanner_init(const char *buffer) {
-
-  scanner_t *s = (scanner_t*)malloc(sizeof(scanner_t));
+  scanner_t *s = malloc(sizeof(scanner_t));
 
   s->b_length = strlen(buffer);
-  s->buffer = (char*)malloc(s->b_length + 1);
+  s->buffer = malloc(s->b_length + 1);
   strncpy(s->buffer, buffer, s->b_length);
   s->buffer[s->b_length] = '\0';
 
@@ -20,17 +19,20 @@ scanner_t *scanner_init(const char *buffer) {
 }
 
 void scanner_destroy(scanner_t *s) {
-  if (s) {
-    if (s->buffer)
-      free(s->buffer);
-    free(s);
-  }
+  if (!s)
+    return;
+  if (s->buffer)
+    free(s->buffer);
+  free(s);
 }
 
-void scanner_seek(scanner_t *s, size_t pos) {
+int scanner_seek(scanner_t *s, size_t pos) {
+  if (pos < 0 || pos > s->b_length)
+    return -1;
   s->pos = pos;
   s->current_char = s->buffer[pos];
-  s->next_char = s->buffer[pos+1];
+  s->next_char = (pos == s->b_length ? '\0' : s->buffer[pos+1]);
+  return s->pos;
 }
 
 char scanner_readchar(scanner_t *s) {

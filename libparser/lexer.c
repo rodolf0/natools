@@ -4,6 +4,13 @@
 
 #include "parser/lexer.h"
 
+#define IS_ALPHA(c) ((c>='a'&& c<='z') || (c>='A'&& c<='Z') ? 1:0)
+#define IS_WHITE(c) ((c==' '|| c=='\t' || c=='\n') ? 1:0)
+#define IS_NUM(c)   ((c>='0' && c<='9') ? 1:0)
+#define MAKES_UNARYOP(c) (c=='+' || c=='-' || c=='*' || \
+                          c=='/' || c=='^' || c==',' || \
+                          c=='(' || c=='=' || c=='\0' ? 1:0)
+
 /* available lex-comp scanners that the tokenize function
  * will recognize */
 lex_component scan_alphanums(scanner_t *s);
@@ -63,6 +70,9 @@ list_t *tokenize(const char *buffer) {
   return tok_list;
 }
 
+
+/* token creation / destruction */
+
 token_t *token_init(lex_component lc, const char *lexem) {
   token_t *t = (token_t*)malloc(sizeof(token_t));
   size_t len = strlen(lexem);
@@ -84,26 +94,23 @@ void token_destroy(token_t *t) {
   }
 }
 
+
+/* lexem scanners: they identify a lexem and return its component */
+
 lex_component scan_alphanums(scanner_t *s) {
   int state = 0;
 
   while (1) {
     switch (state) {
       case 0:
-        if (IS_ALPHA(s->next_char))
-          state = 1;
-        else
-          return no_match;
+        if (IS_ALPHA(s->next_char)) state = 1;
+        else return no_match;
         break;
 
       case 1:
-        if (IS_ALPHA(s->next_char) ||
-            IS_NUM(s->next_char))
-          state = 1;
-        else if (s->next_char == '(')
-          state = 2;
-        else
-          return variable;
+        if (IS_ALPHA(s->next_char) || IS_NUM(s->next_char)) state = 1;
+        else if (s->next_char == '(') state = 2;
+        else return variable;
         break;
 
       case 2:
@@ -115,73 +122,53 @@ lex_component scan_alphanums(scanner_t *s) {
   return no_match;
 }
 
+
 lex_component scan_numbers(scanner_t *s) {
   int state = 0;
 
   while (1) {
     switch (state) {
       case 0:
-        if (IS_NUM(s->next_char))
-          state = 1;
-        else
-          return no_match;
+        if (IS_NUM(s->next_char)) state = 1;
+        else return no_match;
         break;
 
       /* integer part */
       case 1:
-        if (IS_NUM(s->next_char))
-          state = 1;
-        else if (s->next_char == '.')
-          state = 2;
-        else if (s->next_char == 'E' ||
-            s->next_char == 'e')
-          state = 4;
-        else
-          return number;
+        if (IS_NUM(s->next_char)) state = 1;
+        else if (s->next_char == '.') state = 2;
+        else if (s->next_char == 'E' || s->next_char == 'e') state = 4;
+        else return number;
         break;
 
       /* fractional part */
       case 2:
-        if (IS_NUM(s->next_char))
-          state = 3;
-        else
-          return no_match;
+        if (IS_NUM(s->next_char)) state = 3;
+        else return no_match;
         break;
 
       case 3:
-        if (IS_NUM(s->next_char))
-          state = 3;
-        else if (s->next_char == 'e' ||
-                   s->next_char == 'E')
-          state = 4;
-        else
-          return number;
+        if (IS_NUM(s->next_char)) state = 3;
+        else if (s->next_char == 'e' || s->next_char == 'E') state = 4;
+        else return number;
         break;
 
       /* exponent sign */
       case 4:
-        if (s->next_char == '-' ||
-            s->next_char == '+')
-          state = 5;
-        else if (IS_NUM(s->next_char))
-          state = 6;
-        else
-          return no_match;
+        if (s->next_char == '-' || s->next_char == '+') state = 5;
+        else if (IS_NUM(s->next_char)) state = 6;
+        else return no_match;
         break;
 
       /* exponent */
       case 5: /* at least one digit */
-        if (IS_NUM(s->next_char))
-          state = 6;
-        else
-          return no_match;
+        if (IS_NUM(s->next_char)) state = 6;
+        else return no_match;
         break;
 
       case 6:
-        if (IS_NUM(s->next_char))
-          state = 6;
-        else
-          return number;
+        if (IS_NUM(s->next_char)) state = 6;
+        else return number;
         break;
     }
     scanner_readchar(s);
@@ -189,16 +176,15 @@ lex_component scan_numbers(scanner_t *s) {
   return no_match;
 }
 
+
 lex_component scan_operator(scanner_t *s) {
   lex_component ret;
 
   switch(s->next_char) {
     case '+': ret = op_add; break;
     case '-':
-      if (MAKES_UNARYOP(s->current_char))
-        ret = op_neg;
-      else
-        ret = op_sub;
+      if (MAKES_UNARYOP(s->current_char)) ret = op_neg;
+      else ret = op_sub;
       break;
     case '*': ret = op_mul; break;
     case '/': ret = op_div; break;
@@ -207,8 +193,7 @@ lex_component scan_operator(scanner_t *s) {
     case '(': ret = paren_open; break;
     case ')': ret = paren_close; break;
     case '=': ret = op_asig; break;
-    default:
-      return no_match;
+    default: return no_match; break;
   }
   scanner_readchar(s);
   return ret;

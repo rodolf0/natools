@@ -1,6 +1,6 @@
 /* This parser is capable of parsing the following language:
  *
- * E -> number | variable
+ * E -> number | variable | E
  * E -> variable=E
  * E -> E+E | E-E | -E | E*E | E/E | E^E | (E) | f(E, ...)
  *
@@ -10,8 +10,8 @@
 #include <string.h>
 #include <math.h>
 
-#include <parser/parser.h>
-#include <parser/lexer.h>
+#include "parser/parser.h"
+#include "parser/lexer.h"
 
 /* operator precedence table */
 #define LT -1
@@ -105,7 +105,6 @@ static int parser_error_check(parser_t *p) {
 
   int func_params = 0;
 
-  /* error checking */
   switch (tokenLComp(ps_top)) {
     /* non terminal reductions: shouldn't have non terminals on their sides */
     case number:
@@ -157,7 +156,6 @@ static int parser_error_check(parser_t *p) {
       }
       break;
 
-
     /* check for expresion inside () */
     case paren_close: /* ps_top = paren_close */
       /* check how many elements should the result stack have */
@@ -196,7 +194,8 @@ static int parser_error_check(parser_t *p) {
 }
 #endif /* _ERROR_CHECKING_ */
 
-/* parser reduce: add semantic value if right hand production found */
+
+/* parser reduce: add semantic value if right-hand production found */
 static int parser_semantics_eval(parser_t *p) {
   list_node_t *ln;
   token_t *t, *a, *b, *c;
@@ -228,7 +227,7 @@ static int parser_semantics_eval(parser_t *p) {
         list_push(p->result_stack, t);
         break;
 
-
+      /* parse a variable */
       case variable:
         if (!strcmp("pi", t->lexem))
           t->value = M_PI;
@@ -247,14 +246,12 @@ static int parser_semantics_eval(parser_t *p) {
         list_push(p->result_stack, t);
         break;
 
-
       /* parenthesis n comma don't have semantic value */
       case paren_open:
       case paren_close:
       case op_comma:
         token_destroy(t);
         break;
-
 
       /* asign to a variable */
       case op_asig:
@@ -265,8 +262,7 @@ static int parser_semantics_eval(parser_t *p) {
         /* find the variable in the symbol table */
         ln = list_find(p->symbol_table, a);
         if (!ln) {
-          fprintf(stderr,
-                  "Semantic error: variable [%s] not in symbol table.\n",
+          fprintf(stderr, "Semantic error: var [%s] not in symbol table.\n",
                   a->lexem);
           /* cleanup */
           token_destroy(a);
@@ -277,13 +273,12 @@ static int parser_semantics_eval(parser_t *p) {
           c = (token_t*)(ln->data);
         /* store the new value in the symbol table */
         t->value = c->value = b->value;
-
         token_destroy(a);
         token_destroy(b);
         list_push(p->result_stack, t);
         break;
 
-
+      /* parse a simple operation */
       case op_add:
       case op_sub:
       case op_mul:
@@ -292,37 +287,22 @@ static int parser_semantics_eval(parser_t *p) {
         b = list_pop(p->result_stack);
       case op_neg:
         a = list_pop(p->result_stack);
-
         switch (t->lcomp) {
-          case op_add:
-            t->value = a->value + b->value;
-            break;
-          case op_sub:
-            t->value = a->value - b->value;
-            break;
-          case op_mul:
-            t->value = a->value * b->value;
-            break;
-          case op_div:
-            t->value = a->value / b->value;
-            break;
-          case op_pow:
-            t->value = pow(a->value, b->value);
-            break;
-          case op_neg:
-            t->value = -a->value;
-            break;
-          default:
-            break;
+          case op_add: t->value = a->value + b->value; break;
+          case op_sub: t->value = a->value - b->value; break;
+          case op_mul: t->value = a->value * b->value; break;
+          case op_div: t->value = a->value / b->value; break;
+          case op_pow: t->value = pow(a->value, b->value); break;
+          case op_neg: t->value = -a->value; break;
+          default: break; /* make gcc happy */
         }
         token_destroy(a); /* if NULL will be a nop */
         token_destroy(b);
         list_push(p->result_stack, t);
         break;
 
-
+      /* evaluate functions */
       case function:
-
         if (!strcmp("sin(", t->lexem)) {
           a = list_pop(p->result_stack);
           t->value = sin(a->value);
@@ -396,11 +376,10 @@ static int parser_semantics_eval(parser_t *p) {
           }
 
         } else {
-          fprintf(stderr, "Semantic error: lexem [%s] not recognized.\n",
-              t->lexem);
+          fprintf(stderr, "Semantic error: function [%s] not recognized.\n",
+                  t->lexem);
           return 3;
         }
-
         list_push(p->result_stack, t);
         break;
 
@@ -413,13 +392,12 @@ static int parser_semantics_eval(parser_t *p) {
         break;
     }
   }
-
   /* destroy opening mango */
   token_destroy(t);
-
   return 0;
 }
 
+/* the main parsing function */
 int parser_eval(parser_t *p, const char* buf, double *ret) {
 
   if (!buf || buf[0] == '\0') {

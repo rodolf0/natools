@@ -4,6 +4,9 @@
 #include <assert.h>
 #include "../parser/lexer.h"
 
+#define MAKES_UNARYOP(c) (c=='+' || c=='-' || c=='*' || \
+                          c=='/' || c=='^' || c==',' || \
+                          c=='(' || c=='=' || c=='\0' ? 1:0)
 
 list_t * generate_random_buffer(int length) {
   list_t *r = list_init(free, NULL);

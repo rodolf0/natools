@@ -27,7 +27,7 @@ void function_destroy(function_t *f) {
   free(f);
 }
 
-/* evaluates f(x) at x = x0 
+/* evaluates f(x) at x = x0
  * uppon return x0 holds the result */
 int evaluate_function(function_t *f, double x0, double *f0) {
   if (!f) return 1;

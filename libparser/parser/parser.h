@@ -17,6 +17,7 @@ typedef struct _parser {
 
 parser_t *parser_create();
 void parser_destroy(parser_t *p);
+
 int parser_eval(parser_t *p, const char* buf, double *ret);
 
 #endif /*  _PARSER_H_ */
