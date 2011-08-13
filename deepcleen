@@ -10,7 +10,7 @@ cleanfiles=(
   libbaas/test/.deps/
   libbaas/test/Makefile
   libbaas/test/Makefile.in
-  libcnash/Makefile.in
+  libnatools/Makefile.in
   libparser/Makefile.in
   libparser/test/Makefile.in
 )

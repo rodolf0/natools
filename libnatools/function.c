@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <parser/parser.h>
-#include <cnash/function.h>
+#include "parser/parser.h"
+#include "natools/function.h"
 
 function_t *function_create(const char *func) {
   function_t *f = (function_t*)malloc(sizeof(function_t));

@@ -1,5 +1,5 @@
 # initial information about the project
-AC_INIT([cnash-tools],[0.1],[warlock.cc@gmail.com])
+AC_INIT([natools],[0.1],[warlock.cc@gmail.com])
 
 AC_CONFIG_AUX_DIR([build])
 AC_DISABLE_STATIC
@@ -45,7 +45,7 @@ libbaas/Makefile
 libbaas/test/Makefile
 libparser/Makefile
 libparser/test/Makefile
-libcnash/Makefile
+libnatools/Makefile
 bnatools/Makefile
 ])
 

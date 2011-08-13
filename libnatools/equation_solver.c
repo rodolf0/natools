@@ -2,8 +2,8 @@
 #include <math.h>
 #include <stdio.h>
 
-#include <cnash/calculus.h>
-#include <cnash/equation_solver.h>
+#include "natools/calculus.h"
+#include "natools/equation_solver.h"
 
 int root_search_verbose = 0;
 

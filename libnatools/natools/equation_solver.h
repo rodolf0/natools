@@ -1,8 +1,8 @@
 #ifndef _ROOT_SEARCH_H_
 #define _ROOT_SEARCH_H_
 
-#include <cnash/cnash.h>
-#include <cnash/function.h>
+#include "natools/natools.h"
+#include "natools/function.h"
 
 extern int root_search_verbose;
 

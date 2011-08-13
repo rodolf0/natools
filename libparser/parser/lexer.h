@@ -1,7 +1,7 @@
 #ifndef _LEXER_H_
 #define _LEXER_H_
 
-#include <baas/list.h>
+#include "baas/list.h"
 #include "scanner.h"
 
 /* type of tokens: lexical components */

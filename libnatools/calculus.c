@@ -1,7 +1,7 @@
 #include <math.h>
-#include <cnash/cnash.h>
-#include <cnash/calculus.h>
-#include <cnash/interpolation.h>
+#include "natools/natools.h"
+#include "natools/calculus.h"
+#include "natools/interpolation.h"
 
 /* calculates de derivate of f at f(x0)
  *             _______
@@ -16,7 +16,7 @@
  * */
 int derivate_3p(function_t *f, double x0, double h, double *r) {
   double p0, p1;
-    
+
   if (evaluate_function(f, x0 - h, &p0)) return 1;
   if (evaluate_function(f, x0 + h, &p1)) return 1;
 
@@ -26,7 +26,7 @@ int derivate_3p(function_t *f, double x0, double h, double *r) {
 
 int derivate_5p(function_t *f, double x0, double h, double *r) {
   double p0, p1, p2, p3;
-    
+
   if (evaluate_function(f, x0 - 2.0 * h, &p0)) return 1;
   if (evaluate_function(f, x0 - 1.0 * h, &p1)) return 1;
   if (evaluate_function(f, x0 + 1.0 * h, &p2)) return 1;

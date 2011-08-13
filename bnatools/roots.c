@@ -3,9 +3,9 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <cnash/cnash.h>
-#include <cnash/function.h>
-#include <cnash/equation_solver.h>
+#include "natools/natools.h"
+#include "natools/function.h"
+#include "natools/equation_solver.h"
 
 int main(int argc, char *argv[]) {
   int ret;

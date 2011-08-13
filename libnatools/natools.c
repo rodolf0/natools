@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include <cnash/cnash.h>
+#include "natools/natools.h"
 
 interval_t *interval_create(double x0, double x1) {
   interval_t *i = (interval_t*)malloc(sizeof(interval_t));

@@ -1,8 +1,8 @@
 #ifndef _CALCULUS_H_
 #define _CALCULUS_H_
 
-#include <cnash/cnash.h>
-#include <cnash/function.h>
+#include "natools/natools.h"
+#include "natools/function.h"
 
 int derivate_3p(function_t *f, double x0, double h, double *r);
 int derivate_5p(function_t *f, double x0, double h, double *r);

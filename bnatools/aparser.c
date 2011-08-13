@@ -3,10 +3,10 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <unistd.h>
-#include <parser/lexer.h>
-#include <parser/parser.h>
-#include <baas/list.h>
-#include <baas/xstring.h>
+#include "parser/lexer.h"
+#include "parser/parser.h"
+#include "baas/list.h"
+#include "baas/xstring.h"
 
 int main(int argc, char *argv[]) {
   int ret = 0, verbose = 0, interactive = 0;
