@@ -10,12 +10,12 @@ void test_bignum() {
   char num1[8], num2[8], *result;
   int i, nlen;
 
-  nlen = random() % 8;
+  nlen = 1 + random() % 7;
   for (i = 0; i < nlen; i++)
     num1[i] = digit[random() % 9];
   num1[nlen-1] = '\0';
 
-  nlen = random() % 8;
+  nlen = 1 + random() % 7;
   for (i = 0; i < nlen; i++)
     num2[i] = digit[random() % 9];
   num2[nlen-1] = '\0';
