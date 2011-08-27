@@ -1,7 +1,5 @@
 SUBDIRS = . test
 
-CFLAGS += -Wall -Werror
-
 lib_LTLIBRARIES = libbaas.la
 libbaas_la_SOURCES = \
 	list.c \

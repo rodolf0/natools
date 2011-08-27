@@ -27,7 +27,7 @@ void scanner_destroy(scanner_t *s) {
 }
 
 int scanner_seek(scanner_t *s, size_t pos) {
-  if (pos < 0 || pos > s->b_length)
+  if (pos > s->b_length)
     return -1;
   s->pos = pos;
   s->current_char = s->buffer[pos];

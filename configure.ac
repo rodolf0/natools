@@ -1,53 +1,52 @@
-# initial information about the project
-AC_INIT([natools],[0.1],[warlock.cc@gmail.com])
-
+AC_PREREQ([2.68])
+AC_INIT([natools], [0.15], [warlock.cc@gmail.com])
 AC_CONFIG_AUX_DIR([build])
+AC_CONFIG_HEADERS([config.h])
 AC_DISABLE_STATIC
+AC_CONFIG_MACRO_DIR([m4])
 
-# automake initialization (mandatory) including a check for automake API version >= 1.9
+# automake initialization (mandatory)
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 AC_GNU_SOURCE
 
-# add tests for libtool script
-LT_INIT
-
-# distribute additional compiler and linker flags among Makefiles
-# --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
-AC_SUBST([LIBTOOL_DEPS])
-AC_SUBST(ac_aux_dir)
-AC_SUBST([abs_srcdir], ["`cd $srcdir && pwd`"])
-AC_SUBST([abs_builddir], ["`pwd`"])
-
-AM_CFLAGS="-Wall -Werror -Wno-uninitialized"
-AC_SUBST([AM_CFLAGS])
-AC_SUBST([AM_LDFLAGS])
-
-# check for C preprocessor and compiler, libtool, install, ...
-OLD_CFLAGS=$CFLAGS
+# Checks for programs.
+AC_PROG_CC([clang gcc cc])
+AC_PROG_CXX
+AC_PROG_AWK
 AC_PROG_CPP
-AC_PROG_CC
-AC_PROG_LIBTOOL
 AC_PROG_INSTALL
-# reset compiler flags to initial flags
-CFLAGS=$OLD_CFLAGS
+AC_PROG_LIBTOOL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
 
-# use the C compiler for the following checks
-AC_LANG([C])
+# Checks for libraries.
+AC_CHECK_LIB([m], [sin])
+AC_CHECK_LIB([readline], [read_history])
+
+# Checks for header files.
+AC_CHECK_HEADERS([stdint.h stdlib.h string.h unistd.h])
+
+CFLAGS="-O2 -Wall -Werror -Wno-uninitialized"
+
 # Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_INLINE
+AC_TYPE_INT32_T
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
+AC_TYPE_UINT64_T
 
-# files to generate via autotools (prepare .am or .in source files)
-AC_CONFIG_FILES([
-Makefile
-libbaas/Makefile
-libbaas/test/Makefile
-libparser/Makefile
-libparser/test/Makefile
-libnatools/Makefile
-bnatools/Makefile
-])
+# Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([memset pow strchr strstr])
 
-# finally this generates the Makefiles etc. for the build
+AC_CONFIG_FILES([Makefile
+                 bnatools/Makefile
+                 libbaas/Makefile
+                 libbaas/test/Makefile
+                 libnatools/Makefile
+                 libparser/Makefile
+                 libparser/test/Makefile])
 AC_OUTPUT

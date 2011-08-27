@@ -5,7 +5,9 @@ cleanfiles=(
   aclocal.m4
   bnatools/Makefile.in
   configure
+  config.h.in
   build/
+  m4/
   libbaas/Makefile.in
   libbaas/test/.deps/
   libbaas/test/Makefile
