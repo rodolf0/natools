@@ -103,7 +103,7 @@ static int parser_error_check(parser_t *p) {
   /* this is the next token from the buffer */
   list_node_t *buf_fst = p->tokenlist->first;
 
-  int func_params = 0;
+  size_t func_params = 0;
 
   switch (tokenLComp(ps_top)) {
     /* non terminal reductions: shouldn't have non terminals on their sides */

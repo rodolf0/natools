@@ -41,8 +41,8 @@ graph_t * graph_init(free_func_t);
 void graph_destroy(graph_t *g);
 
 graph_vertex_t * graph_add_vertex(graph_t *g, void *d);
-graph_edge_t * graph_add_edge(graph_t *g, graph_vertex_t *orig,
-                    graph_vertex_t *dest, double weight);
+graph_edge_t * graph_add_edge(graph_vertex_t *orig,
+                              graph_vertex_t *dest, double weight);
 
 void graph_clear_pathtrace(graph_t *g);
 

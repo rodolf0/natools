@@ -1,4 +1,3 @@
-AC_PREREQ([2.68])
 AC_INIT([natools], [0.15], [warlock.cc@gmail.com])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_HEADERS([config.h])
@@ -27,7 +26,7 @@ AC_CHECK_LIB([readline], [read_history])
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h stdlib.h string.h unistd.h])
 
-CFLAGS="-O2 -Wall -Werror -Wno-uninitialized"
+CFLAGS="-O2 -Wall -Wextra -Werror -Wno-uninitialized"
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

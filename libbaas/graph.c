@@ -36,7 +36,7 @@ graph_vertex_t * graph_add_vertex(graph_t *g, void *d) {
   return v;
 }
 
-graph_edge_t * graph_add_edge(graph_t *g, graph_vertex_t *orig,
+graph_edge_t * graph_add_edge(graph_vertex_t *orig,
                     graph_vertex_t *dest, double weight) {
   graph_edge_t *e = malloc(sizeof(graph_edge_t));
   e->connection = dest;

@@ -57,10 +57,10 @@ void partition3(void *a, size_t n, int kth, size_t *b,
   /* move the pivot out of the way (swap it with last element) */
   SWAP(IDX(a, kth), IDX(a, n-1));
   /* reorder array */
-  while (i < eq_idx) {
+  while (i < (ssize_t)eq_idx) {
     /* if a[i] < pivot put it at the begining */
     if (cmp(IDX(a, i), IDX(a, n-1)) < 0)
-    { if (i > lt_idx) SWAP(IDX(a, i), IDX(a, lt_idx)); i++; lt_idx++; }
+    { if (i > (ssize_t)lt_idx) SWAP(IDX(a, i), IDX(a, lt_idx)); i++; lt_idx++; }
     /* if a[i] == pivot put it at the end with all pivots */
     else if (cmp(IDX(a, i), IDX(a, n-1)) == 0)
     { eq_idx--; SWAP(IDX(a, i), IDX(a, eq_idx)); }
@@ -104,7 +104,7 @@ void partition32(void *a, size_t n, int kth, size_t *b,
   /* move equal keys on the extremes to the middle. l marks the pivot */
   while (p >= 0) /* r-- to skip pivot, p-- advance element */
   { r--; SWAP(IDX(a, p), IDX(a, r)); p--; }
-  while (q < n-1)
+  while (q < (ssize_t)(n-1))
   { l++; SWAP(IDX(a, q), IDX(a, l)); q++; }
   /* set the start of equal and greater list */
   *b = r; *c = l+1;

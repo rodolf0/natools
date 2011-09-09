@@ -19,7 +19,7 @@ void interval_swap(interval_t *i);
 typedef struct _stop_cond {
   /* error upper bound */
   double epsilon;
-  int max_iterations;
+  size_t max_iterations;
 } stop_cond_t;
 
 stop_cond_t *stop_cond_create(double e, int max_i);
