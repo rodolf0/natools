@@ -19,6 +19,9 @@
 #define GT 1
 #define ER 2
 
+/* unary minus has more precedence than exponentiation, so -4^0.5 = nan
+ * http://en.wikipedia.org/wiki/Order_of_operations (this is how bc works) */
+
 static const char _op_prec[14][14] = {
         /*  n   +   -   *   /   ^   (   )   $   f   ,   -u  v   = */
    /* n */ {ER, GT, GT, GT, GT, GT, ER, GT, GT, ER, GT, ER, ER, ER},
