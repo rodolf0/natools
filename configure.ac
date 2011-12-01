@@ -24,7 +24,7 @@ AC_CHECK_LIB([m], [sin])
 AC_CHECK_LIB([readline], [read_history])
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdint.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([stdint.h stdlib.h string.h unistd.h readline/readline.h])
 
 CFLAGS="-O2 -Wall -Wextra -Werror -Wno-uninitialized"
 

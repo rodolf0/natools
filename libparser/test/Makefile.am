@@ -2,7 +2,7 @@ bin_PROGRAMS = \
 	test_lexer \
 	test_parser
 
-LDADD = ../libparser.la
+LDADD = ../libparser.la ../../libbaas/libbaas.la
 CFLAGS = -O0 -ggdb -Wall -Werror -I$(top_srcdir)/libbaas
 
 test_lexer_SOURCES = test_lexer.c
