@@ -24,7 +24,7 @@ void heap_destroy(heap_t *h) {
 
 /* automatic resize of the heap */
 static inline void heap_resize(heap_t *h) {
-  if (h->size == h->bufsz) { /* if size >= 4/5 bufsz => grow */
+  if (h->size == h->bufsz) {
     /* TODO: check realloc return value (may overwrite our cur value if fail) */
     h->bufsz *= 2;
     h->data = realloc(h->data, sizeof(void*) * h->bufsz);
