@@ -9,7 +9,7 @@ bin_PROGRAMS = \
 #	test_modarithmetic
 
 LDADD = ../libbaas.la
-CFLAGS = -O0 -ggdb -Wall -Werror
+AM_CFLAGS = -O0 -ggdb -Wall -Werror
 
 test_list_SOURCES = test_list.c
 test_bstree_SOURCES = test_bstree.c

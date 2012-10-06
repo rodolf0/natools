@@ -1,5 +1,7 @@
 SUBDIRS = . test
 
+AM_CFLAGS=-O2 -Wall -Wextra -Werror -Wno-uninitialized
+
 lib_LTLIBRARIES = libparser.la
 libparser_la_SOURCES = \
 	scanner.c \

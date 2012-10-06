@@ -1,5 +1,7 @@
 SUBDIRS = . test
 
+AM_CFLAGS=-O2 -Wall -Wextra -Werror -Wno-uninitialized
+
 lib_LTLIBRARIES = libbaas.la
 libbaas_la_SOURCES = \
 	list.c \

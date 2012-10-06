@@ -10,6 +10,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_GNU_SOURCE
 
 # Checks for programs.
+AM_PROG_AR
 AC_PROG_CC([clang gcc cc])
 AC_PROG_CXX
 AC_PROG_AWK
@@ -18,6 +19,8 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+# let automake know we're overriding flags for custom targets
+AM_PROG_CC_C_O
 
 # Checks for libraries.
 AC_CHECK_LIB([m], [sin])
@@ -25,8 +28,6 @@ AC_CHECK_LIB([readline], [read_history])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h stdlib.h string.h unistd.h readline/readline.h])
-
-CFLAGS="-O2 -Wall -Wextra -Werror -Wno-uninitialized"
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
