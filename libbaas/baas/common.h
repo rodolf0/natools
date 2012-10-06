@@ -5,6 +5,7 @@
 
 typedef int (*cmp_func_t)(const void *, const void *);
 typedef void (*free_func_t)(void *);
+typedef size_t (*hash_func_t)(const char *);
 
 #endif /* _BAAS_COMMON_H_ */
 

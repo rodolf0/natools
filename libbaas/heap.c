@@ -24,8 +24,8 @@ void heap_destroy(heap_t *h) {
 
 /* automatic resize of the heap */
 static inline void heap_resize(heap_t *h) {
+  /* TODO: check realloc return value (may overwrite our cur value if fail) */
   if (h->size == h->bufsz) {
-    /* TODO: check realloc return value (may overwrite our cur value if fail) */
     h->bufsz *= 2;
     h->data = realloc(h->data, sizeof(void*) * h->bufsz);
   } else if (h->bufsz > HEAP_INIT_SIZE && h->size < h->bufsz/3) {
