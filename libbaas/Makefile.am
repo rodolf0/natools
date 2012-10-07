@@ -8,6 +8,7 @@ libbaas_la_SOURCES = \
 	bits.c \
 	bstree.c \
 	graph.c \
+	hashtbl.c \
 	heap.c heap-list.c \
 	list.c \
 	sort.c sort-aux.c \
@@ -21,6 +22,7 @@ libbaas_include_HEADERS = \
 	baas/bstree.h \
 	baas/common.h \
 	baas/graph.h \
+	baas/hashtbl.h \
 	baas/heap.h baas/heap-list.h \
 	baas/list.h \
 	baas/sort.h \
