@@ -9,8 +9,6 @@
  *  according to some comparison function */
 /* http://en.wikipedia.org/wiki/Binary_heap */
 
-#define HEAP_INIT_SIZE  64 /* keep this a power of 2 */
-
 typedef struct _heap {
   size_t size;   /* space actually used */
   size_t bufsz;  /* space alloc'ed */

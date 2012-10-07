@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include "baas/heap.h"
 
+#define HEAP_INIT_SIZE  64 /* keep this a power of 2 */
+
 heap_t * heap_init(free_func_t hfree, cmp_func_t hcmp) {
   heap_t *h = malloc(sizeof(heap_t));
   h->bufsz = HEAP_INIT_SIZE;

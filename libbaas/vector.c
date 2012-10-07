@@ -2,6 +2,8 @@
 #include <string.h>
 #include "baas/vector.h"
 
+#define VECTOR_INIT_CAPACITY 32
+
 
 vector_t * vector_init(free_func_t f, cmp_func_t c) {
   vector_t *v = (vector_t*)malloc(sizeof(vector_t));

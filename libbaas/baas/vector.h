@@ -3,8 +3,6 @@
 
 #include "common.h"
 
-#define VECTOR_INIT_CAPACITY 32
-
 typedef struct _vector_t {
   size_t size;
   size_t cap;
