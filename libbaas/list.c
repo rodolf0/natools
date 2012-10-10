@@ -123,6 +123,26 @@ void * list_peek_tail(list_t *l) {
 }
 
 
+void list_remove(list_t *l, list_node_t *n) {
+  if (!l || !l->first)
+    return;
+  /* lock for concurrent access */
+  if (n->next)
+    n->next->prev = n->prev;
+  if (n->prev)
+    n->prev->next = n->next;
+  if (l->first == n)
+    l->first = n->next;
+  if (l->last == n)
+    l->last = n->prev;
+  l->size--;
+  /* unlock */
+  if (l->free)
+    l->free(n->data);
+  free(n);
+}
+
+
 /* execute f with each element of the list */
 void list_foreach(list_t *l, void (*f)(void *)) {
   if (!l || !f)

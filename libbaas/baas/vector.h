@@ -18,7 +18,7 @@ void vector_destroy(vector_t *v);
 
 /* a negative index counts from the end backwards (eg: -1 -> last)
  * index must be [-size <= idx <= size] else operation will fail */
-void vector_insert(vector_t *v, ssize_t idx, void *data);
+ssize_t vector_insert(vector_t *v, ssize_t idx, void *data);
 /* index must be [-size <= idx < size] else operation will fail */
 void vector_remove(vector_t *v, ssize_t idx);
 void * vector_get(vector_t *v, ssize_t idx);

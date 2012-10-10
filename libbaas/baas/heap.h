@@ -23,20 +23,20 @@ static inline size_t heap_parent(size_t idx) { return (idx ? (idx-1)/2 : 0); }
 static inline size_t heap_child_l(size_t idx) { return 2*idx+1; }
 static inline size_t heap_child_r(size_t idx) { return 2*(idx+1); }
 /* get the index of the greatest child of node at idx */
-size_t heap_greatest_child(heap_t *h, size_t idx);
+ssize_t heap_greatest_child(heap_t *h, size_t idx);
 
 /* constructor / destructor */
 heap_t * heap_init(free_func_t hfree, cmp_func_t hcmp);
 void heap_destroy(heap_t *h);
 
 /* heap operation */
-void heap_insert(heap_t *h, void *e);
+ssize_t heap_insert(heap_t *h, void *e);
 void * heap_pop(heap_t *h);
-void heap_bubble_up(heap_t *h, void *e, size_t idx);
-void heap_sift_down(heap_t *h, void *e, size_t idx);
+ssize_t heap_bubble_up(heap_t *h, void *e, size_t idx);
+ssize_t heap_sift_down(heap_t *h, void *e, size_t idx);
 
 /* return the index of the element or next free slot */
-size_t heap_element_idx(heap_t *h, void *e);
+ssize_t heap_find(heap_t *h, void *e);
 
 /* given an array of n elements of size sz make pointers to them
  * and rearange the pointers so that they form a heap.

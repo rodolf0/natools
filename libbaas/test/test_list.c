@@ -11,28 +11,45 @@ int intcmp_r(const int *a, const int *b) {
 }
 
 list_t * generate_test_list() {
-  int n = 0, i, sum = 0, *e=NULL;
+  int n = 0, i, j, sum = 0, *e=NULL;
   list_t *l = list_init(free, (cmp_func_t)intcmp);
+  list_node_t *ln;
 
   for (i = 0; i < 10000; i++) {
-    switch (random() % 4) {
+    switch (random() % 11) {
       case 0:
+      case 1:
+      case 2:
         e = malloc(sizeof(int)); *e = random() % 123456789;
         n++; sum += *e;
         list_push(l, e);
         break;
-      case 1:
+      case 3:
+      case 4:
+      case 5:
         e = malloc(sizeof(int)); *e = random() % 123456789;
         n++; sum += *e;
         list_queue(l, e);
         break;
-      case 2:
+      case 6:
+      case 7:
         e = list_pop(l);
         if (e) { n--; sum -= *e; free(e); }
         break;
-      case 3:
+      case 8:
+      case 9:
         e = list_dequeue(l);
         if (e) { n--; sum -= *e; free(e); }
+        break;
+      case 10:
+        if (!l->size) continue;
+        j = random() % l->size;
+        ln = l->first;
+        while (j--)
+          ln = ln->next;
+        n--;
+        sum -= *(int*)ln->data;
+        list_remove(l, ln);
         break;
     }
 
@@ -52,7 +69,6 @@ list_t * generate_test_list() {
   }
 
   /* check list threading */
-  list_node_t *ln;
   int forward = 0, backward = 0, ctrlsum1 = 0, ctrlsum2 = 0;
   for (ln = l->first; ln; ln = ln->next)
   { forward++; ctrlsum1 += *(int*)ln->data; }

@@ -180,11 +180,11 @@ void graph_explore_dijkstra(graph_t *g, graph_vertex_t *s,
         v->path.distance = s->path.distance + ve->weight;
 
         /* check if destination is already on the heap */
-        size_t idx = heap_element_idx(prioq, v);
-        if (idx == prioq->size)
-          heap_insert(prioq, v);
-        else
+        ssize_t idx = heap_find(prioq, v);
+        if (idx != -1)
           heap_bubble_up(prioq, v, idx);
+        else
+          heap_insert(prioq, v);
       }
     }
   }

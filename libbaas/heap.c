@@ -4,6 +4,8 @@
 #define HEAP_INIT_SIZE  64 /* keep this a power of 2 */
 
 heap_t * heap_init(free_func_t hfree, cmp_func_t hcmp) {
+  if (!hcmp)
+    return NULL;
   heap_t *h = malloc(sizeof(heap_t));
   h->bufsz = HEAP_INIT_SIZE;
   h->size = 0;
@@ -37,13 +39,14 @@ static inline void heap_resize(heap_t *h) {
 }
 
 
-void heap_insert(heap_t *h, void *e) {
+ssize_t heap_insert(heap_t *h, void *e) {
   if (!h)
-    return;
+    return -1;
   /* let the heap grow if we're out of space */
   heap_resize(h);
-  heap_bubble_up(h, e, h->size);
+  size_t idx = heap_bubble_up(h, e, h->size);
   h->size++;
+  return idx;
 }
 
 
@@ -62,8 +65,9 @@ void * heap_pop(heap_t *h) {
 
 /* place element e in position idx (normaly last) and let it bubble up */
 /* this overwrites the value at idx */
-void heap_bubble_up(heap_t *h, void *e, size_t idx) {
-  if (!h || !h->cmp) return;
+ssize_t heap_bubble_up(heap_t *h, void *e, size_t idx) {
+  if (!h)
+    return -1;
   size_t piv = heap_parent(idx);
   /* while new node is bigger than parents swap them */
   while (idx > 0 && h->cmp(e, h->data[piv]) > 0) {
@@ -71,13 +75,15 @@ void heap_bubble_up(heap_t *h, void *e, size_t idx) {
     idx = piv; piv = heap_parent(idx);
   }
   h->data[idx] = e;
+  return idx;
 }
 
 
 /* place e at idx and let it sift down.
  * this overwrites the value at idx */
-void heap_sift_down(heap_t *h, void *e, size_t idx) {
-  if (!h || !h->cmp) return;
+ssize_t heap_sift_down(heap_t *h, void *e, size_t idx) {
+  if (!h)
+    return -1;
   size_t piv = heap_greatest_child(h, idx);
   /* while not in heap order keep on sifting */
   while (piv > 0 && h->cmp(e, h->data[piv]) < 0) {
@@ -85,12 +91,14 @@ void heap_sift_down(heap_t *h, void *e, size_t idx) {
     piv = heap_greatest_child(h, idx);
   }
   h->data[idx] = e;
+  return idx;
 }
 
 
 /* return the index of the greatest child (if any) or the root 0 */
-size_t heap_greatest_child(heap_t *h, size_t idx) {
-  if (!h || !h->cmp) return 0; /* it would never be the root */
+ssize_t heap_greatest_child(heap_t *h, size_t idx) {
+  if (!h)
+    return -1;
   size_t left = heap_child_l(idx);
   size_t right = heap_child_r(idx);
   /* since we use a complete binary tree, if right => left too */
@@ -104,12 +112,14 @@ size_t heap_greatest_child(heap_t *h, size_t idx) {
 
 
 /* return element's index within the heap or one off index */
-size_t heap_element_idx(heap_t *h, void *e) {
-  if (!h) return 0;
+ssize_t heap_find(heap_t *h, void *e) {
+  if (!h)
+    return -1;
   size_t idx = 0;
   for (idx = 0; idx < h->size; idx++)
-    if (h->data[idx] == e) break;
-  return idx;
+    if (h->cmp(h->data[idx], e) == 0)
+      break;
+  return -1;
 }
 
 

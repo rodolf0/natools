@@ -43,6 +43,8 @@ void vector_destroy(vector_t *v) {
 
 /* automatic resize */
 static inline void vector_recapcitate(vector_t *v) {
+  if (!v)
+    return;
   /* TODO: check realloc return value (may overwrite our cur value if fail) */
   if (v->size == v->cap) {
     v->cap *= 2;
@@ -54,12 +56,12 @@ static inline void vector_recapcitate(vector_t *v) {
 }
 
 
-void vector_insert(vector_t *v, ssize_t idx, void *data) {
+ssize_t vector_insert(vector_t *v, ssize_t idx, void *data) {
   if (!v)
-    return;
+    return -1;
   /* check [-size <= idx <= size] */
   if (-idx > (ssize_t)v->size || idx > (ssize_t)v->size)
-    return;
+    return -2;
   if (idx < 0)
     idx += v->size;
   vector_recapcitate(v);
@@ -67,6 +69,7 @@ void vector_insert(vector_t *v, ssize_t idx, void *data) {
   memmove(v->data + idx + 1, v->data + idx, sizeof(void*) * (v->size - idx));
   v->data[idx] = data;
   v->size++;
+  return idx;
 }
 
 

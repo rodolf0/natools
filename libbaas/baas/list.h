@@ -34,6 +34,9 @@ void * list_dequeue(list_t *l);
 void * list_peek_head(list_t *l);
 void * list_peek_tail(list_t *l);
 
+/* unlink a node from the list */
+void list_remove(list_t *l, list_node_t *n);
+
 /* execute f with each element of the list */
 void list_foreach(list_t *l, void (*f)(void *));
 /* run f on each element of l and return a result list. INFO: no cmp/free  */
