@@ -20,23 +20,26 @@ typedef struct _hash_elem_t {
 
 
 /* constructor / destructor */
-hashtbl_t * hashtbl_init(free_func_t f, cmp_func_t c);
+hashtbl_t * hashtbl_init(free_func_t f);
 void hashtbl_destroy(hashtbl_t *h);
 
-hash_elem_t * hashtbl_put(hashtbl_t *h, char *key, void *data);
+hash_elem_t * hashtbl_insert(hashtbl_t *h, char *key, void *data);
+// TOOD: sync with bstree API, make remove take a hash_elem_t
 void hashtbl_remove(hashtbl_t *h, char *key);
 void * hashtbl_get(hashtbl_t *h, char *key);
 
 void hashtbl_foreach(hashtbl_t *h, void (*f)(void*));
-hash_elem_t * hashtbl_find(hashtbl_t *h, void *data);
+hash_elem_t * hashtbl_find(hashtbl_t *h, cmp_func_t datacmp, void *data);
 
-/* return the keys stored in the hashtable */
+/* return the keys (and number of) stored in the hashtable
+ * if return is greater than 0 the user needs to free the keys */
 size_t hashtbl_keys(hashtbl_t *h, char ***keys);
 
 /* some hash functions */
-size_t elf_hash(const char *key);
-size_t pjw_hash(const char *key);
-size_t djb_hash(const char *key);
+// TODO: these functions don't hash well, need a primer number of buckets?
+size_t elf_hash(const unsigned char *key);
+size_t pjw_hash(const unsigned char *key);
+size_t djb_hash(const unsigned char *key);
 /* http://www.partow.net/programming/hashfunctions/index.html */
 
 #endif /* _HASHTBL_H_ */

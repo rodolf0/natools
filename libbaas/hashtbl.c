@@ -4,11 +4,15 @@
 
 #define HASHTBL_INIT_BUCKETS 64
 
-hashtbl_t * hashtbl_init(free_func_t f, cmp_func_t c) {
+static int hashtbl_keycmp(const hash_elem_t *a, const char *key) {
+  return strcmp(a->key, key);
+}
+
+
+hashtbl_t * hashtbl_init(free_func_t f) {
   hashtbl_t *h = (hashtbl_t*)malloc(sizeof(hashtbl_t));
   h->free = f;
-  h->cmp = c;
-  h->hash = pjw_hash;
+  h->hash = djb_hash;
   h->size = 0;
   h->bktnum= HASHTBL_INIT_BUCKETS;
   h->buckets = (vector_t**)malloc(sizeof(vector_t*) * h->bktnum);
@@ -16,23 +20,40 @@ hashtbl_t * hashtbl_init(free_func_t f, cmp_func_t c) {
   return h;
 }
 
+
 void hashtbl_destroy(hashtbl_t *h) {
   if (!h)
     return;
-  size_t i;
+  size_t i, j;
   for (i = 0; i < h->bktnum; i++)
-    if (h->buckets[i])
+    if (h->buckets[i]) {
+      if (h->free) {
+        for (j = 0; j < h->buckets[i]->size; j++) {
+          hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[i], j);
+          h->free(e->data);
+        }
+      }
       vector_destroy(h->buckets[i]);
-
+    }
+  free(h->buckets);
+  free(h);
 }
 
 
-hash_elem_t * hashtbl_put(hashtbl_t *h, char *key, void *data) {
+static void hashtbl_rehash(hashtbl_t *h) {
+  if (!h)
+    return;
+  /*if (h->size > 4 * h->bktnum);*/
+  /*if (h->size < h->bktnum / 2);*/
+}
+
+
+hash_elem_t * hashtbl_insert(hashtbl_t *h, char *key, void *data) {
   if (!h)
     return NULL;
-  size_t b = h->hash(key) % h->bktnum;
+  size_t b = h->hash((unsigned char*)key) % h->bktnum;
   if (!h->buckets[b])
-    h->buckets[b] = vector_init(h->free, h->cmp);
+    h->buckets[b] = vector_init(free, (cmp_func_t)hashtbl_keycmp);
   /* initialize the new element */
   size_t keylen = strlen(key);
   hash_elem_t *e = (hash_elem_t*)malloc(sizeof(hash_elem_t) + keylen + 1);
@@ -40,8 +61,10 @@ hash_elem_t * hashtbl_put(hashtbl_t *h, char *key, void *data) {
   memcpy(e->key, key, keylen);
   e->key[keylen] = '\0';
   e->data = data;
-  /* insert the new element into the hashtable */
-  vector_insert(h->buckets[b], -1, e);
+  /* we could search before insertion to disallow duplicates */
+  vector_append(h->buckets[b], e);
+  h->size++;
+  hashtbl_rehash(h);
   return e;
 }
 
@@ -49,24 +72,30 @@ hash_elem_t * hashtbl_put(hashtbl_t *h, char *key, void *data) {
 void hashtbl_remove(hashtbl_t *h, char *key) {
   if (!h)
     return;
-  size_t b = h->hash(key) % h->bktnum;
+  size_t b = h->hash((unsigned char*)key) % h->bktnum;
   if (!h->buckets[b])
     return;
   ssize_t idx = vector_find(h->buckets[b], key);
-  if (idx >= 0)
-    vector_remove(h->buckets[b], idx);
+  if (idx < 0)
+    return;
+  hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[b], idx);
+  if (h->free)
+    h->free(e->data);
+  vector_remove(h->buckets[b], idx);
+  h->size--;
+  hashtbl_rehash(h);
 }
 
 
 void * hashtbl_get(hashtbl_t *h, char *key) {
   if (!h)
     return NULL;
-  size_t b = h->hash(key) % h->bktnum;
+  size_t b = h->hash((unsigned char*)key) % h->bktnum;
   if (!h->buckets[b])
     return NULL;
   ssize_t idx = vector_find(h->buckets[b], key);
   if (idx >= 0)
-    return vector_get(h->buckets[b], idx);
+    return ((hash_elem_t*)vector_get(h->buckets[b], idx))->data;
   return NULL;
 }
 
@@ -74,19 +103,23 @@ void * hashtbl_get(hashtbl_t *h, char *key) {
 void hashtbl_foreach(hashtbl_t *h, void (*f)(void*)) {
   if (!h)
     return;
-  size_t i;
+  size_t i, j;
   for (i = 0; i < h->bktnum; i++)
-    vector_foreach(h->buckets[i], f);
+    if (h->buckets[i])
+      for (j = 0; j < h->buckets[i]->size; j++)
+        f(((hash_elem_t*)vector_get(h->buckets[i], j))->data);
 }
 
 
-hash_elem_t * hashtbl_find(hashtbl_t *h, void *data) {
+//TODO: this doesn't work as expected
+hash_elem_t * hashtbl_find(hashtbl_t *h, cmp_func_t datacmp, void *data) {
   if (!h)
     return NULL;
   size_t i;
   ssize_t idx;
   for (i = 0; i < h->bktnum; i++)
-    if (h->buckets[i] && (idx = vector_find(h->buckets[i], data)) >= 0)
+    if (h->buckets[i] &&
+        (idx = vector_find2(h->buckets[i], datacmp, data)) >= 0)
       break;
   if (i < h->bktnum && idx >= 0)
     return vector_get(h->buckets[i], idx);
@@ -106,9 +139,9 @@ size_t hashtbl_keys(hashtbl_t *h, char ***keys) {
       for (j = 0; j < h->buckets[i]->size; j++, k++) {
         hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[i], j);
         size_t keylen = strlen(e->key);
-        *keys[k] = (char*)malloc(sizeof(char) * (keylen + 1));
-        memcpy(*keys[k], e->key, keylen);
-        *keys[k][keylen] = '\0';
+        (*keys)[k] = (char*)malloc(sizeof(char) * (keylen + 1));
+        memcpy((*keys)[k], e->key, keylen);
+        (*keys)[k][keylen] = '\0';
       }
   }
   return h->size;
@@ -116,7 +149,7 @@ size_t hashtbl_keys(hashtbl_t *h, char ***keys) {
 
 
 /* some hash functions */
-size_t elf_hash(const char *key) {
+size_t elf_hash(const unsigned char *key) {
   size_t hash = 0, test = 0;
   unsigned char c;
   while ((c = *key++)) {
@@ -129,7 +162,7 @@ size_t elf_hash(const char *key) {
 }
 
 
-size_t pjw_hash(const char *key) {
+size_t pjw_hash(const unsigned char *key) {
   const size_t szbits = sizeof(size_t) * 8;
   const size_t threeq = (szbits * 3) / 4;
   const size_t aeigth = szbits / 8;
@@ -146,7 +179,7 @@ size_t pjw_hash(const char *key) {
 }
 
 
-size_t djb_hash(const char *key) {
+size_t djb_hash(const unsigned char *key) {
   size_t hash = 5381;
   unsigned char c;
   while ((c = *key++))
