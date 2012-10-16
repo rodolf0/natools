@@ -100,39 +100,34 @@ vector_t * generate_test_vector() {
 }
 
 void test_search(vector_t *v) {
-  vector_t *y = vector_copy(v);
   int i;
   for (i = 0; i < 100; i++) {
-    int *search = vector_get(y, random() % y->size);
+    int *search = vector_get(v, random() % v->size);
+    if (!search) continue; /* after resize lots of null elems */
     int *find = vector_get(v, vector_find(v, search));
-    if (search || find)
-      assert(*search == *find);
+    assert(*search == *find);
   }
 }
 
 void test_resize(vector_t *v) {
-  int j, n, sum;
-  size_t idx = v->size * 75/100;
+  int j, sum = 0;
+  size_t newsize = v->size * (60 + random() % 10) / 100;
 
-  totalsum = 0;
-  n = v->size;
-  vector_foreach(v, (void(*)(void*))acumulate);
-  sum = totalsum;
-
-  for (j = idx; j < v->size; j++) {
-    n--; sum -= *(int*)vector_get(v, j);
+  for (j = 0; j < newsize; j++) {
+    sum += *(int*)vector_get(v, j);
   }
-  vector_resize(v, idx);
+  vector_resize(v, newsize);
 
-  assert(n == v->size);
+  assert(newsize == v->size);
   assert(v->cap >= v->size);
   totalsum = 0;
   vector_foreach(v, (void(*)(void*))acumulate);
+  /*fprintf(stderr, "%d, %d\n", totalsum, sum);*/
   assert(totalsum == sum);
 
-  vector_resize(v, 2*idx);
+  vector_resize(v, 2*newsize);
 
-  assert(2*idx == v->size);
+  assert(2*newsize == v->size);
   assert(v->cap >= v->size);
   totalsum = 0;
   vector_foreach(v, (void(*)(void*))acumulate);
@@ -148,7 +143,8 @@ int main(int argc, char *argv[]) {
     vector_t *v = generate_test_vector();
     test_search(v);
     test_resize(v);
-    test_search(v);
+    if (v->size > 0)
+      test_search(v);
     vector_destroy(v);
   }
   fprintf(stderr, "\n");
