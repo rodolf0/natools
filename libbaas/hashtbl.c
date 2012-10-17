@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h> /* uint32_t */
 #include "baas/hashtbl.h"
 
 #define HASHTBL_INIT_BUCKETS 64
@@ -12,7 +13,7 @@ static int hashtbl_keycmp(const hash_elem_t *a, const char *key) {
 hashtbl_t * hashtbl_init(free_func_t f) {
   hashtbl_t *h = (hashtbl_t*)malloc(sizeof(hashtbl_t));
   h->free = f;
-  h->hash = djb_hash;
+  h->hash = meiyan_hash;
   h->size = 0;
   h->bktnum= HASHTBL_INIT_BUCKETS;
   h->buckets = (vector_t**)malloc(sizeof(vector_t*) * h->bktnum);
@@ -149,42 +150,42 @@ size_t hashtbl_keys(hashtbl_t *h, char ***keys) {
 
 
 /* some hash functions */
-size_t elf_hash(const unsigned char *key) {
-  size_t hash = 0, test = 0;
-  unsigned char c;
-  while ((c = *key++)) {
-    hash = (hash << 4) + c;
-    if ((test = hash & 0xf0000000) != 0)
-      hash ^= (test >> 24);
-    hash &= ~test;
-  }
-  return hash & 0x7fffffff; /* clear bitsign just in case */
-}
-
-
-size_t pjw_hash(const unsigned char *key) {
-  const size_t szbits = sizeof(size_t) * 8;
-  const size_t threeq = (szbits * 3) / 4;
-  const size_t aeigth = szbits / 8;
-  const size_t hibits = 0xffffffff << (szbits - aeigth);
-
-  size_t hash = 0, test = 0;
-  unsigned char c;
-  while ((c = *key++)) {
-    hash = (hash << aeigth) + c;
-    if ((test = hash & hibits) != 0)
-      hash = (hash ^ (test >> threeq)) & (~hibits);
-  }
-  return hash & 0x7fffffff; /* clear bitsign just in case */
-}
-
-
 size_t djb_hash(const unsigned char *key) {
   size_t hash = 5381;
   unsigned char c;
   while ((c = *key++))
     hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-  return hash & 0x7fffffff; /* clear bitsign just in case */
+  return hash;
+}
+
+/* http://www.sanmayce.com/Fastest_Hash/ */
+size_t meiyan_hash(const unsigned char *key) {
+  size_t keylen = strlen((char*)key);
+  const size_t prime = 709607;
+  size_t hash = 2166136261;
+
+  while (keylen >= 8) {
+    uint32_t *dwords = (uint32_t*)key;
+    // rotate and mix
+    hash = (hash ^ (*dwords << 5 | *dwords >> 27) ^ *(dwords+1)) * prime;
+    keylen -= 8; key += 8;
+  }
+
+  // cases where keylen < 8
+  if (keylen & 4) { /* >= 4 */
+    hash = (hash ^ *(uint16_t*)key) * prime;
+    key += 2;
+    hash = (hash ^ *(uint16_t*)key) * prime;
+    key += 2;
+  }
+  if (keylen & 2) { /* >= 2 */
+    hash = (hash ^ *(uint16_t*)key) * prime;
+    key += 2;
+  }
+  if (keylen & 1)
+    hash = (hash ^ *key) * prime;
+
+  return hash ^ hash >> 16;
 }
 
 /* vim: set sw=2 sts=2 : */

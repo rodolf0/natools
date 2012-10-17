@@ -35,12 +35,9 @@ hash_elem_t * hashtbl_find(hashtbl_t *h, cmp_func_t datacmp, void *data);
  * if return is greater than 0 the user needs to free the keys */
 size_t hashtbl_keys(hashtbl_t *h, char ***keys);
 
-/* some hash functions */
-// TODO: these functions don't hash well, need a primer number of buckets?
-size_t elf_hash(const unsigned char *key);
-size_t pjw_hash(const unsigned char *key);
+/* some hash functions (http://www.strchr.com/hash_functions) */
 size_t djb_hash(const unsigned char *key);
-/* http://www.partow.net/programming/hashfunctions/index.html */
+size_t meiyan_hash(const unsigned char *key);
 
 #endif /* _HASHTBL_H_ */
 

@@ -86,10 +86,10 @@ void check_hash_distribution(hashtbl_t *h) {
     } else
       empty++;
   }
-  fprintf(stderr,
-      " bucket stats: n %lu, empty %d, min %d, max %d, total %lu, avg %f\n",
-      h->bktnum, empty, min, max, h->size,
-      (float)h->size / (float)(h->bktnum - empty));
+  /*fprintf(stderr,*/
+      /*" bucket stats: n %lu, empty %d, min %d, max %d, total %lu, avg %f\n",*/
+      /*h->bktnum, empty, min, max, h->size,*/
+      /*(float)h->size / (float)(h->bktnum - empty));*/
 
   free(bsz);
   assert(empty == 0 || h->size < 5 * h->bktnum);
