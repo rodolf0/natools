@@ -13,7 +13,7 @@ static int hashtbl_keycmp(const hash_elem_t *a, const char *key) {
 hashtbl_t * hashtbl_init(free_func_t f) {
   hashtbl_t *h = (hashtbl_t*)malloc(sizeof(hashtbl_t));
   h->free = f;
-  h->hash = meiyan_hash;
+  h->hash = sbox_hash;
   h->size = 0;
   h->bktnum= HASHTBL_INIT_BUCKETS;
   h->buckets = (vector_t**)malloc(sizeof(vector_t*) * h->bktnum);
@@ -158,34 +158,22 @@ size_t djb_hash(const unsigned char *key) {
   return hash;
 }
 
-/* http://www.sanmayce.com/Fastest_Hash/ */
-size_t meiyan_hash(const unsigned char *key) {
-  size_t keylen = strlen((char*)key);
-  const size_t prime = 709607;
-  size_t hash = 2166136261;
+/* http://home.comcast.net/~bretm/hash/10.html */
+#define unlikely(x) __builtin_expect(!!(x), 0)
+size_t sbox_hash(const unsigned char *key) {
+  static size_t subst_box[256];
+  size_t hash = 0;
 
-  while (keylen >= 8) {
-    uint32_t *dwords = (uint32_t*)key;
-    // rotate and mix
-    hash = (hash ^ (*dwords << 5 | *dwords >> 27) ^ *(dwords+1)) * prime;
-    keylen -= 8; key += 8;
+  /* the first time the function is called it will initialize
+   * the static substition data and make it available for later use */
+  if (unlikely(subst_box[0] == 0)) {
+    srandom(1);
+    for (hash = 0; hash < 256; hash++)
+      subst_box[hash] = random();
   }
-
-  // cases where keylen < 8
-  if (keylen & 4) { /* >= 4 */
-    hash = (hash ^ *(uint16_t*)key) * prime;
-    key += 2;
-    hash = (hash ^ *(uint16_t*)key) * prime;
-    key += 2;
-  }
-  if (keylen & 2) { /* >= 2 */
-    hash = (hash ^ *(uint16_t*)key) * prime;
-    key += 2;
-  }
-  if (keylen & 1)
-    hash = (hash ^ *key) * prime;
-
-  return hash ^ hash >> 16;
+  while (*key)
+    hash = 3 * (hash ^ subst_box[*key++]);
+  return hash;
 }
 
 /* vim: set sw=2 sts=2 : */

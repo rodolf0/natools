@@ -37,7 +37,7 @@ size_t hashtbl_keys(hashtbl_t *h, char ***keys);
 
 /* some hash functions (http://www.strchr.com/hash_functions) */
 size_t djb_hash(const unsigned char *key);
-size_t meiyan_hash(const unsigned char *key);
+size_t sbox_hash(const unsigned char *key);
 
 #endif /* _HASHTBL_H_ */
 

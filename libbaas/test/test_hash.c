@@ -92,7 +92,48 @@ void check_hash_distribution(hashtbl_t *h) {
       /*(float)h->size / (float)(h->bktnum - empty));*/
 
   free(bsz);
-  assert(empty == 0 || h->size < 5 * h->bktnum);
+  /* the distance of the buckets that have the max total
+     the min must be around the avg */
+  assert(max - min < 10 * h->size / (h->bktnum - empty));
+  /* if we have empty buckets must be because of few elements */
+  assert(empty == 0 || h->size < 10 * h->bktnum);
+}
+
+
+void check_hash_function(hash_func_t hf, size_t maxkeylen) {
+  size_t buckets[4096];
+  const size_t nbkt = sizeof(buckets) / sizeof(size_t);
+  size_t i, j;
+
+  for (i = 0; i < nbkt; i++)
+    buckets[i] = 0;
+
+  for (i = 0; i < nbkt * 100; i++) {
+    // generate a random key
+    size_t keylen = 2 + random() % maxkeylen;
+    unsigned char *key = malloc(keylen+1);
+    for (j = 0; j < keylen; j++)
+      key[j] = 1 + random() % 254;
+    key[keylen] = '\0';
+    // hash into bucket
+    buckets[hf(key) % nbkt]++;
+    free(key);
+  }
+
+  size_t min = 0, max = 0, empty = 0;
+  for (i = 0; i < nbkt; i++) {
+    if (buckets[i] < min || i == 0) min = buckets[i];
+    if (buckets[i] > max || i == 0) max = buckets[i];
+    if (buckets[i] == 0) empty++;
+  }
+
+  /*fprintf(stderr,*/
+      /*" bucket stats: n %lu, empty %lu, min %lu, max %lu, total %lu, avg %f\n",*/
+      /*nbkt, empty, min, max, 100 * nbkt,*/
+      /*(float)(100 * nbkt) / (float)(nbkt - empty));*/
+
+  assert(max - min < 10 * 100*nbkt / (nbkt - empty));
+  assert(empty == 0 || 100*nbkt < 10 * nbkt);
 }
 
 
@@ -103,7 +144,11 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);
     hashtbl_t *h = generate_test_ht();
     check_hash_distribution(h);
-    hashtbl_destroy(h);
+    switch (i % 7) {
+      case 0: check_hash_function(djb_hash, i); break;
+      case 1: check_hash_function(sbox_hash, i); break;
+      default: break;
+    }
   }
   fprintf(stderr, "\n");
   return 0;
