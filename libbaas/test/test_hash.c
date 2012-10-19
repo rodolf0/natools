@@ -137,6 +137,26 @@ void check_hash_function(hash_func_t hf, size_t maxkeylen) {
 }
 
 
+#ifdef _DEBUG_
+void rehash_test() {
+  hashtbl_t *h = hashtbl_init(NULL);
+  size_t i, j;
+  for (i = 0; i < 1000000; i++) {
+    // generate a random key
+    size_t keylen = 3 + random() % 16;
+    unsigned char *key = malloc(keylen+1);
+    for (j = 0; j < keylen; j++)
+      key[j] = 1 + random() % 254;
+    key[keylen] = '\0';
+    hashtbl_insert(h, (char*)key, NULL);
+    free(key);
+    if (i%1000)
+      fprintf(stderr, "\rinserting ... %lu%%\t\t\t", 100*i/1000000);
+  }
+  hashtbl_destroy(h);
+}
+#endif
+
 #define ITERATIONS 100
 int main(int argc, char *argv[]) {
   int i;
@@ -144,17 +164,18 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);
     hashtbl_t *h = generate_test_ht();
     check_hash_distribution(h);
-    switch (i % 7) {
+    switch (i % 20) {
       case 0: check_hash_function(djb_hash, i); break;
       case 1: check_hash_function(sbox_hash, i); break;
       default: break;
     }
+    hashtbl_destroy(h);
   }
+#ifdef _DEBUG_
+  rehash_test();
+#endif
   fprintf(stderr, "\n");
   return 0;
 }
-
-/* vim: set sw=2 sts=2 : */
-
 
 /* vim: set sw=2 sts=2 : */

@@ -3,6 +3,10 @@
 #include <stdint.h> /* uint32_t */
 #include "baas/hashtbl.h"
 
+#ifdef _DEBUG_
+#include <stdio.h>
+#endif
+
 #define HASHTBL_INIT_BUCKETS 64
 
 static int hashtbl_keycmp(const hash_elem_t *a, const char *key) {
@@ -44,8 +48,38 @@ void hashtbl_destroy(hashtbl_t *h) {
 static void hashtbl_rehash(hashtbl_t *h) {
   if (!h)
     return;
-  /*if (h->size > 4 * h->bktnum);*/
-  /*if (h->size < h->bktnum / 2);*/
+  size_t bktnum;
+  if (h->size > 8 * h->bktnum)
+    bktnum = h->bktnum * 2;
+  else if (h->size > HASHTBL_INIT_BUCKETS && h->size < h->bktnum / 3)
+    bktnum = h->bktnum / 2;
+  else
+    return;
+
+#ifdef _DEBUG_
+  fprintf(stderr, "cur size %lu, rehashing...", h->bktnum);
+#endif
+  vector_t **buckets = (vector_t**)malloc(sizeof(vector_t*) * bktnum);
+  memset(buckets, 0, sizeof(vector_t*) * bktnum);
+  size_t i, j;
+  for (i = 0; i < h->bktnum; i++)
+    if (h->buckets[i]) {
+      for (j = 0; j < h->buckets[i]->size; j++) {
+        hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[i], j);
+        size_t b = h->hash((unsigned char*)e->key) % bktnum;
+        if (!buckets[b])
+          buckets[b] = vector_init(free, (cmp_func_t)hashtbl_keycmp);
+        vector_append(buckets[b], e);
+      }
+      h->buckets[i]->free = NULL;
+      vector_destroy(h->buckets[i]);
+    }
+  free(h->buckets);
+  h->buckets = buckets;
+  h->bktnum = bktnum;
+#ifdef _DEBUG_
+  fprintf(stderr, " done, new size %lu\n", bktnum);
+#endif
 }
 
 

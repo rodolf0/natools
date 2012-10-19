@@ -31,7 +31,7 @@ void * hashtbl_get(hashtbl_t *h, char *key);
 void hashtbl_foreach(hashtbl_t *h, void (*f)(void*));
 hash_elem_t * hashtbl_find(hashtbl_t *h, cmp_func_t datacmp, void *data);
 
-/* return the keys (and number of) stored in the hashtable
+/* return the keys (and number) stored in the hashtable
  * if return is greater than 0 the user needs to free the keys */
 size_t hashtbl_keys(hashtbl_t *h, char ***keys);
 
