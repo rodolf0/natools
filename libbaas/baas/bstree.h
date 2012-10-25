@@ -42,9 +42,13 @@ typedef struct _bstree {
 bstree_t * bstree_init(free_func_t f, cmp_func_t c);
 void bstree_destroy(bstree_t *t);
 
+/* insert data or replace existent (insertion in ordered sets) */
+bst_node_t * bstree_replace(bstree_t *t, void *data); /* PENDING */
+bst_node_t * bstree_insert(bstree_t *t, void *data);
 /* remove a node (previously find with bstree_find */
 void bstree_remove(bstree_t *t, bst_node_t *n);
-bst_node_t * bstree_insert(bstree_t *t, void *data);
+
+void bstree_delete(bstree_t *t, void *data); /* PENDING */
 
 bst_node_t * bstree_find(bstree_t *t, void *data);
 void bstree_foreach(bstree_t *t, void (*f)(void *), bst_traversal_t order);

@@ -14,9 +14,10 @@ static int hashtbl_keycmp(const hash_elem_t *a, const char *key) {
 }
 
 
-hashtbl_t * hashtbl_init(free_func_t f) {
+hashtbl_t * hashtbl_init(free_func_t f, cmp_func_t data_cmp) {
   hashtbl_t *h = (hashtbl_t*)malloc(sizeof(hashtbl_t));
   h->free = f;
+  h->cmp = data_cmp;
   h->hash = sbox_hash;
   h->size = 0;
   h->bktnum= HASHTBL_INIT_BUCKETS;
@@ -104,16 +105,15 @@ hash_elem_t * hashtbl_insert(hashtbl_t *h, char *key, void *data) {
 }
 
 
-void hashtbl_remove(hashtbl_t *h, char *key) {
-  if (!h)
+void hashtbl_remove(hashtbl_t *h, hash_elem_t *e) {
+  if (!h || !e)
     return;
-  size_t b = h->hash((unsigned char*)key) % h->bktnum;
+  size_t b = h->hash((unsigned char*)e->key) % h->bktnum;
   if (!h->buckets[b])
     return;
-  ssize_t idx = vector_find(h->buckets[b], key);
+  ssize_t idx = vector_find(h->buckets[b], e->key);
   if (idx < 0)
     return;
-  hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[b], idx);
   if (h->free)
     h->free(e->data);
   vector_remove(h->buckets[b], idx);
@@ -135,6 +135,24 @@ void * hashtbl_get(hashtbl_t *h, char *key) {
 }
 
 
+void hashtbl_delete(hashtbl_t *h, char *key) {
+  if (!h)
+    return;
+  size_t b = h->hash((unsigned char*)key) % h->bktnum;
+  if (!h->buckets[b])
+    return;
+  ssize_t idx = vector_find(h->buckets[b], key);
+  if (idx < 0)
+    return;
+  hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[b], idx);
+  if (h->free)
+    h->free(e->data);
+  vector_remove(h->buckets[b], idx);
+  h->size--;
+  hashtbl_rehash(h);
+}
+
+
 void hashtbl_foreach(hashtbl_t *h, void (*f)(void*)) {
   if (!h)
     return;
@@ -146,18 +164,17 @@ void hashtbl_foreach(hashtbl_t *h, void (*f)(void*)) {
 }
 
 
-//TODO: this doesn't work as expected
-hash_elem_t * hashtbl_find(hashtbl_t *h, cmp_func_t datacmp, void *data) {
+hash_elem_t * hashtbl_find(hashtbl_t *h, void *data) {
   if (!h)
     return NULL;
-  size_t i;
-  ssize_t idx;
+  size_t i, j;
   for (i = 0; i < h->bktnum; i++)
-    if (h->buckets[i] &&
-        (idx = vector_find2(h->buckets[i], datacmp, data)) >= 0)
-      break;
-  if (i < h->bktnum && idx >= 0)
-    return vector_get(h->buckets[i], idx);
+    if (h->buckets[i]) {
+      vector_t *v = h->buckets[i];
+      for (j = 0; j < v->size; j++)
+        if (h->cmp(((hash_elem_t*)vector_get(v, j))->data, data) == 0)
+          return vector_get(v, j);
+    }
   return NULL;
 }
 

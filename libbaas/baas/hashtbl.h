@@ -20,16 +20,19 @@ typedef struct _hash_elem_t {
 
 
 /* constructor / destructor */
-hashtbl_t * hashtbl_init(free_func_t f);
+hashtbl_t * hashtbl_init(free_func_t f, cmp_func_t data_cmp);
 void hashtbl_destroy(hashtbl_t *h);
 
+/* insert data or replace existent (insertion in unordered sets) */
+hash_elem_t * hashtbl_replace(hashtbl_t *h, char *key, void *data); /* PENDING */
 hash_elem_t * hashtbl_insert(hashtbl_t *h, char *key, void *data);
-// TOOD: sync with bstree API, make remove take a hash_elem_t
-void hashtbl_remove(hashtbl_t *h, char *key);
+void hashtbl_remove(hashtbl_t *h, hash_elem_t *e);
+
 void * hashtbl_get(hashtbl_t *h, char *key);
+void hashtbl_delete(hashtbl_t *h, char *key);
 
 void hashtbl_foreach(hashtbl_t *h, void (*f)(void*));
-hash_elem_t * hashtbl_find(hashtbl_t *h, cmp_func_t datacmp, void *data);
+hash_elem_t * hashtbl_find(hashtbl_t *h, void *data);
 
 /* return the keys (and number) stored in the hashtable
  * if return is greater than 0 the user needs to free the keys */

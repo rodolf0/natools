@@ -132,17 +132,6 @@ ssize_t vector_find(vector_t *v, void *data) {
 }
 
 
-ssize_t vector_find2(vector_t *v, cmp_func_t c, void *data) {
-  if (!v || !c)
-    return -2;
-  size_t i;
-  for (i = 0; i < v->size; i++)
-    if (c(v->data[i], data) == 0)
-      return i;
-  return -1;
-}
-
-
 void vector_foreach(vector_t *v, void (*f)(void*)) {
   if (!v || !f)
     return;

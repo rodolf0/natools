@@ -18,14 +18,16 @@ hashtbl_t * generate_test_ht() {
   int n = 0, sum = 0, *e = NULL, i, j;
   char *rk;
 
-  hashtbl_t *h = hashtbl_init(free);
+  hashtbl_t *h = hashtbl_init(free, (cmp_func_t)intcmp);
   vector_t *v = vector_init(free, NULL);
+  hash_elem_t *f;
 
   int q = random() % 17000;
   for (i = 0; i < q; i++) {
-    switch (random() % 4) {
+    switch (random() % 6) {
       case 0:
       case 1:
+      case 2:
         e = malloc(sizeof(int)); *e = random() % 124789;
         rk = (char*)malloc(32);
         sprintf(rk, "%d", *e);
@@ -33,19 +35,29 @@ hashtbl_t * generate_test_ht() {
         n++; sum += *e;
         hashtbl_insert(h, rk, e);
         break;
-      case 2:
+      case 3:
         if (!h->size) continue;
         rk = vector_get(v, random() % v->size);
         e = hashtbl_get(h, rk);
         assert(atoi(rk) == *e);
         break;
-      case 3:
+      case 4:
         if (!h->size) continue;
         j = random() % v->size;
         rk = vector_get(v, j);
         e = hashtbl_get(h, rk);
         n--; sum -= *e;
-        hashtbl_remove(h, rk);
+        hashtbl_delete(h, rk);
+        vector_remove(v, j);
+        break;
+      case 5:
+        if (!h->size) continue;
+        j = random() % v->size;
+        rk = vector_get(v, j);
+        int i = atoi(rk);
+        f = hashtbl_find(h, &i);
+        n--; sum -= *(int*)f->data;
+        hashtbl_remove(h, f);
         vector_remove(v, j);
         break;
     }
@@ -86,15 +98,17 @@ void check_hash_distribution(hashtbl_t *h) {
     } else
       empty++;
   }
-  /*fprintf(stderr,*/
-      /*" bucket stats: n %lu, empty %d, min %d, max %d, total %lu, avg %f\n",*/
-      /*h->bktnum, empty, min, max, h->size,*/
-      /*(float)h->size / (float)(h->bktnum - empty));*/
+#ifdef _DEBUG_
+  fprintf(stderr,
+      " bucket stats: n %lu, empty %d, min %d, max %d, total %lu, avg %f\n",
+      h->bktnum, empty, min, max, h->size,
+      (float)h->size / (float)(h->bktnum - empty));
+#endif
 
   free(bsz);
   /* the distance of the buckets that have the max total
      the min must be around the avg */
-  assert(max - min < 10 * h->size / (h->bktnum - empty));
+  assert(max - min < 15 * h->size / (h->bktnum - empty));
   /* if we have empty buckets must be because of few elements */
   assert(empty == 0 || h->size < 10 * h->bktnum);
 }
@@ -127,10 +141,12 @@ void check_hash_function(hash_func_t hf, size_t maxkeylen) {
     if (buckets[i] == 0) empty++;
   }
 
-  /*fprintf(stderr,*/
-      /*" bucket stats: n %lu, empty %lu, min %lu, max %lu, total %lu, avg %f\n",*/
-      /*nbkt, empty, min, max, 100 * nbkt,*/
-      /*(float)(100 * nbkt) / (float)(nbkt - empty));*/
+#ifdef _DEBUG_
+  fprintf(stderr,
+      " bucket stats: n %lu, empty %lu, min %lu, max %lu, total %lu, avg %f\n",
+      nbkt, empty, min, max, 100 * nbkt,
+      (float)(100 * nbkt) / (float)(nbkt - empty));
+#endif
 
   assert(max - min < 10 * 100*nbkt / (nbkt - empty));
   assert(empty == 0 || 100*nbkt < 10 * nbkt);
@@ -139,7 +155,7 @@ void check_hash_function(hash_func_t hf, size_t maxkeylen) {
 
 #ifdef _DEBUG_
 void rehash_test() {
-  hashtbl_t *h = hashtbl_init(NULL);
+  hashtbl_t *h = hashtbl_init(NULL, NULL);
   size_t i, j;
   for (i = 0; i < 1000000; i++) {
     // generate a random key
