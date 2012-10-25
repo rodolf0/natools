@@ -1,30 +1,55 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "parser/scanner.h"
 
-scanner_t *scanner_init(const char *buffer) {
-  scanner_t *s = malloc(sizeof(scanner_t));
+#define SCANNER_INIT_CAP 128
 
-  s->b_length = strlen(buffer);
-  s->buffer = malloc(s->b_length + 1);
-  strncpy(s->buffer, buffer, s->b_length);
-  s->buffer[s->b_length] = '\0';
 
-  s->pos = -1;
-  s->current_char = '\0';
-  s->next_char = *s->buffer;
+scanner_t * scanner_init_file(const char *file) {
+  if (strcmp(file, "-") == 0)
+    return scanner_init_fp(stdin);
+  return scanner_init_fp(fopen(file, "rb"));
+}
 
+scanner_t * scanner_init_fp(FILE *fp) {
+  if (!fp)
+    return NULL;
+  scanner_t *s = (scanner_t*)malloc(sizeof(scanner_t));
+  memset(s, 0, sizeof(scanner_t));
+  s->fp = fp;
+  s->cap = SCANNER_INIT_CAP;
+  s->buffer = (char*)malloc(s->cap);
+  s->size = fread(s->buffer, sizeof(char), s->cap, s->fp);
+  s->eof = feof(s->fp);
   return s;
 }
+
+
+scanner_t *scanner_init(const char *buffer) {
+  scanner_t *s = malloc(sizeof(scanner_t));
+  memset(s, 0, sizeof(scanner_t));
+  s->size = strlen(buffer);
+  s->cap = s->size + 1;
+  s->buffer = malloc(s->cap);
+  strncpy(s->buffer, buffer, s->size);
+  s->buffer[s->size] = '\0';
+  s->eof = 1;
+  return s;
+}
+
 
 void scanner_destroy(scanner_t *s) {
   if (!s)
     return;
+  if (s->fp && s->fp != stdin)
+    fclose(s->fp);
   if (s->buffer)
     free(s->buffer);
   free(s);
 }
+
 
 int scanner_seek(scanner_t *s, size_t pos) {
   if (pos > s->b_length)
