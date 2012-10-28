@@ -4,8 +4,7 @@
 
 #include "parser/scanner.h"
 
-#define SCANNER_INIT_CAP 128
-
+#define SCANNER_BUF_SZ 4096
 
 scanner_t * scanner_init_file(const char *file) {
   if (strcmp(file, "-") == 0)
@@ -17,28 +16,29 @@ scanner_t * scanner_init_fp(FILE *fp) {
   if (!fp)
     return NULL;
   scanner_t *s = (scanner_t*)malloc(sizeof(scanner_t));
-  memset(s, 0, sizeof(scanner_t));
   s->fp = fp;
-  s->cap = SCANNER_INIT_CAP;
-  s->buffer = (char*)malloc(s->cap);
-  s->size = fread(s->buffer, sizeof(char), s->cap, s->fp);
-  s->eof = feof(s->fp);
+  s->length = s->start = 0;
+  s->buf_cap = SCANNER_BUF_SZ;
+  s->buffer = (char*)malloc(s->buf_cap);
+  /* initial buffer fill */
+  int r = fread(s->buffer, 1, s->buf_cap, s->fp);
+  if (r < 0) {
+    free(s->buffer); free(s);
+    return NULL;
+  }
+  s->buf_sz = r;
   return s;
 }
-
 
 scanner_t *scanner_init(const char *buffer) {
   scanner_t *s = malloc(sizeof(scanner_t));
-  memset(s, 0, sizeof(scanner_t));
-  s->size = strlen(buffer);
-  s->cap = s->size + 1;
-  s->buffer = malloc(s->cap);
-  strncpy(s->buffer, buffer, s->size);
-  s->buffer[s->size] = '\0';
-  s->eof = 1;
+  s->length = s->start = 0;
+  s->buf_cap = s->buf_sz = strlen(buffer) + 1;
+  s->buffer = (char*)malloc(s->buf_cap);
+  /* initial buffer fill */
+  memcpy(s->buffer, buffer, s->buf_sz);
   return s;
 }
-
 
 void scanner_destroy(scanner_t *s) {
   if (!s)
@@ -51,18 +51,60 @@ void scanner_destroy(scanner_t *s) {
 }
 
 
-int scanner_seek(scanner_t *s, size_t pos) {
-  if (pos > s->b_length)
-    return -1;
-  s->pos = pos;
-  s->current_char = s->buffer[pos];
-  s->next_char = (pos == s->b_length ? '\0' : s->buffer[pos+1]);
-  return s->pos;
+/* shift out previous input and refill buffer (return num read -1: error) */
+static int scanner_shift_n_fill(scanner_t *s) {
+  if (!s || s->start == 0)
+    return 0;
+  /* shift available buffer to the beggining */
+  memmove(s->buffer, s->buffer + s->start, s->buf_sz - s->start);
+  s->buf_sz -= s->start;
+  s->start = 0;
+  /* read in more data */
+  int r = 0;
+  if (s->fp && !feof(s->fp)) {
+    r = fread(s->buffer + s->buf_sz, sizeof(char),
+              s->buf_cap - s->buf_sz, s->fp);
+    if (r > 0)
+      s->buf_sz += r;
+  }
+  return r;
 }
 
-char scanner_readchar(scanner_t *s) {
-  scanner_seek(s, s->pos+1);
-  return s->current_char;
+
+char scanner_advance(scanner_t *s) {
+  char a = scanner_peek(s);
+  if (a != 0)
+    s->length++;
+  return a;
+}
+
+char scanner_peek(scanner_t *s) {
+  if (!s)
+    return 0;
+  /* if we're at the buffer's edge, get more input */
+  if (s->start + s->length >= s->buf_sz)
+    if (scanner_shift_n_fill(s) <= 0)
+      return 0;
+  return s->buffer[s->start + s->length];
+}
+
+char scanner_backup(scanner_t *s) {
+  if (s->length <= 0)
+    return 0;
+  s->length--;
+  return scanner_peek(s);
+}
+
+
+void * scanner_accept(scanner_t *s, acceptfn f) {
+  void *r = f(s->buffer + s->start, s->length);
+  s->start = s->length;
+  s->length = 0;
+  return r;
+}
+
+void scanner_ignore(scanner_t *s) {
+  scanner_accept(s, NULL);
 }
 
 /* vim: set sw=2 sts=2 : */
