@@ -16,6 +16,7 @@ scanner_t * scanner_init_fp(FILE *fp) {
   if (!fp)
     return NULL;
   scanner_t *s = (scanner_t*)malloc(sizeof(scanner_t));
+  memset(s, 0, sizeof(scanner_t));
   s->fp = fp;
   s->length = s->start = 0;
   s->buf_cap = SCANNER_BUF_SZ;
@@ -32,6 +33,7 @@ scanner_t * scanner_init_fp(FILE *fp) {
 
 scanner_t *scanner_init(const char *buffer) {
   scanner_t *s = malloc(sizeof(scanner_t));
+  memset(s, 0, sizeof(scanner_t));
   s->length = s->start = 0;
   s->buf_cap = s->buf_sz = strlen(buffer) + 1;
   s->buffer = (char*)malloc(s->buf_cap);
@@ -72,39 +74,59 @@ static int scanner_shift_n_fill(scanner_t *s) {
 
 
 char scanner_advance(scanner_t *s) {
-  char a = scanner_peek(s);
-  if (a != 0)
-    s->length++;
-  return a;
+  if (!s)
+    return 0;
+  s->length++;
+  return scanner_current(s);
 }
 
 char scanner_peek(scanner_t *s) {
-  if (!s)
+  char p = scanner_advance(s);
+  if (p != 0)
+    s->length--;
+  return p;
+}
+
+char scanner_current(scanner_t *s) {
+  if (!s || s->length == 0)
     return 0;
   /* if we're at the buffer's edge, get more input */
-  if (s->start + s->length >= s->buf_sz)
+  if (s->start + s->length > s->buf_sz)
     if (scanner_shift_n_fill(s) <= 0)
       return 0;
-  return s->buffer[s->start + s->length];
+  return s->buffer[s->start + s->length - 1];
 }
 
 char scanner_backup(scanner_t *s) {
-  if (s->length <= 0)
+  if (!s || s->length <= 0)
     return 0;
   s->length--;
-  return scanner_peek(s);
+  return scanner_current(s);
 }
 
 
 void * scanner_accept(scanner_t *s, acceptfn f) {
-  void *r = f(s->buffer + s->start, s->length);
-  s->start = s->length;
+  if (!s || s->length == 0)
+    return NULL;
+  void *r = NULL;
+  if (f)
+    r = f(s->buffer + s->start, s->length);
+  s->start += s->length;
   s->length = 0;
   return r;
 }
 
 void scanner_ignore(scanner_t *s) {
   scanner_accept(s, NULL);
+}
+
+void * scanner_apply(scanner_t *s, acceptfn f) {
+  if (!s || s->length == 0)
+    return NULL;
+  void *r = NULL;
+  if (f)
+    r = f(s->buffer + s->start, s->length);
+  return r;
 }
 
 /* vim: set sw=2 sts=2 : */

@@ -20,24 +20,23 @@ void test_buffer_walk() {
   assert(scanner_peek(s) == 't');
   assert(scanner_advance(s) == 't');
   assert(scanner_advance(s) == 'h');
-  assert(scanner_backup(s) == 'h');
-  assert(scanner_backup(s) == 't');
-  assert(scanner_backup(s) == 0);
-  assert(scanner_backup(s) == 0);
-  assert(scanner_advance(s) == 't');
-  assert(scanner_advance(s) == 'h');
   assert(scanner_advance(s) == 'i');
   assert(scanner_advance(s) == 's');
+  assert(scanner_peek(s) == ' ');
+  assert(scanner_current(s) == 's');
   assert(scanner_advance(s) == ' ');
-  assert(scanner_peek(s) == 'i');
-  assert(scanner_advance(s) == 'i');
+  assert(scanner_backup(s) == 's');
+
+  char *this = (char*)scanner_accept(s, (acceptfn)test_accept_fn);
+  assert(strcmp(this, "this") == 0);
+  free(this);
 
   size_t i;
   char c;
   for (i = s->start + s->length; i < s->buf_sz; i++) {
     c = scanner_advance(s);
     assert(c == b[i]);
-    fprintf(stderr, "%c", c);
+    /*fprintf(stderr, "%c", c);*/
   }
 
   scanner_destroy(s);
@@ -52,8 +51,8 @@ void test_file_walk(const char *file) {
   l = strlen(start);
   for (i = 0; i < l; i++) {
     c = scanner_advance(s);
-    fprintf(stderr, "%c", c);
     assert(c == start[i]);
+    /*fprintf(stderr, "%c", c);*/
   }
 
   char *tok = (char*)scanner_accept(s, (acceptfn)test_accept_fn);
@@ -66,10 +65,9 @@ void test_file_walk(const char *file) {
 int main(int argc, char *argv[]) {
   fprintf(stderr, "Testing... ");
   test_buffer_walk();
-  fprintf(stderr, "\nTesting file... ");
+  /*fprintf(stderr, "\nTesting file... ");*/
   test_file_walk("test_scanner.c");
-  fprintf(stderr, "\n");
-
+  fprintf(stderr, "done\n");
   return 0;
 }
 

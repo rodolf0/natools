@@ -1,6 +1,7 @@
 #ifndef _SCANNER_H_
 #define _SCANNER_H_
 
+#include <stdio.h>
 #include <sys/types.h> /* size_t */
 
 typedef struct _scanner_t {
@@ -22,16 +23,20 @@ scanner_t * scanner_init_fp(FILE *fp);
 scanner_t * scanner_init(const char *buffer);
 void scanner_destroy(scanner_t *s);
 
-/* get the next char in the input stream (0 means eof or token too large) */
+/* get the next input char (0 means eof or token too large) */
 char scanner_advance(scanner_t *s);
-/* get the next char without advancing (0 means eof or token too large) */
+/* show the next char without consuming it (0 means eof or token too large) */
 char scanner_peek(scanner_t *s);
-/* backup a char and get the next (0 means we're at the start pos again) */
+/* show the current char (0 means eof or token too large) */
+char scanner_current(scanner_t *s);
+/* get the prev char (0 means we're at the start pos again) */
 char scanner_backup(scanner_t *s);
 /* accept current slice and start a new one (return result of f) */
 void * scanner_accept(scanner_t *s, acceptfn f);
 /* ignore current slice and start a new one */
 void scanner_ignore(scanner_t *s);
+/* apply the given function on the current slice without accepting */
+void * scanner_apply(scanner_t *s, acceptfn f);
 
 #endif /* _SCANNER_H_ */
 
