@@ -1,44 +1,71 @@
 #ifndef _LEXER_H_
 #define _LEXER_H_
 
-#include "baas/list.h"
 #include "scanner.h"
 
-/* type of tokens: lexical components */
-typedef enum _lex_component {
-  no_match = -1,
-  number = 0,
-  op_add,
-  op_sub,
-  op_mul,
-  op_div,
-  op_pow,
-  paren_open,
-  paren_close,
-  stack_empty,
-  function,
-  op_comma,
-  op_neg,
-  variable,
-  op_asig,
-  mango_o = 50,
-  mango_e,
-  mango_c
-} lex_component;
+/* lexical components */
+typedef enum _lexcomp_t {
+  /* math operators */
+  tokPlus = 1,
+  tokMinus,
+  tokTimes,
+  tokDivide,
+  tokModulo,
+  tokPower,
+  /* misc operators */
+  tokOParen,
+  tokCParen,
+  tokComma,
+  tokAsign,
+  /* logical operators */
+  tokNot,
+  tokAnd,
+  tokOr,
+  tokTrue,
+  tokFalse,
+  /* relational operators */
+  tokEq,
+  tokNe,
+  tokGt,
+  tokLt,
+  tokGe,
+  tokLe,
+  /* numbers, text, ids... */
+  tokNumber,
+  tokText,
+  tokId,
+  tokFunction,
+  /* parser specific */
+  tokOMango = 100,
+  tokEMango,
+  tokCMango,
+  tokStackEmpty,
+  tokNoMatch
+} lexcomp_t;
 
-/* lexical analysis generated tokens */
+/* known tokenizers */
+lexcomp_t tokenize_identifier(scanner_t *s);
+lexcomp_t tokenize_text(scanner_t *s);
+lexcomp_t tokenize_number(scanner_t *s);
+lexcomp_t tokenize_mathops(scanner_t *s);
+lexcomp_t tokenize_relops(scanner_t *s);
+lexcomp_t tokenize_miscops(scanner_t *s);
+
+
+/* utility functions */
+int is_white(char x);
+int is_alpha(char x);
+int is_num(char x);
+
+
+/* token definitions */
 typedef struct _token_t {
-  lex_component lcomp;
+  lexcomp_t lexcomp;
   char *lexem;
-  double value;
 } token_t;
 
-token_t *token_init(lex_component lc, const char *lexem);
-void token_destroy(token_t *t);
-
-/* the lexer interface: returns a list of tokens */
-list_t *tokenize(const char *buffer);
-
+/* extract token from the stream (user must later free) */
+token_t * lexer_nextitem(scanner_t *s);
 
 #endif /* _LEXER_H_ */
 
