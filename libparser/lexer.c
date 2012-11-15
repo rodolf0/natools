@@ -3,6 +3,16 @@
 
 #include "parser/lexer.h"
 
+/* known tokenizers */
+extern lexcomp_t tokenize_identifier(scanner_t *s);
+extern lexcomp_t tokenize_text(scanner_t *s);
+extern lexcomp_t tokenize_number(scanner_t *s);
+extern lexcomp_t tokenize_mathops(scanner_t *s);
+extern lexcomp_t tokenize_relops(scanner_t *s);
+extern lexcomp_t tokenize_bitops(scanner_t *s);
+extern lexcomp_t tokenize_miscops(scanner_t *s);
+
+
 /* utility functions */
 int is_num(char x) {
   return (x >= '0' && x <= '9');
@@ -33,12 +43,14 @@ token_t * lexer_nextitem(scanner_t *s) {
   lexcomp_t lc;
   size_t i;
 
+  /* try to match longest tokens first */
   lexcomp_t (*tokenizers[])(scanner_t*) = {
-    tokenize_identifier,
     tokenize_text,
+    tokenize_identifier,
     tokenize_number,
-    tokenize_mathops,
+    tokenize_bitops,
     tokenize_relops,
+    tokenize_mathops,
     tokenize_miscops,
   };
 

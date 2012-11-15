@@ -6,56 +6,23 @@
 /* lexical components */
 typedef enum _lexcomp_t {
   /* math operators */
-  tokPlus = 1,
-  tokMinus,
-  tokTimes,
-  tokDivide,
-  tokModulo,
-  tokPower,
-  /* misc operators */
-  tokOParen,
-  tokCParen,
-  tokComma,
-  tokAsign,
+  tokPlus, tokMinus, tokUnaryMinus,
+  tokTimes, tokDivide, tokModulo, tokPower,
+  /* bitwise operators */
+  tokRShift, tokLShift,
+  tokBitAnd, tokBitOr, tokBitXor, tokBitNot,
   /* logical operators */
-  tokNot,
-  tokAnd,
-  tokOr,
-  tokTrue,
-  tokFalse,
+  tokNot, tokAnd, tokOr, tokTrue, tokFalse,
   /* relational operators */
-  tokEq,
-  tokNe,
-  tokGt,
-  tokLt,
-  tokGe,
-  tokLe,
+  tokEq, tokNe, tokGt, tokLt, tokGe, tokLe,
+  /* misc operators */
+  tokOParen, tokCParen, tokComma, tokAsign,
   /* numbers, text, ids... */
-  tokNumber,
-  tokText,
-  tokId,
-  tokFunction,
+  tokNumber, tokText, tokId, tokFunction,
   /* parser specific */
-  tokOMango = 100,
-  tokEMango,
-  tokCMango,
-  tokStackEmpty,
-  tokNoMatch
+  tokOMango = 100, tokEMango, tokCMango,
+  tokStackEmpty, tokNoMatch
 } lexcomp_t;
-
-/* known tokenizers */
-lexcomp_t tokenize_identifier(scanner_t *s);
-lexcomp_t tokenize_text(scanner_t *s);
-lexcomp_t tokenize_number(scanner_t *s);
-lexcomp_t tokenize_mathops(scanner_t *s);
-lexcomp_t tokenize_relops(scanner_t *s);
-lexcomp_t tokenize_miscops(scanner_t *s);
-
-
-/* utility functions */
-int is_white(char x);
-int is_alpha(char x);
-int is_num(char x);
 
 
 /* token definitions */
@@ -63,6 +30,10 @@ typedef struct _token_t {
   lexcomp_t lexcomp;
   char *lexem;
 } token_t;
+
+
+token_t * token_init(lexcomp_t lexcomp, const char *lexem);
+void token_destroy(token_t *t);
 
 /* extract token from the stream (user must later free) */
 token_t * lexer_nextitem(scanner_t *s);

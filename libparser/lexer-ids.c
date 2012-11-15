@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include "parser/lexer.h"
 
+
+extern int is_num(char x);
+extern int is_alpha(char x);
+
 /* tokenizer FSM functions */
 typedef void (*statefn)(void);
 typedef statefn (*nextstate)(scanner_t *s);

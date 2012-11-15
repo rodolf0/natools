@@ -31,7 +31,7 @@ void test_lexer() {
 
   token_t tokens[] = {
     { tokNumber        ,  "123" },
-    { tokPlus          ,  "+" },
+    { tokPower         ,  "**" },
     { tokNumber        ,  "123.45" },
     { tokMinus         ,  "-" },
     { tokFalse         ,  "false" },
@@ -40,17 +40,20 @@ void test_lexer() {
     { tokDivide        ,  "/" },
     { tokAnd           ,  "and" },
     { tokOParen        ,  "(" },
-    { tokPower         ,  "^" },
+    { tokBitXor        ,  "^" },
     { tokId            ,  "a" },
+    { tokBitAnd        ,  "&" },
     { tokAsign         ,  "=" },
     { tokNot           ,  "not" },
     { tokModulo        ,  "%" },
     { tokFunction      ,  "sin(" },
+    { tokBitNot        ,  "~" },
     { tokId            ,  "pi" },
     { tokCParen        ,  ")" },
     { tokTrue          ,  "true" },
     { tokMinus         ,  "-" },
     { tokOr            ,  "or" },
+    { tokBitOr         ,  "|" },
     { tokOParen        ,  "(" },
     { tokMinus         ,  "-" },
     { tokNumber        ,  "43" },
@@ -58,9 +61,11 @@ void test_lexer() {
     { tokNumber        ,  "23" },
     { tokComma         ,  "," },
     { tokCParen        ,  ")" },
+    { tokRShift        ,  ">>" },
     { tokGt            ,  ">" },
     { tokLt            ,  "<" },
     { tokId            ,  "Supervar" },
+    { tokLShift        ,  "<<" },
     { tokNe            ,  "!=" },
     { tokText          ,  "\"hello string\"" },
     { tokGe            ,  ">=" },
@@ -80,7 +85,7 @@ void test_lexer() {
 
   i = 0;
   while ((t = lexer_nextitem(s))) {
-    fprintf(stderr, "[%s]: %d\n", t->lexem, t->lexcomp);
+    /*fprintf(stderr, "[%s]: %d\n", t->lexem, t->lexcomp);*/
     assert(strcmp(t->lexem, tokens[i].lexem) == 0);
     assert(t->lexcomp == tokens[i++].lexcomp);
     free(t);

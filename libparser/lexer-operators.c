@@ -12,17 +12,45 @@ lexcomp_t tokenize_mathops(scanner_t *s) {
     case '-':
       return tokMinus;
     case '*':
+      if (scanner_peek(s) == '*') {
+        scanner_advance(s);
+        return tokPower;
+      }
       return tokTimes;
     case '/':
       return tokDivide;
     case '%':
       return tokModulo;
-    case '^':
-      return tokPower;
     default:
       scanner_backup(s);
       break;
   }
+  return tokNoMatch;
+}
+
+
+/* lex bitwise operators */
+lexcomp_t tokenize_bitops(scanner_t *s) {
+  char c = scanner_advance(s);
+
+  if (c == '>' && scanner_peek(s) == '>') {
+    scanner_advance(s);
+    return tokRShift;
+  }
+  if (c == '<' && scanner_peek(s) == '<') {
+    scanner_advance(s);
+    return tokLShift;
+  }
+  if (c == '&')
+    return tokBitAnd;
+  if (c == '|')
+    return tokBitOr;
+  if (c == '^')
+    return tokBitXor;
+  if (c == '~')
+    return tokBitNot;
+
+  scanner_backup(s);
   return tokNoMatch;
 }
 
