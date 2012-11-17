@@ -12,15 +12,16 @@ typedef enum _lexcomp_t {
   tokRShift, tokLShift,
   tokBitAnd, tokBitOr, tokBitXor, tokBitNot,
   /* logical operators */
-  tokNot, tokAnd, tokOr, tokTrue, tokFalse,
+  tokNot, tokAnd, tokOr,
+  /* logical constants */
+  tokTrue, tokFalse,
   /* relational operators */
   tokEq, tokNe, tokGt, tokLt, tokGe, tokLe,
   /* misc operators */
   tokOParen, tokCParen, tokComma, tokAsign,
   /* numbers, text, ids... */
   tokNumber, tokText, tokId, tokFunction,
-  /* parser specific */
-  tokOMango = 100, tokEMango, tokCMango,
+  /* tokNoMatch being last indicates number of known lc's */
   tokStackEmpty, tokNoMatch
 } lexcomp_t;
 
