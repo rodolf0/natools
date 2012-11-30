@@ -40,11 +40,8 @@ static token_t * tok_maker(char *base, size_t n) {
 
 /* get the next token */
 token_t * lexer_nextitem(scanner_t *s) {
-  lexcomp_t lc;
-  size_t i;
-
   /* try to match longest tokens first */
-  lexcomp_t (*tokenizers[])(scanner_t*) = {
+  static lexcomp_t (*tokenizers[])(scanner_t*) = {
     tokenize_text,
     tokenize_identifier,
     tokenize_number,
@@ -53,6 +50,9 @@ token_t * lexer_nextitem(scanner_t *s) {
     tokenize_mathops,
     tokenize_miscops,
   };
+
+  lexcomp_t lc;
+  size_t i;
 
   /* consume all whitespace */
   while (is_white(scanner_advance(s)));

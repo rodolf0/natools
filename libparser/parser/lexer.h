@@ -22,7 +22,9 @@ typedef enum _lexcomp_t {
   /* numbers, text, ids... */
   tokNumber, tokText, tokId, tokFunction,
   /* tokNoMatch being last indicates number of known lc's */
-  tokStackEmpty, tokNoMatch
+  tokStackEmpty, tokNoMatch,
+  /* internal use only */
+  tokOMango, tokEMango, tokCMango
 } lexcomp_t;
 
 
