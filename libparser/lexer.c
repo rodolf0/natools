@@ -4,13 +4,13 @@
 #include "parser/lexer.h"
 
 /* known tokenizers */
-extern lexcomp_t tokenize_identifier(scanner_t *s);
-extern lexcomp_t tokenize_text(scanner_t *s);
-extern lexcomp_t tokenize_number(scanner_t *s);
-extern lexcomp_t tokenize_mathops(scanner_t *s);
-extern lexcomp_t tokenize_relops(scanner_t *s);
-extern lexcomp_t tokenize_bitops(scanner_t *s);
-extern lexcomp_t tokenize_miscops(scanner_t *s);
+lexcomp_t tokenize_identifier(scanner_t *s);
+lexcomp_t tokenize_text(scanner_t *s);
+lexcomp_t tokenize_number(scanner_t *s);
+lexcomp_t tokenize_mathops(scanner_t *s);
+lexcomp_t tokenize_relops(scanner_t *s);
+lexcomp_t tokenize_bitops(scanner_t *s);
+lexcomp_t tokenize_miscops(scanner_t *s);
 
 
 /* utility functions */
@@ -67,6 +67,19 @@ token_t * lexer_nextitem(scanner_t *s) {
     }
   }
   return NULL;
+}
+
+
+token_t * token_init(lexcomp_t lc, char *lexem) {
+  token_t *t = tok_maker(lexem, strlen(lexem));
+  t->lexcomp = lc;
+  return t;
+}
+
+void token_destroy(token_t *t) {
+  if (!t)
+    return;
+  free(t);
 }
 
 /* vim: set sw=2 sts=2 : */

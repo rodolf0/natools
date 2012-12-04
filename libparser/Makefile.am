@@ -6,13 +6,13 @@ lib_LTLIBRARIES = libparser.la
 libparser_la_SOURCES = \
 	scanner.c \
 	lexer.c lexer-ids.c lexer-operators.c \
-	#parser.c
+	parser.c parser-1.c semanter-1.c
 
 libparser_includedir = $(includedir)/parser
 libparser_include_HEADERS = \
 	parser/scanner.h \
 	parser/lexer.h \
-	#parser/parser.h
+	parser/parser.h parser-priv.h
 
 libparser_la_LIBADD = ../libbaas/libbaas.la
 libparser_la_CPPFLAGS = -D_ERROR_CHECKING_ -I$(top_srcdir)/libbaas
