@@ -4,15 +4,7 @@
 #include <stdio.h>
 #include <sys/types.h> /* size_t */
 
-typedef struct _scanner_t {
-  FILE *fp;
-  char *buffer;
-  size_t buf_sz;
-  size_t buf_cap;
-  /* boundaries of current scanned item */
-  size_t start;
-  size_t length;
-} scanner_t;
+typedef struct _scanner_t scanner_t;
 
 /* action type fn to invoke when accepting a char string */
 typedef void * (*acceptfn)(char *start, size_t len);
@@ -27,7 +19,7 @@ void scanner_destroy(scanner_t *s);
 char scanner_advance(scanner_t *s);
 /* show the next char without consuming it (0 means eof or token too large) */
 char scanner_peek(scanner_t *s);
-/* show the current char (0 means eof or token too large) */
+/* show the current char (0 may mean eof or bof) */
 char scanner_current(scanner_t *s);
 /* get the prev char (0 means we're at the start pos again) */
 char scanner_backup(scanner_t *s);

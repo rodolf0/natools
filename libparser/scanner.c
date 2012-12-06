@@ -4,7 +4,18 @@
 
 #include "parser/scanner.h"
 
-#define SCANNER_BUF_SZ 4096
+#define SCANNER_BUF_SZ 1024
+
+typedef struct _scanner_t {
+  FILE *fp;
+  char *buffer;
+  size_t buf_sz;
+  size_t buf_cap;
+  /* boundaries of current scanned item */
+  size_t start;
+  size_t length;
+} scanner_t;
+
 
 scanner_t * scanner_init_file(const char *file) {
   if (strcmp(file, "-") == 0)
@@ -35,10 +46,11 @@ scanner_t *scanner_init(const char *buffer) {
   scanner_t *s = malloc(sizeof(scanner_t));
   memset(s, 0, sizeof(scanner_t));
   s->length = s->start = 0;
-  s->buf_cap = s->buf_sz = strlen(buffer) + 1;
-  s->buffer = (char*)malloc(s->buf_cap);
+  s->buf_cap = s->buf_sz = strlen(buffer);
+  s->buffer = (char*)malloc(s->buf_cap + 1);
   /* initial buffer fill */
   memcpy(s->buffer, buffer, s->buf_sz);
+  s->buffer[s->buf_cap] = 0;
   return s;
 }
 
@@ -76,24 +88,23 @@ static int scanner_shift_n_fill(scanner_t *s) {
 char scanner_advance(scanner_t *s) {
   if (!s)
     return 0;
-  s->length++;
+  if (s->start + s->length <= s->buf_sz)
+    s->length++;
+  if (s->start + s->length > s->buf_sz)
+    scanner_shift_n_fill(s);
   return scanner_current(s);
 }
 
 char scanner_peek(scanner_t *s) {
+  size_t l = s->length;
   char p = scanner_advance(s);
-  if (p != 0)
-    s->length--;
+  s->length = l;
   return p;
 }
 
 char scanner_current(scanner_t *s) {
-  if (!s || s->length == 0)
+  if (!s || s->length == 0 || s->start + s->length > s->buf_sz)
     return 0;
-  /* if we're at the buffer's edge, get more input */
-  if (s->start + s->length > s->buf_sz)
-    if (scanner_shift_n_fill(s) <= 0)
-      return 0;
   return s->buffer[s->start + s->length - 1];
 }
 

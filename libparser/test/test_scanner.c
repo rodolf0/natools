@@ -15,7 +15,6 @@ char * test_accept_fn(char *start, size_t len) {
 void test_buffer_walk() {
   char *b = "this is a small test buffer";
   scanner_t *s = scanner_init(b);
-  assert(strlen(s->buffer) == strlen(b));
 
   assert(scanner_peek(s) == 't');
   assert(scanner_advance(s) == 't');
@@ -31,33 +30,87 @@ void test_buffer_walk() {
   assert(strcmp(this, "this") == 0);
   free(this);
 
-  size_t i;
+  size_t i = 4;
   char c;
-  for (i = s->start + s->length; i < s->buf_sz; i++) {
-    c = scanner_advance(s);
-    assert(c == b[i]);
-    /*fprintf(stderr, "%c", c);*/
-  }
+  while ((c = scanner_advance(s)))
+    assert(c == b[i++]);
+  assert(strlen(b) == i);
 
   scanner_destroy(s);
 }
 
 void test_file_walk(const char *file) {
-  scanner_t *s = scanner_init_file(file);
-  char *start = "#include <assert.h>";
-  size_t i, l;
-  char c;
+  char buf[4000];
+  FILE *f = fopen(file, "rb");
+  int i, j, n = fread(buf, sizeof(char), sizeof(buf), f);
+  fclose(f);
 
-  l = strlen(start);
-  for (i = 0; i < l; i++) {
-    c = scanner_advance(s);
-    assert(c == start[i]);
-    /*fprintf(stderr, "%c", c);*/
+  scanner_t *s = scanner_init_file(file);
+
+  for (j = 0; j < n; j+=16) {
+    for (i = 0; i < 16 && i+j < n; i++)
+      assert(scanner_advance(s) == buf[j+i]);
+    char *tok = (char*)scanner_accept(s, (acceptfn)test_accept_fn);
+    assert(strncmp(tok, buf+j, 16) == 0);
+    free(tok);
   }
 
-  char *tok = (char*)scanner_accept(s, (acceptfn)test_accept_fn);
-  assert(strcmp(tok, start) == 0);
-  free(tok);
+  scanner_destroy(s);
+}
+
+
+void test_eof_bof() {
+  char *b = "test";
+  scanner_t *s = scanner_init(b);
+
+  assert(scanner_peek(s) == 't');
+  assert(scanner_advance(s) == 't');
+  assert(scanner_advance(s) == 'e');
+  assert(scanner_peek(s) == 's');
+  assert(scanner_advance(s) == 's');
+  assert(scanner_advance(s) == 't');
+  assert(scanner_peek(s) == 0);
+  assert(scanner_current(s) == 't');
+  assert(scanner_advance(s) == 0);
+  assert(scanner_advance(s) == 0);
+  assert(scanner_advance(s) == 0);
+  assert(scanner_advance(s) == 0);
+  assert(scanner_current(s) == 0);
+  assert(scanner_backup(s) == 't');
+  assert(scanner_backup(s) == 's');
+  assert(scanner_peek(s) == 't');
+  assert(scanner_backup(s) == 'e');
+  assert(scanner_backup(s) == 't');
+  assert(scanner_backup(s) == 0);
+  assert(scanner_current(s) == 0);
+  assert(scanner_peek(s) == 't');
+
+  scanner_destroy(s);
+}
+
+void test_eof_bof_after_accept() {
+  char *b = "test this";
+  scanner_t *s = scanner_init(b);
+
+  assert(scanner_advance(s) == 't');
+  assert(scanner_advance(s) == 'e');
+  assert(scanner_advance(s) == 's');
+  assert(scanner_advance(s) == 't');
+  assert(scanner_advance(s) == ' ');
+  scanner_ignore(s);
+  assert(scanner_current(s) == 0);
+  assert(scanner_advance(s) == 't');
+  assert(scanner_advance(s) == 'h');
+  assert(scanner_advance(s) == 'i');
+  assert(scanner_advance(s) == 's');
+  assert(scanner_advance(s) == 0);
+  assert(scanner_advance(s) == 0);
+  assert(scanner_current(s) == 0);
+  assert(scanner_backup(s) == 's');
+  assert(scanner_backup(s) == 'i');
+  assert(scanner_backup(s) == 'h');
+  assert(scanner_backup(s) == 't');
+  assert(scanner_backup(s) == 0);
 
   scanner_destroy(s);
 }
@@ -65,8 +118,9 @@ void test_file_walk(const char *file) {
 int main(int argc, char *argv[]) {
   fprintf(stderr, "Testing... ");
   test_buffer_walk();
-  /*fprintf(stderr, "\nTesting file... ");*/
   test_file_walk("test_scanner.c");
+  test_eof_bof();
+  test_eof_bof_after_accept();
   fprintf(stderr, "done\n");
   return 0;
 }
