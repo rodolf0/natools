@@ -11,57 +11,6 @@ typedef void (*statefn)(void);
 typedef statefn (*nextstate)(scanner_t *s);
 
 
-/* check if the current string is a reserved word */
-static lexcomp_t reserved_word(scanner_t *s) {
-  /* TODO: don't get into the scanner, use it's API */
-  if (!strncmp(s->buffer + s->start, "true", s->length < 4 ? 4 : s->length))
-    return tokTrue;
-  if (!strncmp(s->buffer + s->start, "false", s->length < 5 ? 5 : s->length))
-    return tokFalse;
-  if (!strncmp(s->buffer + s->start, "and", s->length < 3 ? 3 : s->length))
-    return tokAnd;
-  if (!strncmp(s->buffer + s->start, "not", s->length < 3 ? 3 : s->length))
-    return tokNot;
-  if (!strncmp(s->buffer + s->start, "or", s->length < 2 ? 2 : s->length))
-    return tokOr;
-  return tokNoMatch;
-}
-
-
-/* lex variable and function names */
-lexcomp_t tokenize_identifier(scanner_t *s) {
-  if (!is_alpha(scanner_peek(s)))
-    return tokNoMatch;
-
-  char c = scanner_advance(s);
-  while (is_alpha(c) || is_num(c))
-    c = scanner_advance(s);
-  scanner_backup(s);
-
-  lexcomp_t rw = reserved_word(s);
-  if (rw != tokNoMatch)
-    return rw;
-
-  if (scanner_advance(s) == '(')
-    return tokFunction;
-
-  scanner_backup(s);
-  return tokId;
-}
-
-
-/* lex text */
-lexcomp_t tokenize_text(scanner_t *s) {
-  if (scanner_peek(s) != '"')
-    return tokNoMatch;
-
-  scanner_advance(s);
-  while (scanner_advance(s) != '"');
-
-  return tokText;
-}
-
-
 /* interpret a number token of the form:
  * n+(.n+)?((e|E)(+|-)?n+)? */
 static statefn integer(scanner_t *s);
@@ -133,4 +82,72 @@ static statefn exponent(scanner_t *s) {
   scanner_backup(s);
   return done;
 }
+
+
+/* check if the current string is a reserved word */
+static int cmp_true(char *start, size_t len) {
+  return strncmp(start, "true", len < 4 ? 4 : len);
+}
+static int cmp_false(char *start, size_t len) {
+  return strncmp(start, "false", len < 5 ? 5 : len);
+}
+static int cmp_and(char *start, size_t len) {
+  return strncmp(start, "and", len < 3 ? 3 : len);
+}
+static int cmp_not(char *start, size_t len) {
+  return strncmp(start, "not", len < 3 ? 3 : len);
+}
+static int cmp_or(char *start, size_t len) {
+  return strncmp(start, "or", len < 2 ? 2 : len);
+}
+
+static lexcomp_t reserved_word(scanner_t *s) {
+  if (scanner_apply(s, (acceptfn)cmp_true) == 0)
+    return tokTrue;
+  if (scanner_apply(s, (acceptfn)cmp_false) == 0)
+    return tokFalse;
+  if (scanner_apply(s, (acceptfn)cmp_and) == 0)
+    return tokAnd;
+  if (scanner_apply(s, (acceptfn)cmp_not) == 0)
+    return tokNot;
+  if (scanner_apply(s, (acceptfn)cmp_or) == 0)
+    return tokOr;
+  return tokNoMatch;
+}
+
+
+/* lex variable and function names */
+lexcomp_t tokenize_identifier(scanner_t *s) {
+  if (!is_alpha(scanner_peek(s)))
+    return tokNoMatch;
+
+  char c = scanner_advance(s);
+  while (is_alpha(c) || is_num(c))
+    c = scanner_advance(s);
+  scanner_backup(s);
+
+  lexcomp_t rw = reserved_word(s);
+  if (rw != tokNoMatch)
+    return rw;
+
+  if (scanner_advance(s) == '(')
+    return tokFunction;
+
+  scanner_backup(s);
+  return tokId;
+}
+
+
+/* lex text */
+lexcomp_t tokenize_text(scanner_t *s) {
+  if (scanner_peek(s) != '"')
+    return tokNoMatch;
+
+  scanner_advance(s);
+  while (scanner_advance(s) != '"');
+
+  return tokText;
+}
+
+
 /* vim: set sw=2 sts=2 : */

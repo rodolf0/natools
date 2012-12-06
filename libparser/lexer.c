@@ -1,16 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "parser/lexer.h"
-
-/* known tokenizers */
-lexcomp_t tokenize_identifier(scanner_t *s);
-lexcomp_t tokenize_text(scanner_t *s);
-lexcomp_t tokenize_number(scanner_t *s);
-lexcomp_t tokenize_mathops(scanner_t *s);
-lexcomp_t tokenize_relops(scanner_t *s);
-lexcomp_t tokenize_bitops(scanner_t *s);
-lexcomp_t tokenize_miscops(scanner_t *s);
 
 
 /* utility functions */
@@ -38,6 +30,16 @@ static token_t * tok_maker(char *base, size_t n) {
   return t;
 }
 
+
+/* known tokenizers */
+lexcomp_t tokenize_identifier(scanner_t *s);
+lexcomp_t tokenize_text(scanner_t *s);
+lexcomp_t tokenize_number(scanner_t *s);
+lexcomp_t tokenize_mathops(scanner_t *s);
+lexcomp_t tokenize_relops(scanner_t *s);
+lexcomp_t tokenize_bitops(scanner_t *s);
+lexcomp_t tokenize_miscops(scanner_t *s);
+
 /* get the next token */
 token_t * lexer_nextitem(scanner_t *s) {
   /* try to match longest tokens first */
@@ -59,6 +61,12 @@ token_t * lexer_nextitem(scanner_t *s) {
   scanner_backup(s);
   scanner_ignore(s);
 
+  if (scanner_peek(s) == 0) {
+    token_t *t = tok_maker("", 0);
+    t->lexcomp = tokStackEmpty;
+    return t;
+  }
+
   for (i = 0; i < sizeof(tokenizers)/sizeof(tokenizers[0]); i++) {
     if ((lc = tokenizers[i](s)) != tokNoMatch) {
       token_t *t = (token_t*)scanner_accept(s, (acceptfn)tok_maker);
@@ -66,6 +74,8 @@ token_t * lexer_nextitem(scanner_t *s) {
       return t;
     }
   }
+
+  fprintf(stderr, "lexer error: unrecognized token\n");
   return NULL;
 }
 
@@ -77,8 +87,7 @@ token_t * token_init(lexcomp_t lc, char *lexem) {
 }
 
 void token_destroy(token_t *t) {
-  if (!t)
-    return;
+  if (!t) return;
   free(t);
 }
 
