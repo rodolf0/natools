@@ -6,7 +6,7 @@ typedef struct _scanner_t scanner_t;
 
 parser_t *parser_create();
 void parser_destroy(parser_t *p);
-double parser_eval(parser_t *p, scanner_t *s);
+int parser_eval(parser_t *p, scanner_t *s, long double *result);
 
 #endif /* _PARSER_H_ */
 

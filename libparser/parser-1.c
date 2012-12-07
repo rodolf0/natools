@@ -41,16 +41,15 @@ static ssize_t decode_lexcomp(lexcomp_t lc) {
     case tokFunction   : return 30;
     case tokText       : return 31;
     case tokStackEmpty : return 32;
-    default            : break;
+    default            : return -1;
   }
-  return -1;
 }
 
 op_prec_t parser_precedence_1(lexcomp_t op1, lexcomp_t op2) {
   ssize_t row = decode_lexcomp(op1),
           col = decode_lexcomp(op2);
   if (row == -1 || col == -1)
-    return E0;
+    return E7;
   /* rows: element on the stack, cols: elements from the buffer */
   static const op_prec_t _precedence[tokNoMatch][tokNoMatch] = {
          /*  +   -   -u  *   /   %   **  >>  <<  &   |   ^   ~   !   &&  ||  tr  fa  ==  !=  >   <   >=  <=  (   )   ,   =   n   id  f   t   $   */
@@ -86,7 +85,7 @@ op_prec_t parser_precedence_1(lexcomp_t op1, lexcomp_t op2) {
    /* id */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, GT, E3, E3, E3, E3, GT},
    /*  f */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, E1, LT, LT, LT, LT, E4},
    /*  t */ {GT, E2, E3, GT, E2, E2, E2, E2, E2, E2, E2, E2, E3, E3, E2, E2, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, E3, GT},
-   /*  $ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, LT, LT, LT, LT, LT, E7},
+   /*  $ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, LT, LT, LT, LT, LT, E0},
   };
   return _precedence[row][col];
 }

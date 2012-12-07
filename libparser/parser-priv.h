@@ -11,14 +11,14 @@ typedef enum {
   LT = -1,
   EQ = 0,
   GT = 1,
-  E0, /* internal error */
+  E0, /* empty buffer and stack, end of parsing */
   E1, /* non-variable assignment */
   E2, /* wrong argument type for operator */
   E3, /* expected binary operator or eol */
   E4, /* unbalanced open parenthesis */
   E5, /* comma only allowed between function arguments */
   E6, /* unbalanced closing parenthesis */
-  E7  /* empty buffer and stack, end of parsing */
+  E7  /* internal error */
 } op_prec_t;
 
 /* return the precedence relation of two operators */
@@ -48,18 +48,18 @@ typedef enum {
   stVariable,
 } symtype_t;
 
-typedef union _symbol_t {
+typedef struct _symbol_t {
   symtype_t t;
   union {
-    double dVal;
+    long double dVal;
     char *sVal;
   };
 } symbol_t;
 
-symbol_t * symbol_number(double d);
+symbol_t * symbol_number(long double d);
 symbol_t * symbol_variable(char *varname);
 void symbol_destroy(symbol_t *s);
-double lookup_symbol(hashtbl_t *symtab, symbol_t *s);
+int pop_operand(parser_t *p, long double *r);
 
 #endif /* _PARSER_H_PARSER_H_ */
 

@@ -1,6 +1,6 @@
 SUBDIRS = . test
 
-AM_CFLAGS=-O2 -Wall -Wextra -Werror -Wno-uninitialized
+AM_CFLAGS=-O2 -Wall -Wextra -Werror -Wno-uninitialized -D_VERBOSE_
 
 lib_LTLIBRARIES = libparser.la
 libparser_la_SOURCES = \
@@ -15,5 +15,5 @@ libparser_include_HEADERS = \
 	parser/parser.h parser-priv.h
 
 libparser_la_LIBADD = ../libbaas/libbaas.la
-libparser_la_CPPFLAGS = -D_ERROR_CHECKING_ -I$(top_srcdir)/libbaas
+libparser_la_CPPFLAGS = -I$(top_srcdir)/libbaas
 libparser_la_LDFLAGS = -lm -version-info 0:1:0

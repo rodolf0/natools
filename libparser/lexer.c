@@ -61,11 +61,8 @@ token_t * lexer_nextitem(scanner_t *s) {
   scanner_backup(s);
   scanner_ignore(s);
 
-  if (scanner_peek(s) == 0) {
-    token_t *t = tok_maker("", 0);
-    t->lexcomp = tokStackEmpty;
-    return t;
-  }
+  if (scanner_peek(s) == 0)
+    return token_init(tokStackEmpty, "");
 
   for (i = 0; i < sizeof(tokenizers)/sizeof(tokenizers[0]); i++) {
     if ((lc = tokenizers[i](s)) != tokNoMatch) {
@@ -75,8 +72,7 @@ token_t * lexer_nextitem(scanner_t *s) {
     }
   }
 
-  fprintf(stderr, "lexer error: unrecognized token\n");
-  return NULL;
+  return token_init(tokNoMatch, "");
 }
 
 

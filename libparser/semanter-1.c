@@ -5,7 +5,7 @@
 
 #include "parser-priv.h"
 
-symbol_t * symbol_number(double d) {
+symbol_t * symbol_number(long double d) {
   symbol_t *s = malloc(sizeof(symbol_t));
   s->t = stNumber;
   s->dVal = d;
@@ -30,34 +30,57 @@ void symbol_destroy(symbol_t *s) {
   free(s);
 }
 
-double lookup_symbol(hashtbl_t *symtab, symbol_t *s) {
+
+static int lookup_symbol(hashtbl_t *symtab, symbol_t *s, long double *r) {
   if (!symtab || !s) {
+#ifdef _VERBOSE_
     fprintf(stderr, "Invalid symbol or symbol table\n");
-    return 0.0;
+#endif
+    return 1;
   }
-  if (s->t == stNumber)
-    return s->dVal;
-  else if (s->t == stVariable) {
-    double *d;
-    if ((d = (double*)hashtbl_get(symtab, s->sVal))) {
+  if (s->t == stNumber) {
+    *r = s->dVal;
+    return 0;
+  } else if (s->t == stVariable) {
+    long double *d;
+    if ((d = (long double*)hashtbl_get(symtab, s->sVal))) {
+#ifdef _VERBOSE_
       fprintf(stderr, "semantic error: uninitialized variable [%s]\n", s->sVal);
-      return 0.0;
+#endif
+      return 2;
     }
-    return *d;
+    *r = *d;
+    return 0;
   }
+#ifdef _VERBOSE_
   fprintf(stderr, "semantic error: unkown type %d\n", s->t);
-  return 0.0;
+#endif
+  return 1;
 }
 
-static double semanter_mathops(lexcomp_t lc, double lhs, double rhs) {
+int pop_operand(parser_t *p, long double *r) {
+  if (p->partial->size < 1) {
+#ifdef _VERBOSE_
+    fprintf(stderr, "syntactic error: missing operand\n");
+#endif
+    return 1;
+  }
+  symbol_t *s = (symbol_t*)list_pop(p->partial);
+  int err = lookup_symbol(p->symbol_table, s, r);
+  symbol_destroy(s);
+  return err;
+}
+
+
+static long double semanter_mathops(lexcomp_t lc, long double lhs, long double rhs) {
   switch (lc) {
     case tokPlus       : return lhs+rhs;
     case tokMinus      : return lhs-rhs;
-    case tokUnaryMinus : return -rhs;
+    case tokUnaryMinus : return -lhs;
     case tokTimes      : return lhs * rhs;
     case tokDivide     : return lhs / rhs;
-    case tokModulo     : return pow(lhs, rhs);
-    case tokPower      : return fmod(lhs, rhs);
+    case tokPower      : return pow(lhs, rhs);
+    case tokModulo     : return fmod(lhs, rhs);
     default:
       return 0.0;
   }
@@ -70,7 +93,7 @@ static int semanter_bitops(lexcomp_t lc, int lhs, int rhs) {
     case tokBitAnd: return lhs & rhs;
     case tokBitOr:  return lhs | rhs;
     case tokBitXor: return lhs ^ rhs;
-    case tokBitNot: return ~rhs;
+    case tokBitNot: return ~lhs;
     default:
       return 0;
   }
@@ -78,7 +101,7 @@ static int semanter_bitops(lexcomp_t lc, int lhs, int rhs) {
 
 static int semanter_logicops(lexcomp_t lc, int lhs, int rhs) {
   switch (lc) {
-    case tokNot: return !rhs;
+    case tokNot: return !lhs;
     case tokAnd: return lhs && rhs;
     case tokOr:  return lhs || rhs;
     default:
@@ -86,7 +109,7 @@ static int semanter_logicops(lexcomp_t lc, int lhs, int rhs) {
   }
 }
 
-static int semanter_relops(lexcomp_t lc, double lhs, double rhs) {
+static int semanter_relops(lexcomp_t lc, long double lhs, long double rhs) {
   switch (lc) {
     case tokEq: return lhs == rhs;
     case tokNe: return lhs != rhs;
@@ -104,9 +127,10 @@ static int semanter_relops(lexcomp_t lc, double lhs, double rhs) {
 int semantic_eval_1(parser_t *p) {
   size_t funcparams = 0;
   token_t *op;
+  int error = 0;
 
   while ((op = (token_t*)list_pop(p->stack))->lexcomp != tokOMango) {
-    double lhs = 0.0, rhs = 0.0, *dp = NULL, d;
+    long double lhs = 0.0, rhs = 0.0, *dp = NULL, d;
     symbol_t *s = NULL;
 
     switch (op->lexcomp) {
@@ -125,13 +149,9 @@ int semantic_eval_1(parser_t *p) {
       case tokDivide:
       case tokModulo:
       case tokPower:
-        s = (symbol_t*)list_pop(p->partial);
-        rhs = lookup_symbol(p->symbol_table, s);
-        symbol_destroy(s);
+        if ((error = pop_operand(p, &rhs))) break;
       case tokUnaryMinus:
-        s = (symbol_t*)list_pop(p->partial);
-        lhs = lookup_symbol(p->symbol_table, s);
-        symbol_destroy(s);
+        if ((error = pop_operand(p, &lhs))) break;
         d = semanter_mathops(op->lexcomp, lhs, rhs);
         list_push(p->partial, symbol_number(d));
         break;
@@ -142,29 +162,20 @@ int semantic_eval_1(parser_t *p) {
       case tokBitAnd:
       case tokBitOr:
       case tokBitXor:
-        s = (symbol_t*)list_pop(p->partial);
-        rhs = lookup_symbol(p->symbol_table, s);
-        symbol_destroy(s);
+        if ((error = pop_operand(p, &rhs))) break;
       case tokBitNot:
-        s = (symbol_t*)list_pop(p->partial);
-        lhs = lookup_symbol(p->symbol_table, s);
-        symbol_destroy(s);
-        d = (double)semanter_bitops(op->lexcomp, (int)lhs, (int)rhs);
-        list_push(p->partial, symbol_number(d));
+        if ((error = pop_operand(p, &lhs))) break;
+        d = (long double)semanter_bitops(op->lexcomp, (int)lhs, (int)rhs);
         list_push(p->partial, symbol_number(d));
         break;
 
       /* logicops */
       case tokAnd:
       case tokOr:
-        s = (symbol_t*)list_pop(p->partial);
-        rhs = lookup_symbol(p->symbol_table, s);
-        symbol_destroy(s);
+        if ((error = pop_operand(p, &rhs))) break;
       case tokNot:
-        s = (symbol_t*)list_pop(p->partial);
-        lhs = lookup_symbol(p->symbol_table, s);
-        symbol_destroy(s);
-        d = (double)semanter_logicops(op->lexcomp, lhs, rhs);
+        if ((error = pop_operand(p, &lhs))) break;
+        d = (long double)semanter_logicops(op->lexcomp, lhs, rhs);
         list_push(p->partial, symbol_number(d));
         break;
 
@@ -175,19 +186,15 @@ int semantic_eval_1(parser_t *p) {
       case tokLt:
       case tokGe:
       case tokLe:
-        s = (symbol_t*)list_pop(p->partial);
-        rhs = lookup_symbol(p->symbol_table, s);
-        symbol_destroy(s);
-        s = (symbol_t*)list_pop(p->partial);
-        lhs = lookup_symbol(p->symbol_table, s);
-        symbol_destroy(s);
-        d = (double)semanter_relops(op->lexcomp, lhs, rhs);
+        if ((error = pop_operand(p, &rhs))) break;
+        if ((error = pop_operand(p, &lhs))) break;
+        d = (long double)semanter_relops(op->lexcomp, lhs, rhs);
         list_push(p->partial, symbol_number(d));
         break;
 
       /* no partials involved, just the lexem being used */
       case tokNumber:
-        list_push(p->partial, symbol_number(atof(op->lexem)));
+        list_push(p->partial, symbol_number(strtold(op->lexem, NULL)));
         break;
       case tokTrue:
         list_push(p->partial, symbol_number(1.0));
@@ -200,14 +207,19 @@ int semantic_eval_1(parser_t *p) {
         break;
 
       case tokAsign:
+        if ((error = pop_operand(p, &rhs))) break;
+        if (p->partial->size < 1) {
+#ifdef _VERBOSE_
+          fprintf(stderr, "syntactic error: missing variable name\n");
+#endif
+          error = 1;
+          break;
+        }
         s = (symbol_t*)list_pop(p->partial);
-        rhs = lookup_symbol(p->symbol_table, s);
-        symbol_destroy(s);
-        s = (symbol_t*)list_pop(p->partial);
-        if ((dp = (double*)hashtbl_get(p->symbol_table, s->sVal))) {
+        if ((dp = (long double*)hashtbl_get(p->symbol_table, s->sVal))) {
           *dp = rhs;
         } else {
-          dp = malloc(sizeof(double));
+          dp = malloc(sizeof(long double));
           *dp = rhs;
           hashtbl_insert(p->symbol_table, s->sVal, dp);
         }
@@ -227,6 +239,8 @@ int semantic_eval_1(parser_t *p) {
         break;
     }
     token_destroy(op);
+    if (error)
+      return error;
   }
   /* destroy opening mango */
   token_destroy(op);

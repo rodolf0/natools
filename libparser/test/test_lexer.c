@@ -2,25 +2,29 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <math.h>
 
 #include "../parser/lexer.h"
 
+#define EPSILON 1.0e-10
+#define ASSERT_EQ(x, y) assert(fabsl((x)-(y)) < EPSILON)
 
 void test_numbers() {
   token_t *t;
   scanner_t *s = scanner_init("123 123.45 123e2 987E+3 432.324e3 245.1e-14");
-  /* TODO: these results are not super accurate */
-  const double sum = 1431870.45, prod = 195330978.95594069;
-  double mysum = 0.0, myprod = 1.0;
+  const long double sum = 1431870.4500000000024L, prod = 195330978.95594071194L;
+  long double mysum = 0.0, myprod = 1.0;
+
 
   while ((t = lexer_nextitem(s))->lexcomp != tokStackEmpty) {
-    double x = atof(t->lexem);
+    long double x = strtold(t->lexem, NULL);
     mysum += x;
     myprod *= x;
     free(t);
   }
   free(t);
-  assert(sum == mysum);
+  /*fprintf(stderr, "%.20Lf == %.20Lf\n", sum, mysum);*/
+  ASSERT_EQ(sum, mysum);
   assert(prod == myprod);
   scanner_destroy(s);
 }
@@ -99,9 +103,9 @@ void test_lexer() {
 
 void test_unkown() {
   scanner_t *s = scanner_init("..32");
-  fprintf(stderr, "EXPECTED ERROR [");
-  assert(lexer_nextitem(s) == NULL);
-  fprintf(stderr, "] ");
+  token_t *t = lexer_nextitem(s);
+  assert(t->lexcomp == tokNoMatch);
+  free(t);
   scanner_destroy(s);
 }
 
