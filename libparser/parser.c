@@ -29,6 +29,7 @@ void parser_destroy(parser_t *p) {
   if (!p)
     return;
   hashtbl_destroy(p->symbol_table);
+  hashtbl_destroy(p->function_table);
   free(p);
 }
 

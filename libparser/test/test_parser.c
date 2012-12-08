@@ -33,7 +33,7 @@ void check_operators() {
   ASSERT_EQ(evaluate("-23"), -23);
   ASSERT_EQ(evaluate("--5343"), 5343);
   ASSERT_EQ(evaluate("56934.234"), 56934.234L);
-  ASSERT_EQ(evaluate("593063 * 56934.234"), 33765587618.742L);
+  ASSERT_EQ(evaluate("23.41 * 34e+2"), 79594);
   ASSERT_EQ(evaluate("98 / 0.4235"), 231.40495867768);
   ASSERT_EQ(evaluate("9%4"), 1);
   ASSERT_EQ(evaluate("23489 % 234.23"), 66);
