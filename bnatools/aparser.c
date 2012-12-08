@@ -2,26 +2,40 @@
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <string.h>
 #include <unistd.h>
-#include "parser/lexer.h"
-#include "parser/parser.h"
-#include "baas/list.h"
+
 #include "baas/xstring.h"
+#include "parser-priv.h"
+
+
+parser_t *P = NULL;
+long double evaluate(const char *expr) {
+  if (!P)
+    P = parser_create();
+  if (!strcmp(expr, "shutdown")) {
+    parser_destroy(P);
+    P = NULL;
+    return 0.0;
+  }
+  scanner_t *s = scanner_init(expr);
+  long double r = 0.0;
+  if (parser_eval(P, s, &r)) {
+    fprintf(stderr, "Error evaluating expression\n");
+  }
+  scanner_destroy(s);
+  return r;
+}
+
 
 int main(int argc, char *argv[]) {
-  int ret = 0, verbose = 0, interactive = 0;
-  double r = 0.0;
-  list_node_t *n;
+  int ret = 0, interactive = 0;
 
   /* parse command line */
-  while ((ret = getopt(argc, argv, "vhi")) != -1) {
+  while ((ret = getopt(argc, argv, "hi")) != -1) {
     switch (ret) {
-      case 'v':
-        verbose = 1;
-        break;
       case 'h':
-        fprintf(stderr, "usage: %s [-v (verbose)] "
-                        "<expresion eg: 4/sin(pi^e+2)>\n", argv[0]);
+        fprintf(stderr, "usage: %s" "<expresion eg: 4/sin(pi^e+2)>\n", argv[0]);
         return 0;
         break;
       case 'i':
@@ -32,48 +46,41 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  parser_t *p = parser_create();
-
   if (interactive) {
-    char *buf = NULL;
-    char histfile[256];
+    char histfile[256], *expr = NULL;
 
-    snprintf(histfile, sizeof(histfile),
-             "%s/.aparser_history", getenv("HOME"));
-
+    snprintf(histfile, sizeof(histfile), "%s/.aparser_history", getenv("HOME"));
     using_history();
     read_history(histfile);
     stifle_history(50);
 
-    while ((buf = readline(">> "))) {
-      chomp(buf);
+    evaluate("pi");
+    while ((expr = readline(">> "))) {
+      chomp(expr);
+      if (!strcmp(expr, "env")) {
+        char **keys;
+        size_t j, n = hashtbl_keys(P->symbol_table, &keys);
+        for (j = 0; j < n; j++) {
+          long double *d = (long double*)hashtbl_get(P->symbol_table, keys[j]);
+          printf("%s: %.15Lg\n", keys[j], *d);
+          free(keys[j]);
+        }
+        free(keys);
+      } else
+        printf("%.15Lg\n", evaluate(expr));
 
-      if ((ret = parser_eval(p, buf, &r)))
-        fprintf(stderr, "Couldn't evaluate [%s].\n", buf);
-      else
-        printf("%.15g\n", r);
-
-      if (verbose) {
-        for (n = p->symbol_table->first; n; n = n->next)
-          fprintf(stderr, "%s = %f\n",
-              ((token_t*)n->data)->lexem,
-              ((token_t*)n->data)->value);
-      }
-      add_history(buf);
-      free(buf);
+      add_history(expr);
+      free(expr);
     }
     printf("\n");
     write_history(histfile);
 
-  } else if (optind < argc) {
-    if ((ret = parser_eval(p, argv[optind], &r)))
-      fprintf(stderr, "Couldn't evaluate [%s].\n", argv[optind]);
-    else
-      printf("%.15g\n", r);
-  }
+  } else if (optind < argc)
+    printf("%.15Lg\n", evaluate(argv[optind]));
+  else
+    fprintf(stderr, "usage: %s" "<expresion eg: 4/sin(pi^e+2)>\n", argv[0]);
 
-  parser_destroy(p);
-
+  evaluate("shutdown");
   return ret;
 }
 
