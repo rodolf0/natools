@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   char *x0 = NULL, *x1 = NULL;
   char *epsilon = EPSILON, *func = NULL;
   char *max_iter = MAXITER, *method = "secant";
-  double r;
+  long double r;
 
   /* parse command line */
   while ((ret = getopt(argc, argv, "vm:e:i:a:b:")) != -1) {
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
   if (ret) {
     fprintf(stderr, "%s method failed (ret: %d)\n", method, ret);
   } else {
-    printf("%.15g\n", r);
+    printf("%.15Lg\n", r);
   }
 
   function_destroy(f);

@@ -13,7 +13,7 @@ typedef struct _function {
 function_t *function_create(const char *func);
 void function_destroy(function_t *f);
 
-int evaluate_function(function_t *f, double x0, double *f0);
+int evaluate_function(function_t *f, long double x0, long double *f0);
 
 #endif /* _FUNCTION_H_ */
 

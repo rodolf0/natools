@@ -14,8 +14,8 @@
  *
  * a good h is h = sqrt(epsilon) * x0
  * */
-int derivate_3p(function_t *f, double x0, double h, double *r) {
-  double p0, p1;
+int derivate_3p(function_t *f, long double x0, long double h, long double *r) {
+  long double p0, p1;
 
   if (evaluate_function(f, x0 - h, &p0)) return 1;
   if (evaluate_function(f, x0 + h, &p1)) return 1;
@@ -24,8 +24,8 @@ int derivate_3p(function_t *f, double x0, double h, double *r) {
   return 0;
 }
 
-int derivate_5p(function_t *f, double x0, double h, double *r) {
-  double p0, p1, p2, p3;
+int derivate_5p(function_t *f, long double x0, long double h, long double *r) {
+  long double p0, p1, p2, p3;
 
   if (evaluate_function(f, x0 - 2.0 * h, &p0)) return 1;
   if (evaluate_function(f, x0 - 1.0 * h, &p1)) return 1;
@@ -37,7 +37,7 @@ int derivate_5p(function_t *f, double x0, double h, double *r) {
 }
 
 /* TODO: extend this to a 5 point aproach ? */
-int derivate(function_t *f, int n, double x0, double h, double *r) {
+int derivate(function_t *f, int n, long double x0, long double h, long double *r) {
   if (finite_difference(f, n, x0, h, r)) return 1;
   *r = *r / pow(h, n);
   return 0;
@@ -46,9 +46,9 @@ int derivate(function_t *f, int n, double x0, double h, double *r) {
 /* composite simpson's rule:
  * n: the resolution points used to calculate
  * actually half of the points) */
-int integrate_simpson(function_t *f, interval_t *i, int n, double *r) {
-  double h = (i->x1 - i->x0) / (2.0 * n);
-  double p0, pm, pi, pj, fj;
+int integrate_simpson(function_t *f, interval_t *i, int n, long double *r) {
+  long double h = (i->x1 - i->x0) / (2.0 * n);
+  long double p0, pm, pi, pj, fj;
   int j;
 
   if (evaluate_function(f, i->x0, &p0)) return 1;

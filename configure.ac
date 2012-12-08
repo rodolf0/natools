@@ -43,7 +43,7 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([memset pow strchr strstr])
 
 AC_CONFIG_FILES([Makefile
-                 bnatools/Makefile
+                 tools/Makefile
                  libbaas/Makefile
                  libbaas/test/Makefile
                  libnatools/Makefile

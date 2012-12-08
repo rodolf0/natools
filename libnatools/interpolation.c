@@ -18,8 +18,8 @@
  *        i=0                  j=0
  * */
 
-int interpolate_newton(vector2_t *x, int n, double x0, double *r) {
-  double a;
+int interpolate_newton(vector2_t *x, int n, long double x0, long double *r) {
+  long double a;
   int i, j;
 
   for (i = 0, *r = 0.0, a = 1.0; i < n; i++) {
@@ -42,16 +42,16 @@ int interpolate_newton(vector2_t *x, int n, double x0, double *r) {
  * dx^n           h^n
  *
  * */
-int finite_difference(function_t *f, int n, double x0, double h, double *r) {
+int finite_difference(function_t *f, int n, long double x0, long double h, long double *r) {
   int i, sign;
-  double fx_i;
+  long double fx_i;
   /* T = 1:   forward difference
    * T = 0.5: central difference
    * T = 0:   backward difference */
-  double T = 0.5;
+  long double T = 0.5;
 
   for (i = 0, sign = 1, *r = 0.0; i <= n; i++) {
-    if (evaluate_function(f, x0 + (T*(double)n - i) * h, &fx_i)) return 1;
+    if (evaluate_function(f, x0 + (T*(long double)n - i) * h, &fx_i)) return 1;
     *r += sign * k_combinations(n, i) * fx_i;
     sign *= -1;
   }
@@ -63,8 +63,8 @@ int finite_difference(function_t *f, int n, double x0, double h, double *r) {
  * L(x) = SUM yi * MUL  ---------  j!=i
  *        i=0      j=0   xi - xj
  * */
-int interpolate_lagrange(vector2_t *x, int n, double x0, double *r) {
-  double p;
+int interpolate_lagrange(vector2_t *x, int n, long double x0, long double *r) {
+  long double p;
   int i, j;
 
   for (i = 0, *r = 0.0; i < n; i++) {

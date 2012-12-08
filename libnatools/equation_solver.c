@@ -19,8 +19,8 @@ int root_search_verbose = 0;
  * X_n+1 = X_n - ------------------- * f(X_n)  (Secant method)
  *                f(X_n) - f(X_n-1)
  * */
-int root_secant(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
-  double d, f1, f0;
+int root_secant(function_t *f, interval_t *i, stop_cond_t *s, long double *r) {
+  long double d, f1, f0;
   size_t j;
 
   if (evaluate_function(f, i->x0, &f0)) return 1;
@@ -38,7 +38,7 @@ int root_secant(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
     if (evaluate_function(f, i->x1, &f1)) return 1;
 
     if (root_search_verbose)
-      fprintf(stderr, "i=%zu: x=%.15f f(x)=%.15f d=%.15f\n", j, i->x1, f1, d);
+      fprintf(stderr, "i=%zu: x=%.15Lg f(x)=%.15Lg d=%.15Lg\n", j, i->x1, f1, d);
   }
 
   /* aproximate root */
@@ -46,8 +46,8 @@ int root_secant(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
   return 0;
 }
 
-int root_newton(function_t *f, double x0, stop_cond_t *s, double *r) {
-  double f0, df0_dx, d;
+int root_newton(function_t *f, long double x0, stop_cond_t *s, long double *r) {
+  long double f0, df0_dx, d;
   size_t j;
 
   for (j = 0; j < s->max_iterations; j++) {
@@ -61,20 +61,20 @@ int root_newton(function_t *f, double x0, stop_cond_t *s, double *r) {
     x0 -= d;
 
     if (root_search_verbose)
-      fprintf(stderr, "i=%zu: x=%.15f f(x)=%.15f d=%.15f\n", j, x0, f0, d);
+      fprintf(stderr, "i=%zu: x=%.15Lg f(x)=%.15Lg d=%.15Lg\n", j, x0, f0, d);
   }
 
   *r = x0;
   return 0;
 }
 
-static void pair_swap(double *x0, double *x1) {
-  double m = *x0;
+static void pair_swap(long double *x0, long double *x1) {
+  long double m = *x0;
   *x0 = *x1; *x1 = m;
 }
 
-int root_bisection(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
-  double m, fm, f1, f0;
+int root_bisection(function_t *f, interval_t *i, stop_cond_t *s, long double *r) {
+  long double m, fm, f1, f0;
   size_t j;
 
   if (evaluate_function(f, i->x0, &f0)) return 1;
@@ -105,7 +105,7 @@ int root_bisection(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
     }
 
     if (root_search_verbose)
-      fprintf(stderr, "i=%zu: x=%.15f f(x0)=%.15f f(x1)=%.15f\n",
+      fprintf(stderr, "i=%zu: x=%.15Lg f(x0)=%.15Lg f(x1)=%.15Lg\n",
               j, (i->x1 + i->x0) / 2.0, f0, f1);
   }
 
@@ -120,8 +120,8 @@ int root_bisection(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
  * down-weighting is applied to improve method and
  * make it suprlinear convergent.
  * */
-int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
-  double m = 0.0, fm, f1, f0;
+int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, long double *r) {
+  long double m = 0.0, fm, f1, f0;
   size_t j;
   ssize_t side = 0;
 
@@ -162,7 +162,7 @@ int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
       break;
 
     if (root_search_verbose)
-      fprintf(stderr, "i=%zu: x=%.15f f(x)=%.15f\n", j, m, fm);
+      fprintf(stderr, "i=%zu: x=%.20Lg f(x)=%.20Lg\n", j, m, fm);
   }
 
   *r = m;
@@ -177,7 +177,7 @@ int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, double *r) {
  */
 int roots_gauss_seidel(matrix_t *A, vector_t *x, vector_t *b, stop_cond_t *s) {
   size_t i, j, k;
-  double *xi, *xj, *mij, *bi, *mii, d;
+  long double *xi, *xj, *mij, *bi, *mii, d;
 
   for (k = 0; k < s->max_iterations; k++) {
     for (i = 0, d = 0.0; i < A->r; i++) {

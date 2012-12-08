@@ -1,4 +1,4 @@
-SUBDIRS = libbaas libparser libnatools bnatools
+SUBDIRS = libbaas libparser libnatools tools
 
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck

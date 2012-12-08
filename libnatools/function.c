@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "parser/lexer.h"
 #include "parser/parser.h"
 #include "natools/function.h"
 
@@ -29,13 +30,17 @@ void function_destroy(function_t *f) {
 
 /* evaluates f(x) at x = x0
  * uppon return x0 holds the result */
-int evaluate_function(function_t *f, double x0, double *f0) {
+int evaluate_function(function_t *f, long double x0, long double *f0) {
   if (!f) return 1;
   char asig_buf[256];
   /* load x=x0 into the parser and evaluate f(x0) */
-  snprintf(asig_buf, sizeof(asig_buf), "x=%.15e", x0);
-  if (parser_eval(f->parser, asig_buf, f0)) return 2;
-  if (parser_eval(f->parser, f->function, f0)) return 3;
+  snprintf(asig_buf, sizeof(asig_buf), "x=%.20Lg", x0);
+  scanner_t *s = scanner_init(asig_buf);
+  if (parser_eval(f->parser, s, f0)) return 2;
+  scanner_destroy(s);
+  s = scanner_init(f->function);
+  if (parser_eval(f->parser, s, f0)) return 3;
+  scanner_destroy(s);
   return 0;
 }
 
