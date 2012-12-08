@@ -34,6 +34,20 @@ void parser_destroy(parser_t *p) {
 }
 
 
+int parser_setvar(parser_t *p, char *var, long double val) {
+  if (!p || !var)
+    return 1;
+  long double *v;
+  if ((v = (long double*)hashtbl_get(p->symbol_table, var))) {
+    *v = val;
+  } else {
+    v = malloc(sizeof(long double));
+    *v= val;
+    hashtbl_insert(p->symbol_table, var, v);
+  }
+  return 0;
+}
+
 int parser_eval(parser_t *p, scanner_t *s, long double *result) {
   if (!p || !s) {
 #ifdef _VERBOSE_
@@ -107,18 +121,9 @@ int parser_eval(parser_t *p, scanner_t *s, long double *result) {
     }
   }
 
-
   if (error <= 0) {
-    if ((error = pop_operand(p, result)) == 0) {
-      long double *ans;
-      if ((ans = (long double*)hashtbl_get(p->symbol_table, "ans"))) {
-        *ans = *result;
-      } else {
-        ans = malloc(sizeof(long double));
-        *ans = *result;
-        hashtbl_insert(p->symbol_table, "ans", ans);
-      }
-    }
+    if ((error = pop_operand(p, result)) == 0)
+      parser_setvar(p, "ans", *result);
   }
 
   token_destroy(bf);

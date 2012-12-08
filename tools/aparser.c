@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
           free(keys[j]);
         }
         free(keys);
-      } else
+      } else if (strcmp(expr, ""))
         printf("%.15Lg\n", evaluate(expr));
 
       add_history(expr);

@@ -129,7 +129,7 @@ int semantic_eval_1(parser_t *p) {
 
   while (error == 0) {
     op = (token_t*)list_pop(p->stack);
-    long double lhs = 0.0, rhs = 0.0, *dp = NULL, d;
+    long double lhs = 0.0, rhs = 0.0, d;
     symbol_t *s = NULL;
     function_t fp;
 
@@ -208,15 +208,9 @@ int semantic_eval_1(parser_t *p) {
           break;
         }
         s = (symbol_t*)list_pop(p->partial);
-        if ((dp = (long double*)hashtbl_get(p->symbol_table, s->sVal))) {
-          *dp = rhs;
-        } else {
-          dp = malloc(sizeof(long double));
-          *dp = rhs;
-          hashtbl_insert(p->symbol_table, s->sVal, dp);
-        }
+        parser_setvar(p, s->sVal, rhs);
         symbol_destroy(s);
-        list_push(p->partial, symbol_number(*dp));
+        list_push(p->partial, symbol_number(rhs));
         break;
 
       case tokFunction:
