@@ -25,8 +25,6 @@ symbol_t * symbol_variable(char *varname) {
 void symbol_destroy(symbol_t *s) {
   if (!s)
     return;
-  if (s->t == stVariable)
-    free(s->sVal);
   free(s);
 }
 
@@ -43,7 +41,7 @@ static int lookup_symbol(hashtbl_t *symtab, symbol_t *s, long double *r) {
     return 0;
   } else if (s->t == stVariable) {
     long double *d;
-    if ((d = (long double*)hashtbl_get(symtab, s->sVal))) {
+    if (!(d = (long double*)hashtbl_get(symtab, s->sVal))) {
 #ifdef _VERBOSE_
       fprintf(stderr, "semantic error: uninitialized variable [%s]\n", s->sVal);
 #endif
@@ -129,19 +127,13 @@ int semantic_eval_1(parser_t *p) {
   token_t *op;
   int error = 0;
 
-  while ((op = (token_t*)list_pop(p->stack))->lexcomp != tokOMango) {
+  while (error == 0) {
+    op = (token_t*)list_pop(p->stack);
     long double lhs = 0.0, rhs = 0.0, *dp = NULL, d;
     symbol_t *s = NULL;
+    function_t fp;
 
     switch (op->lexcomp) {
-      /* ignore these, no semantic value */
-      case tokOParen:
-      case tokCParen:
-      case tokComma:
-      case tokStackEmpty:
-      case tokNoMatch:
-        break;
-
       /* mathops */
       case tokPlus:
       case tokMinus:
@@ -224,26 +216,49 @@ int semantic_eval_1(parser_t *p) {
           hashtbl_insert(p->symbol_table, s->sVal, dp);
         }
         symbol_destroy(s);
+        list_push(p->partial, symbol_number(*dp));
         break;
 
       case tokFunction:
-      case tokText:
+        if (!(fp = (function_t)hashtbl_get(p->function_table, op->lexem))) {
+#ifdef _VERBOSE_
+          fprintf(stderr, "semantic error: unknown function %s\n", op->lexem);
+#endif
+          error = 2;
+          break;
+        }
+        if ((error = fp(p, funcparams, &rhs))) {
+#ifdef _VERBOSE_
+          fprintf(stderr, "function error: error un function call %s\n", op->lexem);
+#endif
+          break;
+        }
+        list_push(p->partial, symbol_number(rhs));
         break;
 
       case tokEMango:
         funcparams++;
         break;
 
+      /* ignore these, no semantic value */
+      default:
       case tokCMango:
+      case tokOParen:
+      case tokCParen:
+      case tokComma:
+      case tokStackEmpty:
+      case tokNoMatch:
+        break;
+
+      /* reduction done */
       case tokOMango:
+        error = -1;
         break;
     }
     token_destroy(op);
-    if (error)
+    if (error > 0)
       return error;
   }
-  /* destroy opening mango */
-  token_destroy(op);
   return 0;
 }
 

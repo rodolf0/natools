@@ -38,6 +38,7 @@ typedef struct _parser_t {
   adjustfn adjust;
   semanticfn reduce;
   hashtbl_t *symbol_table;
+  hashtbl_t *function_table;
   list_t *stack;
   list_t *partial;
 } parser_t;
@@ -60,6 +61,11 @@ symbol_t * symbol_number(long double d);
 symbol_t * symbol_variable(char *varname);
 void symbol_destroy(symbol_t *s);
 int pop_operand(parser_t *p, long double *r);
+
+/* prototype of known functions */
+typedef int (*function_t)(parser_t *p, size_t nargs, long double *r);
+int register_functions(parser_t *p);
+int register_constants(parser_t *p);
 
 #endif /* _PARSER_H_PARSER_H_ */
 

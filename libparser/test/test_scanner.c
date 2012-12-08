@@ -116,12 +116,10 @@ void test_eof_bof_after_accept() {
 }
 
 int main(int argc, char *argv[]) {
-  fprintf(stderr, "Testing... ");
   test_buffer_walk();
   test_file_walk("test_scanner.c");
   test_eof_bof();
   test_eof_bof_after_accept();
-  fprintf(stderr, "done\n");
   return 0;
 }
 

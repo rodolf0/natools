@@ -10,8 +10,18 @@ parser_t * parser_create() {
   p->adjust = adjust_token_1;
   p->reduce = semantic_eval_1;
   p->symbol_table = hashtbl_init(free, NULL);
+  p->function_table = hashtbl_init(NULL, NULL);
   p->stack = NULL;
   p->partial = NULL;
+  /* preload symbol table */
+  if (register_constants(p)) {
+    parser_destroy(p);
+    return NULL;
+  }
+  if (register_functions(p)) {
+    parser_destroy(p);
+    return NULL;
+  }
   return p;
 }
 

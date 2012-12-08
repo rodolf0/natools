@@ -21,7 +21,7 @@ typedef enum _lexcomp_t {
   tokOParen, tokCParen, tokComma, tokAsign,
   /* numbers, text, ids... */
   tokNumber, tokText, tokId, tokFunction,
-  /* WARNING: keep tokNoMatch last, indicates number of public lexcomps */
+  /* misc */
   tokStackEmpty, tokNoMatch,
   /* internal use only */
   tokOMango, tokEMango, tokCMango

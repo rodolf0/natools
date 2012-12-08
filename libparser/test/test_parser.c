@@ -13,6 +13,7 @@ long double evaluate(const char *expr) {
     p = parser_create();
   else if (!strcmp(expr, "shutdown")) {
     parser_destroy(p);
+    p = NULL;
     return 0.0;
   }
   scanner_t *s = scanner_init(expr);
@@ -22,16 +23,128 @@ long double evaluate(const char *expr) {
   return r;
 }
 
+#define EPSILON 1.0e-10
+#define ASSERT_EQ(x, y) assert(fabsl((x)-(y)) < EPSILON)
 
-int main(int argc, char *argv[]) {
-  assert(evaluate("23+45") == 68);
-  assert(evaluate("23-45") == -22);
-  assert(evaluate("-23") == -23);
-  assert(evaluate("--5343") == 5343);
-  assert(evaluate("56934.234") == 56934.234L);
-  assert(evaluate("593063*56934.234") == 33765587618.742L);
+
+void check_operators() {
+  ASSERT_EQ(evaluate("23+45"), 68);
+  ASSERT_EQ(evaluate("23-45"), -22);
+  ASSERT_EQ(evaluate("-23"), -23);
+  ASSERT_EQ(evaluate("--5343"), 5343);
+  ASSERT_EQ(evaluate("56934.234"), 56934.234L);
+  ASSERT_EQ(evaluate("593063 * 56934.234"), 33765587618.742L);
+  ASSERT_EQ(evaluate("98 / 0.4235"), 231.40495867768);
+  ASSERT_EQ(evaluate("9%4"), 1);
+  ASSERT_EQ(evaluate("23489 % 234.23"), 66);
+  ASSERT_EQ(evaluate("3**3"), 27);
+  ASSERT_EQ(evaluate("16**2"), 256);
+  ASSERT_EQ(evaluate("144**0.5"), 12);
+
+  ASSERT_EQ(evaluate("64 >> 2"), 16);
+  ASSERT_EQ(evaluate("64 >> 2.2"), 16);
+  ASSERT_EQ(evaluate("1 << 5"), 32);
+  ASSERT_EQ(evaluate("8 & 9"), 8);
+  ASSERT_EQ(evaluate("64 & 63"), 0);
+  ASSERT_EQ(evaluate("7 & 5"), 5);
+  ASSERT_EQ(evaluate("7 | 5"), 7);
+  ASSERT_EQ(evaluate("7 | 8"), 15);
+  ASSERT_EQ(evaluate("8 ^ 7"), 15);
+  ASSERT_EQ(evaluate("10 ^ 11"), 1);
+  ASSERT_EQ(evaluate("~0"), -1);
+  ASSERT_EQ(evaluate("~1"), -2);
+
+  ASSERT_EQ(evaluate("not 0"), 1);
+  ASSERT_EQ(evaluate("0 and 3"), 0);
+  ASSERT_EQ(evaluate("0 or 3"), 1);
+  ASSERT_EQ(evaluate("true"), 1);
+  ASSERT_EQ(evaluate("false"), 0);
+
+  ASSERT_EQ(evaluate("3.1415 == 31415e-4"), 1);
+  ASSERT_EQ(evaluate("3.1415 != 31415e-2"), 1);
+  ASSERT_EQ(evaluate("3.1415 > 31415e-2"), 0);
+  ASSERT_EQ(evaluate("3.1415 < 31415e2"), 1);
+  ASSERT_EQ(evaluate("3.1415 >= 31415e2"), 0);
+  ASSERT_EQ(evaluate("3.1415 <= 31415e2"), 1);
+
+  ASSERT_EQ(evaluate("(75.34)"), 75.34);
+  ASSERT_EQ(evaluate("-(75.34)"), -75.34);
+  ASSERT_EQ(evaluate("3*(75.34-4)"), 214.02);
+  ASSERT_EQ(evaluate("2**(3-1)"), 4);
+
+  ASSERT_EQ(evaluate("a = 23"), 23);
+  ASSERT_EQ(evaluate("a = 2 * a"), 46);
 
   evaluate("shutdown");
+}
+
+void check_functions() {
+  ASSERT_EQ(evaluate("a = 46"), 46);
+
+  ASSERT_EQ(evaluate("max(10, 20, 12, 15)"), 20);
+  ASSERT_EQ(evaluate("min(11, 21, 15, 25)"), 11);
+  ASSERT_EQ(evaluate("sum(1, 2, 3, 4, 5, 6)"), 21);
+  ASSERT_EQ(evaluate("avg(3.4, 4e-2, 3.5, a)"), 13.235);
+  ASSERT_EQ(evaluate("abs(-34)"), 34);
+
+  evaluate("a = random()");
+  ASSERT_EQ(evaluate("cos(a)**2 + sin(a)**2"), 1.0);
+  ASSERT_EQ(evaluate("sin(phi)/cos(phi) - tan(phi)"), 0.0);
+  ASSERT_EQ(evaluate("1 + tan(a)**2 - 1/cos(a)**2"), 0.0);
+
+  ASSERT_EQ(evaluate("atan2(a, phi) == atan(a/phi)"), 1);
+  ASSERT_EQ(evaluate("acos(cos(phi)) == phi"), 1);
+  ASSERT_EQ(evaluate("asin(sin(phi/4)) == phi/4"), 1);
+
+  ASSERT_EQ(evaluate("log(exp(3))"), 3);
+  ASSERT_EQ(evaluate("log(234 * 4234) == log(234) + log(4234)"), 1);
+
+  ASSERT_EQ(evaluate("fact(15)"), 1307674368000);
+
+  evaluate("shutdown");
+}
+
+void check_precedence() {
+  ASSERT_EQ(evaluate("3 + 4 * 5"), 23);
+  ASSERT_EQ(evaluate("(3 + 4) * 5"), 35);
+
+  ASSERT_EQ(evaluate("3*5**2"), 75);
+  ASSERT_EQ(evaluate("(3 * 5)**2"), 225);
+  ASSERT_EQ(evaluate("-3**2"), 9);
+
+  ASSERT_EQ(evaluate("3 * 7 % 3"), 0);
+  ASSERT_EQ(evaluate("3 * (7 % 3)"), 3);
+
+  ASSERT_EQ(evaluate("32 >> 3 & 6"), 4);
+  ASSERT_EQ(evaluate("32 >> (3 & 6)"), 8);
+
+  ASSERT_EQ(evaluate("4 << (7 ^ 5)"), 16);
+
+  ASSERT_EQ(evaluate("4 | 5 ^ 3 & 2"), 7);
+  ASSERT_EQ(evaluate("4 | (5 ^ 3) & 2"), 6);
+
+  ASSERT_EQ(evaluate("false and false or true"), 1);
+  ASSERT_EQ(evaluate("false and (false or true)"), 0);
+
+  ASSERT_EQ(evaluate("1 < 2 < 3"), 1);
+  ASSERT_EQ(evaluate("a = 5"), 5);
+  ASSERT_EQ(evaluate("a = b = 3"), 3);
+
+  ASSERT_EQ(evaluate("max(3, 4) - -min(-3, 4)"), 1);
+  evaluate("shutdown");
+}
+
+void check_longer() {
+  ASSERT_EQ(evaluate("5.23e+3**4**-2 + avg(34>>2, phi < pi, max(phi, pi, 3.2))"), 5.774346129827);
+
+  evaluate("shutdown");
+}
+
+int main(int argc, char *argv[]) {
+  check_operators();
+  check_functions();
+  check_precedence();
+  check_longer();
   return 0;
 }
 

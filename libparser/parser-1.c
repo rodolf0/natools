@@ -39,8 +39,8 @@ static ssize_t decode_lexcomp(lexcomp_t lc) {
     case tokNumber     : return 28;
     case tokId         : return 29;
     case tokFunction   : return 30;
-    case tokText       : return 31;
-    case tokStackEmpty : return 32;
+    case tokStackEmpty : return 31;
+    /*case tokText       : return -1;*/
     default            : return -1;
   }
 }
@@ -51,41 +51,40 @@ op_prec_t parser_precedence_1(lexcomp_t op1, lexcomp_t op2) {
   if (row == -1 || col == -1)
     return E7;
   /* rows: element on the stack, cols: elements from the buffer */
-  static const op_prec_t _precedence[tokNoMatch][tokNoMatch] = {
-         /*  +   -   -u  *   /   %   **  >>  <<  &   |   ^   ~   !   &&  ||  tr  fa  ==  !=  >   <   >=  <=  (   )   ,   =   n   id  f   t   $   */
-   /*  + */ {GT, GT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, LT, GT},
-   /*  - */ {GT, GT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /* -u */ {GT, GT, LT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /*  * */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, LT, GT},
-   /*  / */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /*  % */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /* ** */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /* >> */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /* << */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /*  & */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /*  | */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, LT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /*  ^ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /*  ~ */ {GT, GT, LT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /*  ! */ {GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /* && */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /* || */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, E2, GT},
-   /* tr */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, E3, GT},
-   /* fa */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, E3, GT},
-   /* == */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, LT, GT},
-   /* != */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, LT, GT},
-   /*  > */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, LT, GT},
-   /*  < */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, LT, GT},
-   /* >= */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, LT, GT},
-   /* <= */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, LT, GT},
-   /*  ( */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, E5, E1, LT, LT, LT, LT, E4},
-   /*  ) */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, E3, GT},
-   /*  , */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, E1, LT, LT, LT, LT, E5},
-   /*  = */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, LT, LT, LT, LT, LT, GT},
-   /*  n */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, E3, GT},
-   /* id */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, GT, E3, E3, E3, E3, GT},
-   /*  f */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, E1, LT, LT, LT, LT, E4},
-   /*  t */ {GT, E2, E3, GT, E2, E2, E2, E2, E2, E2, E2, E2, E3, E3, E2, E2, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, E3, GT},
-   /*  $ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, LT, LT, LT, LT, LT, E0},
+  static const op_prec_t _precedence[32][32] = {
+         /*  +   -   -u  *   /   %   **  >>  <<  &   |   ^   ~   !   &&  ||  tr  fa  ==  !=  >   <   >=  <=  (   )   ,   =   n   id  f   $  */
+   /*  + */ {GT, GT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  - */ {GT, GT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /* -u */ {GT, GT, LT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  * */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  / */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  % */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /* ** */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /* >> */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /* << */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  & */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  | */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, LT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  ^ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  ~ */ {GT, GT, LT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  ! */ {GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /* && */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /* || */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /* tr */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, GT},
+   /* fa */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, GT},
+   /* == */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /* != */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  > */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  < */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /* >= */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /* <= */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
+   /*  ( */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, E5, E1, LT, LT, LT, E4},
+   /*  ) */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, GT},
+   /*  , */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, E1, LT, LT, LT, E5},
+   /*  = */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, LT, LT, LT, LT, GT},
+   /*  n */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, GT},
+   /* id */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, GT, E3, E3, E3, GT},
+   /*  f */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, E1, LT, LT, LT, E4},
+   /*  $ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, LT, LT, LT, LT, E0},
   };
   return _precedence[row][col];
 }

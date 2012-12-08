@@ -111,11 +111,9 @@ void test_unkown() {
 
 
 int main(int argc, char *argv[]) {
-  fprintf(stderr, "Testing... ");
   test_numbers();
   test_lexer();
   test_unkown();
-  fprintf(stderr, "done\n");
   return 0;
 }
 
