@@ -8,6 +8,10 @@
 #include "baas/xstring.h"
 #include "parser-priv.h"
 
+void help() {
+  fprintf(stderr, "usage: aparser {-i | <expresion>}\n");
+}
+
 
 parser_t *P = NULL;
 long double evaluate(const char *expr) {
@@ -35,7 +39,7 @@ int main(int argc, char *argv[]) {
   while ((ret = getopt(argc, argv, "hi")) != -1) {
     switch (ret) {
       case 'h':
-        fprintf(stderr, "usage: %s" "<expresion eg: 4/sin(pi^e+2)>\n", argv[0]);
+        help();
         return 0;
         break;
       case 'i':
@@ -78,7 +82,7 @@ int main(int argc, char *argv[]) {
   } else if (optind < argc)
     printf("%.15Lg\n", evaluate(argv[optind]));
   else
-    fprintf(stderr, "usage: %s" "<expresion eg: 4/sin(pi^e+2)>\n", argv[0]);
+    help();
 
   evaluate("shutdown");
   return ret;

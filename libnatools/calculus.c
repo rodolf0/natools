@@ -17,8 +17,8 @@
 int derivate_3p(function_t *f, long double x0, long double h, long double *r) {
   long double p0, p1;
 
-  if (evaluate_function(f, x0 - h, &p0)) return 1;
-  if (evaluate_function(f, x0 + h, &p1)) return 1;
+  p0 = function_eval(f, x0 - h);
+  p1 = function_eval(f, x0 + h);
 
   *r = (p1 - p0) / (2.0 * h);
   return 0;
@@ -27,10 +27,10 @@ int derivate_3p(function_t *f, long double x0, long double h, long double *r) {
 int derivate_5p(function_t *f, long double x0, long double h, long double *r) {
   long double p0, p1, p2, p3;
 
-  if (evaluate_function(f, x0 - 2.0 * h, &p0)) return 1;
-  if (evaluate_function(f, x0 - 1.0 * h, &p1)) return 1;
-  if (evaluate_function(f, x0 + 1.0 * h, &p2)) return 1;
-  if (evaluate_function(f, x0 + 2.0 * h, &p3)) return 1;
+  p0 = function_eval(f, x0 - 2.0 * h);
+  p1 = function_eval(f, x0 - 1.0 * h);
+  p2 = function_eval(f, x0 + 1.0 * h);
+  p3 = function_eval(f, x0 + 2.0 * h);
 
   *r = (p0 + 8.0 * (p2 - p1) - p3) / (12.0 * h);
   return 0;
@@ -51,15 +51,15 @@ int integrate_simpson(function_t *f, interval_t *i, int n, long double *r) {
   long double p0, pm, pi, pj, fj;
   int j;
 
-  if (evaluate_function(f, i->x0, &p0)) return 1;
-  if (evaluate_function(f, i->x1, &pm)) return 1;
+  p0 = function_eval(f, i->x0);
+  pm = function_eval(f, i->x1);
 
   for (j = 1, pj = 0.0; j < n; j++) {
-    if (evaluate_function(f, i->x0 + h * (2*j), &fj)) return 1;
+    fj = function_eval(f, i->x0 + h * (2*j));
     pj += fj;
   }
   for (j = 1, pi = 0.0; j <= n; j++) {
-    if (evaluate_function(f, i->x0 + h * (2*j-1), &fj)) return 1;
+    fj = function_eval(f, i->x0 + h * (2*j-1));
     pi += fj;
   }
 

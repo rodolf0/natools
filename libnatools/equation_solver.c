@@ -23,8 +23,8 @@ int root_secant(function_t *f, interval_t *i, stop_cond_t *s, long double *r) {
   long double d, f1, f0;
   size_t j;
 
-  if (evaluate_function(f, i->x0, &f0)) return 1;
-  if (evaluate_function(f, i->x1, &f1)) return 1;
+  f0 = function_eval(f, i->x0);
+  f1 = function_eval(f, i->x1);
 
   for (j = 0; j < s->max_iterations; j++) {
     /* calculate next aproximation */
@@ -35,7 +35,7 @@ int root_secant(function_t *f, interval_t *i, stop_cond_t *s, long double *r) {
     /* update secant points */
     i->x0 = i->x1; f0 = f1;
     i->x1 = i->x1 - d;
-    if (evaluate_function(f, i->x1, &f1)) return 1;
+    f1 = function_eval(f, i->x1);
 
     if (root_search_verbose)
       fprintf(stderr, "i=%zu: x=%.15Lg f(x)=%.15Lg d=%.15Lg\n", j, i->x1, f1, d);
@@ -52,7 +52,7 @@ int root_newton(function_t *f, long double x0, stop_cond_t *s, long double *r) {
 
   for (j = 0; j < s->max_iterations; j++) {
     /* evaluate function at x0 */
-    if (evaluate_function(f, x0, &f0)) return 1;
+    f0 = function_eval(f, x0);
     /* evaluate f'(x) at x0 */
     if (derivate_5p(f, x0, 0.05, &df0_dx)) return 2;
     /* check stop condition */
@@ -77,8 +77,8 @@ int root_bisection(function_t *f, interval_t *i, stop_cond_t *s, long double *r)
   long double m, fm, f1, f0;
   size_t j;
 
-  if (evaluate_function(f, i->x0, &f0)) return 1;
-  if (evaluate_function(f, i->x1, &f1)) return 1;
+  f0 = function_eval(f, i->x0);
+  f1 = function_eval(f, i->x1);
 
   /* f(x0) and f(x1) have opposite signs => contain a root */
   if (f0 > 0.0 && f1 < 0.0) {
@@ -92,7 +92,7 @@ int root_bisection(function_t *f, interval_t *i, stop_cond_t *s, long double *r)
   for (j = 0; j < s->max_iterations; j++) {
     /* evaluate function at midpoint */
     m = (i->x0 + i->x1) / 2.0;
-    if (evaluate_function(f, m, &fm)) return 1;
+    fm = function_eval(f, m);
     /* check stop conditions */
     if (i->x0 == m || i->x1 == m ||
         fabs(i->x0 - i->x1) < s->epsilon) break;
@@ -125,8 +125,8 @@ int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, long double *
   size_t j;
   ssize_t side = 0;
 
-  if (evaluate_function(f, i->x0, &f0)) return 1;
-  if (evaluate_function(f, i->x1, &f1)) return 1;
+  f0 = function_eval(f, i->x0);
+  f1 = function_eval(f, i->x1);
 
   /* f(x0) and f(x1) have opposite signs => contain a root */
   if (f0 > 0.0 && f1 < 0.0) {
@@ -144,7 +144,7 @@ int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, long double *
     if (fabs(i->x0 - i->x1) < s->epsilon * fabs(i->x0 + i->x1))
       break;
 
-    if (evaluate_function(f, m, &fm)) return 1;
+    fm = function_eval(f, m);
 
     /* update endpoints */
     if (fm < 0.0) {

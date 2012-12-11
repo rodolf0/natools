@@ -4,7 +4,6 @@
 
 #include "parser/lexer.h"
 
-
 /* utility functions */
 int is_num(char x) {
   return (x >= '0' && x <= '9');

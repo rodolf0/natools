@@ -51,7 +51,7 @@ int finite_difference(function_t *f, int n, long double x0, long double h, long 
   long double T = 0.5;
 
   for (i = 0, sign = 1, *r = 0.0; i <= n; i++) {
-    if (evaluate_function(f, x0 + (T*(long double)n - i) * h, &fx_i)) return 1;
+    fx_i = function_eval(f, x0 + (T*(long double)n - i) * h);
     *r += sign * k_combinations(n, i) * fx_i;
     sign *= -1;
   }
