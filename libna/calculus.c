@@ -71,7 +71,7 @@ long double integrate_simpson(function_t *f, long double x0, long double x1) {
  * Compute the arc-length using composite simpson's rule
  */
 long double arc_length(function_t *f, long double x0, long double x1) {
-  int j, n = (int)((x1 - x0) / 1.0e-2);
+  int j, n = (int)((x1 - x0) / 0.3e-2);
   long double _h = (x1 - x0) / (2.0 * n);
   long double p0, pm, pi = 0.0, pj = 0.0;
 

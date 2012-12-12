@@ -33,8 +33,27 @@ void test_derivates() {
   function_destroy(f);
 }
 
+void test_arclength() {
+  function_t *f = function_create("2**x - log(x)");
+  ASSERT_EQ(arc_length(f, 0.5, 2.3), 3.0663188081);
+  function_destroy(f);
+
+  f = function_create("1/x + sin(x)**0.3");
+  ASSERT_EQ(arc_length(f, 0.5, 2.3), 2.4417982309);
+  function_destroy(f);
+
+  f = function_create("3.5*x**4 - 30.3*x**3 + 7.2*x**2 - 3.4*x + 32.0");
+  ASSERT_EQ(arc_length(f, -5, 7), 8109.52041086);
+  function_destroy(f);
+
+  f = function_create("3.5*x**4 - 7.2*x**2 - 3.4*x - 32.0");
+  ASSERT_EQ(arc_length(f, -1.5, 0.73), 14.196939434);
+  function_destroy(f);
+}
+
 int main(int argc, char *argv[]) {
   test_derivates();
+  test_arclength();
   return 0;
 }
 
