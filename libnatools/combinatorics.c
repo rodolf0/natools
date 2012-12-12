@@ -2,10 +2,8 @@
 
 int factorial(int n) {
   int r = 1, i;
-
   for (i = 1; i <= n; i++)
     r *= i;
-
   return r;
 }
 
@@ -18,10 +16,8 @@ int factorial(int n) {
 int k_combinations(int n, int k) {
   double r = 1.0;
   int i;
-
   for (i=0, r = 1.0; i < k; i++)
-    r *= (double)(n - i) / (double)(k - i);
-
+    r *= (long double)(n - i) / (long double)(k - i);
   return (int)r;
 }
 
@@ -37,20 +33,16 @@ int k_combinations_rep(int n, int k) {
  * */
 int k_permutations(int n, int k) {
   int i, r;
-
   for (i = 0, r = 1; i < k; i++)
     r *= n - i;
-
   return r;
 }
 
 /* n^k */
 int k_permutations_rep(int n, int k) {
   int i, r;
-
   for (i = 0, r = 1; i < k; i++)
     r *= n;
-
   return r;
 }
 
