@@ -51,9 +51,21 @@ void test_arclength() {
   function_destroy(f);
 }
 
+void test_integration() {
+  function_t *f = function_create("2**x - log(x)");
+  ASSERT_EQ(integrate_simpson(f, 0.5, 2.3), 4.60212);
+  function_destroy(f);
+
+  f = function_create("1/x - sin(x)**3");
+  ASSERT_EQ(integrate_simpson(f, 2.45, 8.145), 1.54018);
+  function_destroy(f);
+}
+
+
 int main(int argc, char *argv[]) {
   test_derivates();
   test_arclength();
+  test_integration();
   return 0;
 }
 
