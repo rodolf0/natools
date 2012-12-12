@@ -54,7 +54,7 @@ int root_newton(function_t *f, long double x0, stop_cond_t *s, long double *r) {
     /* evaluate function at x0 */
     f0 = function_eval(f, x0);
     /* evaluate f'(x) at x0 */
-    if (derivate_5p(f, x0, 0.05, &df0_dx)) return 2;
+    df0_dx = derivate_1(f, x0);
     /* check stop condition */
     if (fabs(d = f0 / df0_dx) < s->epsilon) break;
 

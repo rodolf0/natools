@@ -2,6 +2,7 @@
 #include "natools/interpolation.h"
 #include "natools/combinatorics.h"
 
+
 /* Newton's interpolation polynomial:
  *
  * x0  y0 = f[x0]
@@ -42,20 +43,20 @@ int interpolate_newton(vector2_t *x, int n, long double x0, long double *r) {
  * dx^n           h^n
  *
  * */
-int finite_difference(function_t *f, int n, long double x0, long double h, long double *r) {
-  int i, sign;
-  long double fx_i;
+long double finite_difference(function_t *f, int n, long double x0, long double h) {
   /* T = 1:   forward difference
    * T = 0.5: central difference
    * T = 0:   backward difference */
-  long double T = 0.5;
+  const long double T = 0.5;
+  long double fx_i, r = 0.0;
+  int i, sign;
 
-  for (i = 0, sign = 1, *r = 0.0; i <= n; i++) {
+  for (i = 0, sign = 1; i <= n; i++) {
     fx_i = function_eval(f, x0 + (T*(long double)n - i) * h);
-    *r += sign * k_combinations(n, i) * fx_i;
-    sign *= -1;
+    r += sign * k_combinations(n, i) * fx_i;
+    sign = -sign;
   }
-  return 0;
+  return r;
 }
 
 
