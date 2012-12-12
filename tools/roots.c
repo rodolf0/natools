@@ -3,9 +3,9 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "natools/natools.h"
-#include "natools/function.h"
-#include "natools/equation_solver.h"
+#include "na/natools.h"
+#include "na/function.h"
+#include "na/nonlinear_equations.h"
 
 int main(int argc, char *argv[]) {
   int ret;

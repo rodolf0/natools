@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "natools/natools.h"
+#include "na/natools.h"
 
 interval_t *interval_create(long double x0, long double x1) {
   interval_t *i = (interval_t*)malloc(sizeof(interval_t));

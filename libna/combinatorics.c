@@ -1,4 +1,4 @@
-#include "natools/combinatorics.h"
+#include "na/combinatorics.h"
 
 int factorial(int n) {
   int r = 1, i;

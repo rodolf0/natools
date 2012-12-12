@@ -46,7 +46,8 @@ AC_CONFIG_FILES([Makefile
                  tools/Makefile
                  libbaas/Makefile
                  libbaas/test/Makefile
-                 libnatools/Makefile
+                 libna/Makefile
+                 libna/test/Makefile
                  libparser/Makefile
                  libparser/test/Makefile])
 AC_OUTPUT

@@ -2,8 +2,9 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "natools/calculus.h"
-#include "natools/equation_solver.h"
+#include "na/function.h"
+#include "na/calculus.h"
+#include "na/nonlinear_equations.h"
 
 int root_search_verbose = 0;
 
