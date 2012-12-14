@@ -11,7 +11,7 @@ vector, ...) as well as some basic sorting, bignum, bits, string...  algorithms.
 * a small lexer capable of tokenizing identifiers, numbers, and math operators.
 * a parser that understands operator-precedence grammars and a math sample one.
 
-## libnatools
+## libna
 Miscelanous math functionality...
 * combinatronic functions (eg: factorial, combinations, permutations)
 * numerical calculus functions (eg: derivate, integrate by simpson)

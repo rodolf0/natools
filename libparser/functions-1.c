@@ -53,19 +53,13 @@ int _avg(parser_t *p, size_t nargs, long double *r) {
   return e;
 }
 
-static long int factorial(long int x) {
-  if (x == 1 || x == 0)
-    return 1;
-  return x * factorial(x - 1);
-}
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int _factorial(parser_t *p, size_t nargs, long double *r) {
+int _gamma(parser_t *p, size_t nargs, long double *r) {
   int e;
   if ((e = pop_operand(p, r)))
     return e;
-  *r = (long double)factorial((long int)*r);
+  *r = tgammal(*r);
   return 0;
 }
 
@@ -179,7 +173,7 @@ int register_functions(parser_t *p) {
   hashtbl_insert(p->function_table, "log(", _log);
   hashtbl_insert(p->function_table, "exp(", _exp);
 
-  hashtbl_insert(p->function_table, "fact(", _factorial);
+  hashtbl_insert(p->function_table, "gamma(", _gamma);
 
   return 0;
 }

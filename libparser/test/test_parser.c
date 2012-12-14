@@ -99,7 +99,7 @@ void check_functions() {
   ASSERT_EQ(evaluate("log(exp(3))"), 3);
   ASSERT_EQ(evaluate("log(234 * 4234) == log(234) + log(4234)"), 1);
 
-  ASSERT_EQ(evaluate("fact(15)"), 1307674368000);
+  ASSERT_EQ(roundl(evaluate("gamma(16)")), 1307674368000);
 
   evaluate("shutdown");
 }
