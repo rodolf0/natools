@@ -16,7 +16,7 @@ long int k_combinations(int n, int k) {
   return lroundl(expl(lgammal(n+1) - lgammal(k+1) - lgammal(n-k+1)));
 }
 
-long int k_combinations_rep(int n, int k) {
+long int k_multicombinations(int n, int k) {
   return k_combinations(n + k - 1, n - 1);
 }
 
@@ -31,7 +31,7 @@ long int k_permutations(int n, int k) {
 }
 
 /* n^k */
-long int k_permutations_rep(int n, int k) {
+long int product(int n, int k) {
   return lroundl(powl(n, k));
 }
 
