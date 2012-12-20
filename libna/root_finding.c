@@ -4,7 +4,7 @@
 
 #include "na/function.h"
 #include "na/calculus.h"
-#include "na/nonlinear_equations.h"
+#include "na/root_finding.h"
 
 int root_search_verbose = 0;
 

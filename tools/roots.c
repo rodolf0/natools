@@ -5,7 +5,7 @@
 
 #include "na/natools.h"
 #include "na/function.h"
-#include "na/nonlinear_equations.h"
+#include "na/root_finding.h"
 
 int main(int argc, char *argv[]) {
   int ret;

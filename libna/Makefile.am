@@ -7,7 +7,7 @@ libna_la_SOURCES = \
 	function.c \
 	combinatorics.c   \
 	calculus.c \
-	nonlinear_equations.c \
+	root_finding.c \
 	interpolation.c \
 	natools.c
 
@@ -17,7 +17,7 @@ libna_include_HEADERS = \
 	na/combinatorics.h \
  	na/calculus.h \
 	na/natools.h \
-	na/nonlinear_equations.h \
+	na/root_finding.h \
 	na/interpolation.h
 
 libna_la_LIBADD = ../libparser/libparser.la
