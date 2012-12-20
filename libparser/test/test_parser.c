@@ -18,7 +18,11 @@ long double evaluate(const char *expr) {
   }
   scanner_t *s = scanner_init(expr);
   long double r = 0.0;
-  assert(parser_eval(p, s, &r) == 0);
+  int error = 0;
+  if ((error = parser_eval(p, s, &r)) != 0) {
+    fprintf(stderr, "[%s] failed with error: %d\n", expr, error);
+    abort();
+  }
   scanner_destroy(s);
   return r;
 }

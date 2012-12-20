@@ -29,33 +29,6 @@ void symbol_destroy(symbol_t *s) {
 }
 
 
-static int lookup_symbol(hashtbl_t *symtab, symbol_t *s, long double *r) {
-  if (!symtab || !s) {
-#ifdef _VERBOSE_
-    fprintf(stderr, "Invalid symbol or symbol table\n");
-#endif
-    return 1;
-  }
-  if (s->t == stNumber) {
-    *r = s->dVal;
-    return 0;
-  } else if (s->t == stVariable) {
-    long double *d;
-    if (!(d = (long double*)hashtbl_get(symtab, s->sVal))) {
-#ifdef _VERBOSE_
-      fprintf(stderr, "semantic error: uninitialized variable [%s]\n", s->sVal);
-#endif
-      return 2;
-    }
-    *r = *d;
-    return 0;
-  }
-#ifdef _VERBOSE_
-  fprintf(stderr, "semantic error: unkown type %d\n", s->t);
-#endif
-  return 1;
-}
-
 int pop_operand(parser_t *p, long double *r) {
   if (p->partial->size < 1) {
 #ifdef _VERBOSE_
@@ -64,9 +37,44 @@ int pop_operand(parser_t *p, long double *r) {
     return 1;
   }
   symbol_t *s = (symbol_t*)list_pop(p->partial);
-  int err = lookup_symbol(p->symbol_table, s, r);
+  if (!s) {
+#ifdef _VERBOSE_
+    fprintf(stderr, "Invalid symbol\n");
+#endif
+    return 1;
+  }
+
+  int error = 0;
+  switch (s->t) {
+    case stNumber:
+      *r = s->dVal;
+      break;
+
+    case stVariable:
+      if (!p->symbol_table) {
+#ifdef _VERBOSE_
+        fprintf(stderr, "Invalid symbol table\n");
+        error = 1;
+#endif
+      }
+      long double *d;
+      if (!(d = (long double*)hashtbl_get(p->symbol_table, s->sVal))) {
+#ifdef _VERBOSE_
+        fprintf(stderr, "semantic error: uninitialized variable [%s]\n", s->sVal);
+#endif
+        error = 2;
+      } else
+        *r = *d;
+      break;
+
+    default:
+#ifdef _VERBOSE_
+  fprintf(stderr, "semantic error: unkown type %d\n", s->t);
+#endif
+      break;
+  }
   symbol_destroy(s);
-  return err;
+  return error;
 }
 
 
