@@ -45,7 +45,7 @@ static ssize_t decode_lexcomp(lexcomp_t lc) {
   }
 }
 
-op_prec_t parser_precedence_1(lexcomp_t op1, lexcomp_t op2) {
+op_prec_t parser_precedence(lexcomp_t op1, lexcomp_t op2) {
   ssize_t row = decode_lexcomp(op1),
           col = decode_lexcomp(op2);
   if (row == -1 || col == -1)
@@ -91,7 +91,7 @@ op_prec_t parser_precedence_1(lexcomp_t op1, lexcomp_t op2) {
 
 
 /* check if t-token is a unary-minus, return adjusted-t */
-token_t * adjust_token_1(token_t *t, token_t *prev) {
+token_t * adjust_token(token_t *t, token_t *prev) {
   if (!t || t->lexcomp != tokMinus)
     return t;
 

@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "baas/hashtbl.h"
 #include "parser-priv.h"
+
 
 symbol_t * symbol_number(long double d) {
   symbol_t *s = malloc(sizeof(symbol_t));
@@ -24,9 +26,7 @@ symbol_t * symbol_variable(char *varname) {
 
 symbol_t * symbol_operator(lexcomp_t lc) {
   symbol_t *s = malloc(sizeof(symbol_t));
-  if (s->operator == tokUnaryMinus ||
-      s->operator == tokBitNot ||
-      s->operator == tokNot)
+  if (lc == tokUnaryMinus || lc == tokBitNot || lc == tokNot)
     s->type = stUniOperator;
   else
     s->type = stBinOperator;
@@ -93,9 +93,8 @@ static long double semanter_operator(lexcomp_t lc, long double lhs, long double 
 }
 
 
-
-int evaluate_expression(const expr_t *e, long double *r,
-                        hashtbl_t *vars, hashtbl_t *funcs) {
+int parser_eval(const expr_t *e, long double *r,
+                hashtbl_t *vars, hashtbl_t *funcs) {
   if (!e || !r) {
 #ifdef _VERBOSE_
   fprintf(stderr, "eval error: null expression or result var\n");
@@ -182,11 +181,11 @@ int evaluate_expression(const expr_t *e, long double *r,
 
 
 /* parse symbols out of tokens */
-int semantic_evaluation(parser_t *p) {
+int semanter_reduce(list_t *stack, list_t *partial) {
   size_t funcparams = 0;
   token_t *op;
 
-  while ((op = (token_t*)list_pop(p->stack))) {
+  while ((op = (token_t*)list_pop(stack))) {
     switch (op->lexcomp) {
       /* binary operators */
       case tokPlus   : case tokMinus  : case tokTimes  :
@@ -197,23 +196,23 @@ int semantic_evaluation(parser_t *p) {
       case tokEq     : case tokNe     : case tokGt     :
       case tokLt     : case tokGe     : case tokLe     :
       case tokAsign  :
-        list_push(p->partial, symbol_operator(op->lexcomp));
+        list_push(partial, symbol_operator(op->lexcomp));
         break;
 
       case tokNumber:
-        list_push(p->partial, symbol_number(strtold(op->lexem, NULL)));
+        list_push(partial, symbol_number(strtold(op->lexem, NULL)));
         break;
       case tokTrue:
-        list_push(p->partial, symbol_number(1.0));
+        list_push(partial, symbol_number(1.0));
         break;
       case tokFalse:
-        list_push(p->partial, symbol_number(0.0));
+        list_push(partial, symbol_number(0.0));
         break;
       case tokId:
-        list_push(p->partial, symbol_variable(op->lexem));
+        list_push(partial, symbol_variable(op->lexem));
         break;
       case tokFunction:
-        list_push(p->partial, symbol_function(op->lexem, funcparams));
+        list_push(partial, symbol_function(op->lexem, funcparams));
         break;
 
       /* ignore these, no semantic value */

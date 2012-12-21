@@ -1,82 +1,37 @@
-/* http://en.wikipedia.org/wiki/Operator-precedence_grammar */
-
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "parser-priv.h"
 
-parser_t * parser_create() {
-  parser_t *p = (parser_t*)malloc(sizeof(parser_t));
-  p->p = parser_precedence_1;
-  p->adjust = adjust_token_1;
-  p->reduce = semantic_evaluation;
-  p->symbol_table = hashtbl_init(free, NULL);
-  p->function_table = hashtbl_init(NULL, NULL);
-  p->stack = NULL;
-  p->partial = NULL;
-  /* preload symbol table */
-  /*if (register_constants(p)) {*/
-    /*parser_destroy(p);*/
-    /*return NULL;*/
-  /*}*/
-  /*if (register_functions(p)) {*/
-    /*parser_destroy(p);*/
-    /*return NULL;*/
-  /*}*/
-  return p;
-}
-
-void parser_destroy(parser_t *p) {
-  if (!p)
-    return;
-  hashtbl_destroy(p->symbol_table);
-  hashtbl_destroy(p->function_table);
-  free(p);
-}
-
-
-int parser_setvar(parser_t *p, char *var, long double val) {
-  if (!p || !var)
-    return 1;
-  long double *v;
-  if ((v = (long double*)hashtbl_get(p->symbol_table, var))) {
-    *v = val;
-  } else {
-    v = malloc(sizeof(long double));
-    *v= val;
-    hashtbl_insert(p->symbol_table, var, v);
-  }
-  return 0;
-}
-
-expr_t * parser_compile(parser_t *p, scanner_t *s) {
-  if (!p || !s) {
+expr_t * parser_compile(scanner_t *s) {
+  if (!s) {
 #ifdef _VERBOSE_
-    fprintf(stderr, "Invalid parser or scanner\n");
+    fprintf(stderr, "parser: Invalid scanner\n");
 #endif
     return NULL;
   }
 
-  p->stack = list_init((free_func_t)token_destroy, NULL);
-  list_push(p->stack, token_init(tokStackEmpty, ""));
-  p->partial = list_init(free, NULL);
-  token_t *st, *bf = p->adjust(lexer_nextitem(s), NULL);
+  list_t *stack = list_init((free_func_t)token_destroy, NULL);
+  list_push(stack, token_init(tokStackEmpty, ""));
+  list_t *partial = list_init(free, NULL);
+  token_t *st, *bf = adjust_token(lexer_nextitem(s), NULL);
 
   int error = 0;
   while (error == 0) {
-    st = (token_t*)list_peek_head(p->stack);
-    switch (p->p(st->lexcomp, bf->lexcomp)) {
+    st = (token_t*)list_peek_head(stack);
+    switch (parser_precedence(st->lexcomp, bf->lexcomp)) {
       case LT:
-        list_push(p->stack, token_init(tokOMango, ""));
-        list_push(p->stack, bf);
-        bf = p->adjust(lexer_nextitem(s), bf);
+        list_push(stack, token_init(tokOMango, ""));
+        list_push(stack, bf);
+        bf = adjust_token(lexer_nextitem(s), bf);
         break;
       case EQ:
-        list_push(p->stack, token_init(tokEMango, ""));
-        list_push(p->stack, bf);
-        bf = p->adjust(lexer_nextitem(s), bf);
+        list_push(stack, token_init(tokEMango, ""));
+        list_push(stack, bf);
+        bf = adjust_token(lexer_nextitem(s), bf);
         break;
       case GT:
-        error = p->reduce(p);
+        error = semanter_reduce(stack, partial);
         break;
 
       case E0:
@@ -122,18 +77,17 @@ expr_t * parser_compile(parser_t *p, scanner_t *s) {
   }
 
   token_destroy(bf);
-  list_destroy(p->stack);
-  p->stack = NULL;
-
-  list_t *expr;
-  if (error <= 0) {
-    expr = p->partial;
-    p->partial = NULL;
-  } else {
-    expr = NULL;
-    list_destroy(p->partial);
+  list_destroy(stack);
+  if (error > 0) {
+    list_destroy(partial);
+    return NULL;
   }
-  return (expr_t*)expr;
+  return (expr_t*)partial;
+}
+
+
+void parser_destroy_expr(expr_t *e) {
+  list_destroy((list_t*)e);
 }
 
 /* vim: set sw=2 sts=2 : */
