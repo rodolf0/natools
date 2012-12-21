@@ -32,6 +32,7 @@ token_t * adjust_token_1(token_t *t, token_t *prev);
 /* semantic evaluation of the parser's output */
 typedef int (*semanticfn)(parser_t *p);
 int semantic_eval_1(parser_t *p);
+int semantic_evaluation(parser_t *p);
 
 typedef struct _parser_t {
   precedencefn p;
@@ -47,18 +48,29 @@ typedef struct _parser_t {
 typedef enum {
   stNumber,
   stVariable,
+  stBinOperator,
+  stUniOperator,
+  stFunction,
 } symtype_t;
 
 typedef struct _symbol_t {
-  symtype_t t;
+  symtype_t type;
   union {
-    long double dVal;
-    char *sVal;
+    long double number;
+    char *variable;
+    lexcomp_t operator;
+    struct {
+      char *name;
+      size_t nargs;
+    } func;
   };
 } symbol_t;
 
 symbol_t * symbol_number(long double d);
 symbol_t * symbol_variable(char *varname);
+symbol_t * symbol_operator(lexcomp_t lc);
+symbol_t * symbol_function(char *funcname, size_t nargs);
+
 void symbol_destroy(symbol_t *s);
 int pop_operand(parser_t *p, long double *r);
 

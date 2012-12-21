@@ -8,20 +8,20 @@ parser_t * parser_create() {
   parser_t *p = (parser_t*)malloc(sizeof(parser_t));
   p->p = parser_precedence_1;
   p->adjust = adjust_token_1;
-  p->reduce = semantic_eval_1;
+  p->reduce = semantic_evaluation;
   p->symbol_table = hashtbl_init(free, NULL);
   p->function_table = hashtbl_init(NULL, NULL);
   p->stack = NULL;
   p->partial = NULL;
   /* preload symbol table */
-  if (register_constants(p)) {
-    parser_destroy(p);
-    return NULL;
-  }
-  if (register_functions(p)) {
-    parser_destroy(p);
-    return NULL;
-  }
+  /*if (register_constants(p)) {*/
+    /*parser_destroy(p);*/
+    /*return NULL;*/
+  /*}*/
+  /*if (register_functions(p)) {*/
+    /*parser_destroy(p);*/
+    /*return NULL;*/
+  /*}*/
   return p;
 }
 
@@ -48,12 +48,12 @@ int parser_setvar(parser_t *p, char *var, long double val) {
   return 0;
 }
 
-int parser_eval(parser_t *p, scanner_t *s, long double *result) {
+expr_t * parser_compile(parser_t *p, scanner_t *s) {
   if (!p || !s) {
 #ifdef _VERBOSE_
     fprintf(stderr, "Invalid parser or scanner\n");
 #endif
-    return E7;
+    return NULL;
   }
 
   p->stack = list_init((free_func_t)token_destroy, NULL);
@@ -121,16 +121,19 @@ int parser_eval(parser_t *p, scanner_t *s, long double *result) {
     }
   }
 
-  if (error <= 0) {
-    if ((error = pop_operand(p, result)) == 0)
-      parser_setvar(p, "ans", *result);
-  }
-
   token_destroy(bf);
-  list_destroy(p->partial);
   list_destroy(p->stack);
-  p->partial = p->stack = NULL;
-  return error;
+  p->stack = NULL;
+
+  list_t *expr;
+  if (error <= 0) {
+    expr = p->partial;
+    p->partial = NULL;
+  } else {
+    expr = NULL;
+    list_destroy(p->partial);
+  }
+  return (expr_t*)expr;
 }
 
 /* vim: set sw=2 sts=2 : */

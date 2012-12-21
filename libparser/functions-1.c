@@ -178,14 +178,14 @@ int register_functions(parser_t *p) {
   return 0;
 }
 
-int register_constants(parser_t *p) {
-  long double *x = malloc(sizeof(long double));
-  srandom((unsigned int)*x); /* use heap garbage as random seed */
-  parser_setvar(p, "ans", *x);
-  parser_setvar(p, "pi", M_PIl);
-  parser_setvar(p, "e", M_El);
-  parser_setvar(p, "phi", (1.0 + sqrtl(5)) / 2.0);
-  return 0;
-}
+/*int register_constants(parser_t *p) {*/
+  /*long double *x = malloc(sizeof(long double));*/
+  /*srandom((unsigned int)*x); [> use heap garbage as random seed <]*/
+  /*parser_setvar(p, "ans", *x);*/
+  /*parser_setvar(p, "pi", M_PIl);*/
+  /*parser_setvar(p, "e", M_El);*/
+  /*parser_setvar(p, "phi", (1.0 + sqrtl(5)) / 2.0);*/
+  /*return 0;*/
+/*}*/
 
 /* vim: set sw=2 sts=2 : */
