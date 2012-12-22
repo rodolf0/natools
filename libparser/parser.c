@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "parser-priv.h"
+#include "parser/parser.h"
 
 
 expr_t * parser_compile(scanner_t *s) {
@@ -81,11 +83,28 @@ void parser_destroy_expr(expr_t *e) {
 }
 
 
+/* wrapper functions to avoid constructing everything */
 expr_t * parser_compile_str(const char *str) {
   scanner_t *s = scanner_init(str);
   expr_t *e = parser_compile(s);
   scanner_destroy(s);
   return e;
+}
+
+#define unlikely(x) __builtin_expect(!!(x), 0)
+long double parser_qeval(const char *expr) {
+  static hashtbl_t *vars = NULL;
+  if (unlikely(vars == NULL))
+    vars = hashtbl_init(free, NULL);
+  if (unlikely(vars && !strcmp(expr, "_shutdown"))) {
+    hashtbl_destroy(vars);
+    return 0.0;
+  }
+  long double r = 0.0;
+  expr_t *e = parser_compile_str(expr);
+  parser_eval(e, &r, vars);
+  parser_destroy_expr(e);
+  return r;
 }
 
 /* vim: set sw=2 sts=2 : */

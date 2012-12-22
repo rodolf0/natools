@@ -155,5 +155,4 @@ lexcomp_t tokenize_text(scanner_t *s) {
   return tokText;
 }
 
-
 /* vim: set sw=2 sts=2 : */
