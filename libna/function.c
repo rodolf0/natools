@@ -26,12 +26,6 @@ void function_destroy(function_t *f) {
 }
 
 long double function_eval(function_t *f, long double x0) {
-  if (!f) {
-#ifdef _VERBOSE_
-    fprintf(stderr, "func eval: Null function evaluation\n");
-#endif
-    return 0.0;
-  }
   long double *x = hashtbl_get(f->vars, "x");
   if (!x) {
     x = malloc(sizeof(long double));
