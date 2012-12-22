@@ -6,31 +6,12 @@
 #include <unistd.h>
 
 #include "baas/xstring.h"
-#include "parser-priv.h"
+#include "baas/hashtbl.h"
+#include "parser/parser.h"
 
 void help() {
   fprintf(stderr, "usage: aparser {-i | <expresion>}\n");
 }
-
-
-parser_t *P = NULL;
-long double evaluate(const char *expr) {
-  if (!P)
-    P = parser_create();
-  if (!strcmp(expr, "shutdown")) {
-    parser_destroy(P);
-    P = NULL;
-    return 0.0;
-  }
-  scanner_t *s = scanner_init(expr);
-  long double r = 0.0;
-  if (parser_eval(P, s, &r)) {
-    fprintf(stderr, "Error evaluating expression\n");
-  }
-  scanner_destroy(s);
-  return r;
-}
-
 
 int main(int argc, char *argv[]) {
   int ret = 0, interactive = 0;
@@ -50,6 +31,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  hashtbl_t *vars = hashtbl_init(free, NULL);
   if (interactive) {
     char histfile[256], *expr = NULL;
 
@@ -58,20 +40,26 @@ int main(int argc, char *argv[]) {
     read_history(histfile);
     stifle_history(50);
 
-    evaluate("pi");
     while ((expr = readline(">> "))) {
       chomp(expr);
-      if (!strcmp(expr, "env")) {
+
+      if (!strcmp(expr, "vars")) {
         char **keys;
-        size_t j, n = hashtbl_keys(P->symbol_table, &keys);
+        size_t j, n = hashtbl_keys(vars, &keys);
         for (j = 0; j < n; j++) {
-          long double *d = (long double*)hashtbl_get(P->symbol_table, keys[j]);
+          long double *d = (long double*)hashtbl_get(vars, keys[j]);
           printf("%s: %.15Lg\n", keys[j], *d);
           free(keys[j]);
         }
         free(keys);
-      } else if (strcmp(expr, ""))
-        printf("%.15Lg\n", evaluate(expr));
+
+      } else if (strcmp(expr, "")) {
+        expr_t *e = parser_compile_str(expr);
+        long double d = 0.0;
+        parser_eval(e, &d, vars);
+        printf("%.25Lg\n", d);
+        parser_destroy_expr(e);
+      }
 
       add_history(expr);
       free(expr);
@@ -80,11 +68,11 @@ int main(int argc, char *argv[]) {
     write_history(histfile);
 
   } else if (optind < argc)
-    printf("%.15Lg\n", evaluate(argv[optind]));
+    printf("%.25Lg\n", parser_qeval(argv[optind]));
   else
     help();
 
-  evaluate("shutdown");
+  hashtbl_destroy(vars);
   return ret;
 }
 
