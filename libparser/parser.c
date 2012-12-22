@@ -66,13 +66,18 @@ expr_t * parser_compile(scanner_t *s) {
         fprintf(stderr, "syntactic error: unbalanced closing parenthesis\n");
 #endif
         error = 6; break;
-      default:
       case E7:
+#ifdef _VERBOSE_
+        fprintf(stderr, "syntactic error: chaining assignments\n");
+#endif
+        error = 7; break;
+      default:
+      case E8:
 #ifdef _VERBOSE_
         fprintf(stderr, "syntactic error: stack [%d:%s], buffer [%d:%s]\n",
                 st->lexcomp, st->lexem, bf->lexcomp, bf->lexem);
 #endif
-        error = 7; break;
+        error = 8; break;
     }
   }
 

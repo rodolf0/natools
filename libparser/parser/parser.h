@@ -8,8 +8,7 @@ typedef struct _expr_t expr_t;
 expr_t * parser_compile(scanner_t *s);
 void parser_destroy_expr(expr_t *e);
 
-int parser_eval(const expr_t *e, long double *r,
-                hashtbl_t *vars, hashtbl_t *funcs);
+int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars);
 
 #endif /* _PARSER_H_ */
 

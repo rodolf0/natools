@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "baas/hashtbl.h"
 #include "parser-priv.h"
 
 
@@ -18,6 +17,17 @@ symbol_t * symbol_variable(char *varname) {
   int len = strlen(varname);
   symbol_t *s = malloc(sizeof(symbol_t) + len + 1);
   s->type = stVariable;
+  s->variable = (char*)s + sizeof(symbol_t);
+  memcpy(s->variable, varname, len);
+  s->variable[len] = '\0';
+  return s;
+}
+
+/* keep the variable we're assigning to in the symbol */
+symbol_t * symbol_assignment(char *varname) {
+  int len = strlen(varname);
+  symbol_t *s = malloc(sizeof(symbol_t) + len + 1);
+  s->type = stAsignment;
   s->variable = (char*)s + sizeof(symbol_t);
   memcpy(s->variable, varname, len);
   s->variable[len] = '\0';
@@ -93,8 +103,8 @@ static long double semanter_operator(lexcomp_t lc, long double lhs, long double 
 }
 
 
-int parser_eval(const expr_t *e, long double *r,
-                hashtbl_t *vars, hashtbl_t *funcs) {
+#define unlikely(x) __builtin_expect(!!(x), 0)
+int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
   if (!e || !r) {
 #ifdef _VERBOSE_
   fprintf(stderr, "eval error: null expression or result var\n");
@@ -102,19 +112,27 @@ int parser_eval(const expr_t *e, long double *r,
     return 1;
   }
 
+  /* load known functions */
+  static hashtbl_t *functions = NULL;
+  if (unlikely(functions == NULL)) {
+    functions = hashtbl_init(NULL, NULL);
+    register_functions(functions);
+  }
+
   const list_t *l = (const list_t*)e;
   const list_node_t *n = l->last;
-  list_t *partial = list_init(free, NULL);
+  list_t *args = list_init(free, NULL);
   const symbol_t *s;
 
   while (n && (s = (const symbol_t*)n->data)) {
     long double *d = NULL, *v = NULL;
+    long double (*f)(list_t*, size_t);
 
     switch (s->type) {
       case stNumber:
         d = malloc(sizeof(long double));
         *d = s->number;
-        list_push(partial, d);
+        list_push(args, d);
         break;
 
       case stVariable:
@@ -122,59 +140,91 @@ int parser_eval(const expr_t *e, long double *r,
 #ifdef _VERBOSE_
           fprintf(stderr, "eval error: no symbol table\n");
 #endif
-          list_destroy(partial);
+          list_destroy(args);
           return 1;
         }
         if (!(v = (long double*)hashtbl_get(vars, s->variable))) {
 #ifdef _VERBOSE_
           fprintf(stderr, "eval error: uninitialized variable [%s]\n", s->variable);
 #endif
-          list_destroy(partial);
+          list_destroy(args);
           return 1;
         }
         d = malloc(sizeof(long double));
         *d = *v;
-        list_push(partial, d);
+        list_push(args, d);
         break;
 
       case stBinOperator:
         /* rhs operand */
-        if (!(v = list_pop(partial))) {
+        if (!(v = list_pop(args))) {
 #ifdef _VERBOSE_
           fprintf(stderr, "eval error: missing rhs operand\n");
 #endif
-          list_destroy(partial);
+          list_destroy(args);
           return 1;
         }
       case stUniOperator:
         /* lhs operand, don't pop it... use it to store the result too */
-        if (!(d = list_peek_head(partial))) {
+        if (!(d = list_peek_head(args))) {
 #ifdef _VERBOSE_
           fprintf(stderr, "eval error: missing lhs operand\n");
 #endif
-          list_destroy(partial);
+          list_destroy(args);
           return 1;
         }
         *d = semanter_operator(s->operator, *d, s->type == stBinOperator ? *v : 0.0);
+        free(v);
+        break;
+
+      case stAsignment:
+        if (!vars) {
+#ifdef _VERBOSE_
+          fprintf(stderr, "eval error: no symbol table\n");
+#endif
+          list_destroy(args);
+          return 1;
+        }
+        if (!(d = list_peek_head(args))) {
+#ifdef _VERBOSE_
+          fprintf(stderr, "eval error: missing rhs operand\n");
+#endif
+          list_destroy(args);
+          return 1;
+        }
+        if (!(v = (long double*)hashtbl_get(vars, s->variable))) {
+          v = malloc(sizeof(long double));
+          hashtbl_insert(vars, s->variable, v);
+        }
+        *v = *d;
         break;
 
       case stFunction:
-        hashtbl_get(funcs, "");
+        if (!(f = hashtbl_get(functions, s->func.name))) {
+#ifdef _VERBOSE_
+          fprintf(stderr, "eval error: unknown function [%s]\n", s->func.name);
+#endif
+          list_destroy(args);
+          return 1;
+        }
+        d = malloc(sizeof(long double));
+        *d = f(args, s->func.nargs);
+        list_push(args, d);
         break;
     }
     n = n->prev;
   }
 
-  if (partial->size != 1) {
+  if (args->size != 1) {
 #ifdef _VERBOSE_
-    fprintf(stderr, "eval error: corrupt partials stack\n");
+    fprintf(stderr, "eval error: corrupt args stack\n");
 #endif
-    list_destroy(partial);
+    list_destroy(args);
     return 1;
   }
 
-  long double *d = (long double*)list_pop(partial);
-  list_destroy(partial);
+  long double *d = (long double*)list_pop(args);
+  list_destroy(args);
   *r = *d;
   return 0;
 }
@@ -184,6 +234,7 @@ int parser_eval(const expr_t *e, long double *r,
 int semanter_reduce(list_t *stack, list_t *partial) {
   size_t funcparams = 0;
   token_t *op;
+  symbol_t *lhs, *rhs;
 
   while ((op = (token_t*)list_pop(stack))) {
     switch (op->lexcomp) {
@@ -195,10 +246,17 @@ int semanter_reduce(list_t *stack, list_t *partial) {
       case tokAnd    : case tokOr     : case tokNot    :
       case tokEq     : case tokNe     : case tokGt     :
       case tokLt     : case tokGe     : case tokLe     :
-      case tokAsign  :
         list_push(partial, symbol_operator(op->lexcomp));
         break;
 
+      /* remove variable symbol and encode variable name into assignment symbol */
+      case tokAsign:
+        rhs = (symbol_t*)list_pop(partial);
+        lhs = (symbol_t*)list_pop(partial);
+        list_push(partial, rhs);
+        list_push(partial, symbol_assignment(lhs->variable));
+        symbol_destroy(lhs);
+        break;
       case tokNumber:
         list_push(partial, symbol_number(strtold(op->lexem, NULL)));
         break;

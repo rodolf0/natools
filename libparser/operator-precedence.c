@@ -49,7 +49,7 @@ op_prec_t parser_precedence(lexcomp_t op1, lexcomp_t op2) {
   ssize_t row = decode_lexcomp(op1),
           col = decode_lexcomp(op2);
   if (row == -1 || col == -1)
-    return E7;
+    return E8;
   /* rows: element on the stack, cols: elements from the buffer */
   static const op_prec_t _precedence[32][32] = {
          /*  +   -   -u  *   /   %   **  >>  <<  &   |   ^   ~   !   &&  ||  tr  fa  ==  !=  >   <   >=  <=  (   )   ,   =   n   id  f   $  */
@@ -80,7 +80,7 @@ op_prec_t parser_precedence(lexcomp_t op1, lexcomp_t op2) {
    /*  ( */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, E5, E1, LT, LT, LT, E4},
    /*  ) */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, GT},
    /*  , */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, E1, LT, LT, LT, E5},
-   /*  = */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, LT, LT, LT, LT, GT},
+   /*  = */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, E7, LT, LT, LT, GT},
    /*  n */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, GT},
    /* id */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, GT, E3, E3, E3, GT},
    /*  f */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, E1, LT, LT, LT, E4},
