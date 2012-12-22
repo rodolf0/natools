@@ -6,6 +6,8 @@ typedef struct _hashtbl_t hashtbl_t;
 typedef struct _expr_t expr_t;
 
 expr_t * parser_compile(scanner_t *s);
+expr_t * parser_compile_str(const char *str);
+
 void parser_destroy_expr(expr_t *e);
 
 int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars);

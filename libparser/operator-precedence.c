@@ -21,28 +21,30 @@ static ssize_t decode_lexcomp(lexcomp_t lc) {
     case tokNot        : return 13;
     case tokAnd        : return 14;
     case tokOr         : return 15;
-    case tokTrue       : return 16;
-    case tokFalse      : return 17;
 
-    case tokEq         : return 18;
-    case tokNe         : return 19;
-    case tokGt         : return 20;
-    case tokLt         : return 21;
-    case tokGe         : return 22;
-    case tokLe         : return 23;
+    case tokEq         : return 16;
+    case tokNe         : return 17;
+    case tokGt         : return 18;
+    case tokLt         : return 19;
+    case tokGe         : return 20;
+    case tokLe         : return 21;
 
-    case tokOParen     : return 24;
-    case tokCParen     : return 25;
-    case tokComma      : return 26;
-    case tokAsign      : return 27;
+    case tokOParen     : return 22;
+    case tokCParen     : return 23;
+    case tokComma      : return 24;
 
-    case tokNumber     : return 28;
-    case tokId         : return 29;
-    case tokFunction   : return 30;
-    case tokStackEmpty : return 31;
-    /*case tokText       : return -1;*/
-    default            : return -1;
+    case tokTrue       : return 25;
+    case tokFalse      : return 25;
+    case tokNumber     : return 25;
+    case tokId         : return 25;
+    case tokFunction   : return 26;
+    case tokStackEmpty : return 27;
+
+    case tokText: case tokAsign: case tokNoMatch:
+    case tokOMango: case tokEMango: case tokCMango:
+      return -1;
   }
+  return -1;
 }
 
 op_prec_t parser_precedence(lexcomp_t op1, lexcomp_t op2) {
@@ -51,40 +53,36 @@ op_prec_t parser_precedence(lexcomp_t op1, lexcomp_t op2) {
   if (row == -1 || col == -1)
     return E8;
   /* rows: element on the stack, cols: elements from the buffer */
-  static const op_prec_t _precedence[32][32] = {
-         /*  +   -   -u  *   /   %   **  >>  <<  &   |   ^   ~   !   &&  ||  tr  fa  ==  !=  >   <   >=  <=  (   )   ,   =   n   id  f   $  */
-   /*  + */ {GT, GT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  - */ {GT, GT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /* -u */ {GT, GT, LT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  * */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  / */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  % */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /* ** */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /* >> */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /* << */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  & */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  | */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, LT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  ^ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  ~ */ {GT, GT, LT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  ! */ {GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /* && */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /* || */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /* tr */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, GT},
-   /* fa */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, GT},
-   /* == */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /* != */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  > */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  < */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /* >= */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /* <= */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, LT, GT, GT, E1, LT, LT, LT, GT},
-   /*  ( */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, E5, E1, LT, LT, LT, E4},
-   /*  ) */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, GT},
-   /*  , */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, E1, LT, LT, LT, E5},
-   /*  = */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, E7, LT, LT, LT, GT},
-   /*  n */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, E1, E3, E3, E3, GT},
-   /* id */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, E3, GT, GT, GT, E3, E3, E3, GT},
-   /*  f */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, E1, LT, LT, LT, E4},
-   /*  $ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, LT, LT, LT, LT, E0},
+  static const op_prec_t _precedence[28][28] = {
+         /*  +   -   -u  *   /   %   **  >>  <<  &   |   ^   ~   !   &&  ||  ==  !=  >   <   >=  <=  (   )   ,   id  f   $  */
+   /*  + */ {GT, GT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  - */ {GT, GT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* -u */ {GT, GT, LT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  * */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  / */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  % */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* ** */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* >> */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* << */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  & */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /*  | */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, LT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /*  ^ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /*  ~ */ {GT, GT, LT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  ! */ {GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* && */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /* || */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /* == */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, GT, GT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /* != */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, GT, GT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /*  > */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  < */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* >= */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* <= */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  ( */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, E5, LT, LT, E4},
+   /*  ) */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, GT, GT, E3, GT, GT, E3, E3, GT},
+   /*  , */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, LT, LT, E5},
+   /* id */ {GT, GT, E3, GT, GT, GT, GT, GT, GT, GT, GT, GT, E3, E3, GT, GT, GT, GT, GT, GT, GT, GT, E3, GT, GT, E3, E3, GT},
+   /*  f */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, EQ, EQ, LT, LT, E4},
+   /*  $ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, E6, E5, LT, LT, E0},
   };
   return _precedence[row][col];
 }
@@ -95,40 +93,34 @@ token_t * adjust_token(token_t *t, token_t *prev) {
   if (!t || t->lexcomp != tokMinus)
     return t;
 
-  if (!prev ||
-      /* math operators */
-      prev->lexcomp == tokPlus ||
-      prev->lexcomp == tokMinus ||
-      prev->lexcomp == tokUnaryMinus ||
-      prev->lexcomp == tokTimes ||
-      prev->lexcomp == tokDivide ||
-      prev->lexcomp == tokModulo ||
-      prev->lexcomp == tokPower ||
-      /* bitwise operators */
-      prev->lexcomp == tokRShift ||
-      prev->lexcomp == tokLShift ||
-      prev->lexcomp == tokBitAnd ||
-      prev->lexcomp == tokBitOr ||
-      prev->lexcomp == tokBitXor ||
-      prev->lexcomp == tokBitNot ||
-      /* logical operators */
-      prev->lexcomp == tokNot ||
-      prev->lexcomp == tokAnd ||
-      prev->lexcomp == tokOr ||
-      /* relational operators */
-      prev->lexcomp == tokEq ||
-      prev->lexcomp == tokNe ||
-      prev->lexcomp == tokGt ||
-      prev->lexcomp == tokLt ||
-      prev->lexcomp == tokGe ||
-      prev->lexcomp == tokLe ||
-      /* misc operators */
-      prev->lexcomp == tokOParen ||
-      prev->lexcomp == tokFunction ||
-      prev->lexcomp == tokComma ||
-      prev->lexcomp == tokAsign ||
-      prev->lexcomp == tokStackEmpty)
+  if (!prev)
     t->lexcomp = tokUnaryMinus;
+  else
+    switch (prev->lexcomp) {
+      /* math operators */
+      case tokPlus  : case tokMinus  : case tokUnaryMinus :
+      case tokTimes : case tokDivide : case tokModulo     : case tokPower :
+      /* bitwise operators */
+      case tokRShift : case tokLShift : case tokBitAnd :
+      case tokBitOr  : case tokBitXor : case tokBitNot :
+      /* logical operators */
+      case tokNot : case tokAnd : case tokOr :
+      /* relational operators */
+      case tokEq : case tokNe : case tokGt :
+      case tokLt : case tokGe : case tokLe :
+      /* misc operators */
+      case tokOParen     : case tokFunction :
+      case tokComma      : case tokAsign    :
+      case tokStackEmpty :
+        t->lexcomp = tokUnaryMinus;
+        break;
+
+      /* list so compiler warns us on missing case */
+      case tokTrue: case tokFalse: case tokNumber: case tokText: case tokId:
+      case tokOMango: case tokEMango: case tokCMango:
+      case tokCParen: case tokNoMatch:
+        break;
+    }
 
   return t;
 }

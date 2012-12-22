@@ -23,17 +23,6 @@ symbol_t * symbol_variable(char *varname) {
   return s;
 }
 
-/* keep the variable we're assigning to in the symbol */
-symbol_t * symbol_assignment(char *varname) {
-  int len = strlen(varname);
-  symbol_t *s = malloc(sizeof(symbol_t) + len + 1);
-  s->type = stAsignment;
-  s->variable = (char*)s + sizeof(symbol_t);
-  memcpy(s->variable, varname, len);
-  s->variable[len] = '\0';
-  return s;
-}
-
 symbol_t * symbol_operator(lexcomp_t lc) {
   symbol_t *s = malloc(sizeof(symbol_t));
   if (lc == tokUnaryMinus || lc == tokBitNot || lc == tokNot)
@@ -118,6 +107,10 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
     functions = hashtbl_init(NULL, NULL);
     register_functions(functions);
   }
+  /* stash constants into whatever symtab we get */
+  if (unlikely(vars && !hashtbl_get(vars, "_stashed"))) {
+    register_constants(vars);
+  }
 
   const list_t *l = (const list_t*)e;
   const list_node_t *n = l->last;
@@ -177,28 +170,6 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
         free(v);
         break;
 
-      case stAsignment:
-        if (!vars) {
-#ifdef _VERBOSE_
-          fprintf(stderr, "eval error: no symbol table\n");
-#endif
-          list_destroy(args);
-          return 1;
-        }
-        if (!(d = list_peek_head(args))) {
-#ifdef _VERBOSE_
-          fprintf(stderr, "eval error: missing rhs operand\n");
-#endif
-          list_destroy(args);
-          return 1;
-        }
-        if (!(v = (long double*)hashtbl_get(vars, s->variable))) {
-          v = malloc(sizeof(long double));
-          hashtbl_insert(vars, s->variable, v);
-        }
-        *v = *d;
-        break;
-
       case stFunction:
         if (!(f = hashtbl_get(functions, s->func.name))) {
 #ifdef _VERBOSE_
@@ -234,7 +205,6 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
 int semanter_reduce(list_t *stack, list_t *partial) {
   size_t funcparams = 0;
   token_t *op;
-  symbol_t *lhs, *rhs;
 
   while ((op = (token_t*)list_pop(stack))) {
     switch (op->lexcomp) {
@@ -249,14 +219,6 @@ int semanter_reduce(list_t *stack, list_t *partial) {
         list_push(partial, symbol_operator(op->lexcomp));
         break;
 
-      /* remove variable symbol and encode variable name into assignment symbol */
-      case tokAsign:
-        rhs = (symbol_t*)list_pop(partial);
-        lhs = (symbol_t*)list_pop(partial);
-        list_push(partial, rhs);
-        list_push(partial, symbol_assignment(lhs->variable));
-        symbol_destroy(lhs);
-        break;
       case tokNumber:
         list_push(partial, symbol_number(strtold(op->lexem, NULL)));
         break;

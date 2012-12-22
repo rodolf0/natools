@@ -4,24 +4,18 @@
 #include <assert.h>
 #include <math.h>
 
-#include "../parser/lexer.h"
 #include "../parser/parser.h"
 #include "baas/hashtbl.h"
 
-long double evaluate(const char *expr) {
-  static hashtbl_t *symtab = NULL;
-  if (!symtab)
-    symtab = hashtbl_init(free, NULL);
+static hashtbl_t *vars = NULL;
 
-  scanner_t *s = scanner_init(expr);
+long double evaluate(const char *expr) {
   expr_t *e = NULL;
-  if (!(e = parser_compile(s))) {
+  if (!(e = parser_compile_str(expr)))
     abort();
-  }
-  scanner_destroy(s);
 
   long double r = 0.0; int error = 0;
-  if ((error = parser_eval(e, &r, symtab)) != 0) {
+  if ((error = parser_eval(e, &r, vars)) != 0) {
     fprintf(stderr, "[%s] failed with error: %d\n", expr, error);
     abort();
   }
@@ -76,13 +70,12 @@ void check_operators() {
   ASSERT_EQ(evaluate("-(75.34)"), -75.34);
   ASSERT_EQ(evaluate("3*(75.34-4)"), 214.02);
   ASSERT_EQ(evaluate("2**(3-1)"), 4);
-
-  ASSERT_EQ(evaluate("a = 23"), 23);
-  ASSERT_EQ(evaluate("a = 2 * a"), 46);
 }
 
 void check_functions() {
-  ASSERT_EQ(evaluate("a = 46"), 46);
+  long double *a = malloc(sizeof(long double));
+  *a = 46;
+  hashtbl_insert(vars, "a", a);
 
   ASSERT_EQ(evaluate("max(10, 20, 12, 15)"), 20);
   ASSERT_EQ(evaluate("min(11, 21, 15, 25)"), 11);
@@ -90,13 +83,13 @@ void check_functions() {
   ASSERT_EQ(evaluate("avg(3.4, 4e-2, 3.5, a)"), 13.235);
   ASSERT_EQ(evaluate("abs(-34)"), 34);
 
-  evaluate("a = random()");
+  *a = evaluate("random()");
   ASSERT_EQ(evaluate("cos(a)**2 + sin(a)**2"), 1.0);
   ASSERT_EQ(evaluate("sin(phi)/cos(phi) - tan(phi)"), 0.0);
   ASSERT_EQ(evaluate("1 + tan(a)**2 - 1/cos(a)**2"), 0.0);
 
   ASSERT_EQ(evaluate("atan2(a, phi) == atan(a/phi)"), 1);
-  ASSERT_EQ(evaluate("acos(cos(phi)) == phi"), 1);
+  ASSERT_EQ(evaluate("acos(cos(phi)) - phi"), 0.0);
   ASSERT_EQ(evaluate("asin(sin(phi/4)) == phi/4"), 1);
 
   ASSERT_EQ(evaluate("log(exp(3))"), 3);
@@ -128,21 +121,28 @@ void check_precedence() {
   ASSERT_EQ(evaluate("false and (false or true)"), 0);
 
   ASSERT_EQ(evaluate("1 < 2 < 3"), 1);
-  ASSERT_EQ(evaluate("a = 5"), 5);
 
-  /*ASSERT_EQ(evaluate("max(3, 4) - -min(-3, 4)"), 1);*/
+  ASSERT_EQ(evaluate("max(3, 4) - -min(-3, 4)"), 1);
 }
 
 void check_longer() {
   ASSERT_EQ(evaluate("5.23e+3**4**-2 + avg(34>>2, phi < pi, max(phi, pi, 3.2))"), 5.774346129827);
+  long double *x = malloc(sizeof(long double));
+  hashtbl_insert(vars, "x", x);
+  *x = 3.0;
+  ASSERT_EQ(evaluate("e**tan(x)/(1+x**2)*sin((1+log(x)**2)**0.5)"), 0.0864000589547301);
+  *x = 17.25;
+  ASSERT_EQ(evaluate("e**tan(x)/(1+x**2)*sin((1+log(x)**2)**0.5)"), 514696792827.6593301594257L);
 }
 
 int main(int argc, char *argv[]) {
-  /*fprintf(stderr, "%.15Lg\n", evaluate(argv[1]));*/
+  vars = hashtbl_init(free, NULL);
+  /*fprintf(stderr, "%.25Lg\n", evaluate(argv[1]));*/
   check_operators();
   check_functions();
   check_precedence();
   check_longer();
+  hashtbl_destroy(vars);
   return 0;
 }
 

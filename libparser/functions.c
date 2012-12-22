@@ -1,4 +1,4 @@
-/* use GNU_SOURCE for long double version of math functions */
+/* use GNU_SOURCE for long double constants */
 #define __USE_GNU
 #define _GNU_SOURCE
 #include <math.h>
@@ -115,14 +115,19 @@ void register_functions(hashtbl_t *h) {
   hashtbl_insert(h, "gamma(", _gamma);
 }
 
-/*int register_constants(parser_t *p) {*/
-  /*long double *x = malloc(sizeof(long double));*/
-  /*srandom((unsigned int)*x); [> use heap garbage as random seed <]*/
-  /*parser_setvar(p, "ans", *x);*/
-  /*parser_setvar(p, "pi", M_PIl);*/
-  /*parser_setvar(p, "e", M_El);*/
-  /*parser_setvar(p, "phi", (1.0 + sqrtl(5)) / 2.0);*/
-  /*return 0;*/
-/*}*/
+void register_constants(hashtbl_t *h) {
+  long double *x;
+  x = malloc(sizeof(long double)); *x = M_PIl;
+  hashtbl_insert(h, "pi", x);
+
+  x = malloc(sizeof(long double)); *x = M_El;
+  hashtbl_insert(h, "e", x);
+
+  x = malloc(sizeof(long double)); *x = (1.0 + sqrtl(5)) / 2.0;
+  hashtbl_insert(h, "phi", x);
+
+  x = malloc(sizeof(long double)); *x = 27021984;
+  hashtbl_insert(h, "_stashed", x);
+}
 
 /* vim: set sw=2 sts=2 : */

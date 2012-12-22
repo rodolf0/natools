@@ -13,13 +13,10 @@ typedef enum {
   EQ = 0,
   GT = 1,
   E0, /* empty buffer and stack, end of parsing */
-  E1, /* non-variable assignment */
-  E2, /* wrong argument type for operator */
   E3, /* expected binary operator or eol */
   E4, /* unbalanced open parenthesis */
   E5, /* comma only allowed between function arguments */
   E6, /* unbalanced closing parenthesis */
-  E7, /* chaining assignments */
   E8  /* internal error */
 } op_prec_t;
 
@@ -32,7 +29,7 @@ int semanter_reduce(list_t *stack, list_t *partial);
 
 /* register all known functions for the parser */
 void register_functions(hashtbl_t *h);
-
+void register_constants(hashtbl_t *h);
 
 /* parsed symbols */
 typedef enum {
@@ -41,7 +38,6 @@ typedef enum {
   stBinOperator,
   stUniOperator,
   stFunction,
-  stAsignment,
 } symtype_t;
 
 typedef struct _symbol_t {
@@ -61,7 +57,6 @@ symbol_t * symbol_number(long double d);
 symbol_t * symbol_variable(char *varname);
 symbol_t * symbol_operator(lexcomp_t lc);
 symbol_t * symbol_function(char *funcname, size_t nargs);
-symbol_t * symbol_assignment(char *varname);
 void symbol_destroy(symbol_t *s);
 
 #endif /* _PARSER_H_PARSER_H_ */

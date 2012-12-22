@@ -3,6 +3,7 @@
 
 #include "parser-priv.h"
 
+
 expr_t * parser_compile(scanner_t *s) {
   if (!s) {
 #ifdef _VERBOSE_
@@ -36,16 +37,6 @@ expr_t * parser_compile(scanner_t *s) {
 
       case E0:
         error = -1; break; /* parsing finished */
-      case E1:
-#ifdef _VERBOSE_
-        fprintf(stderr, "syntactic error: non-variable assignment\n");
-#endif
-        error = 1; break;
-      case E2:
-#ifdef _VERBOSE_
-        fprintf(stderr, "syntactic error: wrong argument type for operator\n");
-#endif
-        error = 2; break;
       case E3:
 #ifdef _VERBOSE_
         fprintf(stderr, "syntactic error: expected binary operator or eol\n");
@@ -66,12 +57,6 @@ expr_t * parser_compile(scanner_t *s) {
         fprintf(stderr, "syntactic error: unbalanced closing parenthesis\n");
 #endif
         error = 6; break;
-      case E7:
-#ifdef _VERBOSE_
-        fprintf(stderr, "syntactic error: chaining assignments\n");
-#endif
-        error = 7; break;
-      default:
       case E8:
 #ifdef _VERBOSE_
         fprintf(stderr, "syntactic error: stack [%d:%s], buffer [%d:%s]\n",
@@ -93,6 +78,14 @@ expr_t * parser_compile(scanner_t *s) {
 
 void parser_destroy_expr(expr_t *e) {
   list_destroy((list_t*)e);
+}
+
+
+expr_t * parser_compile_str(const char *str) {
+  scanner_t *s = scanner_init(str);
+  expr_t *e = parser_compile(s);
+  scanner_destroy(s);
+  return e;
 }
 
 /* vim: set sw=2 sts=2 : */
