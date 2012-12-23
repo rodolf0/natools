@@ -25,6 +25,7 @@ void check_set_min(int *x) {
   minimum = *x;
 }
 
+
 #ifdef _BALANCED_TREE_
 void check_red_node_childs(bst_node_t *n) {
   if (!n)
@@ -75,9 +76,9 @@ void check_black_height(bst_node_t *n) {
 #endif
 
 
-void generate_test_tree() {
+void generate_test_tree(int allow_dups) {
   int n = 0, i, sum = 0, *e=NULL;
-  bstree_t *t = bstree_init(free, (cmp_func_t)intcmp);
+  bstree_t *t = bstree_init(free, (cmp_func_t)intcmp, allow_dups);
   bst_node_t *node;
 
   int inserted = 0, removed = 0, rightrot = 0, leftrot = 0;
@@ -85,17 +86,18 @@ void generate_test_tree() {
   int q = random() % 7000;
   for (i = 0; i < q; i++) {
 #ifdef _BALANCED_TREE_
-    switch (random() % 2) {
+    switch (random() % 3) {
 #else
-    switch (random() % 4) {
+    switch (random() % 5) {
 #endif
       case 0:
+      case 1:
         e = malloc(sizeof(int)); *e = random() % 512;
         n++; sum += *e;
         bstree_insert(t, e);
         inserted++;
         break;
-      case 1:
+      case 2:
         /* try n find a possibly inserted number to remove it */
         e = malloc(sizeof(int)); *e = random() % 512;
         node = bstree_find(t, e);
@@ -107,7 +109,7 @@ void generate_test_tree() {
         free(e);
         break;
 #ifndef _BALANCED_TREE_
-      case 2:
+      case 3:
         /* try n find a possibly inserted number to rotate it's node */
         e = malloc(sizeof(int)); *e = random() % 512;
         node = bstree_find(t, e);
@@ -117,7 +119,7 @@ void generate_test_tree() {
         }
         free(e);
         break;
-      case 3:
+      case 4:
         /* try n find a possibly inserted number to rotate it's node */
         e = malloc(sizeof(int)); *e = random() % 512;
         node = bstree_find(t, e);
@@ -142,10 +144,19 @@ void generate_test_tree() {
           inserted, removed, leftrot, rightrot);
 
   /* check all elements are correct */
-  assert(t->size == n);
-  totalsum = 0;
-  bstree_foreach(t, (void (*)(void*))acumulate, inorder);
-  assert(totalsum == sum);
+  if (allow_dups) {
+    assert(t->size == n);
+    totalsum = 0;
+    bstree_foreach(t, (void (*)(void*))acumulate, inorder);
+    assert(totalsum == sum);
+  } else {
+    while (t->size) {
+      bst_node_t *r = t->root;
+      int x = *(int*)r->data;
+      bstree_remove(t, r);
+      assert(bstree_find(t, &x) == NULL);
+    }
+  }
 
   /* check propper sorting of elements*/
   minimum = 0;
@@ -155,12 +166,13 @@ void generate_test_tree() {
 }
 
 
-#define ITERATIONS 100
+#define ITERATIONS 50
 int main(int argc, char *argv[]) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);
-    generate_test_tree();
+    generate_test_tree(1);
+    generate_test_tree(0);
   }
   fprintf(stderr, "\n");
   return 0;

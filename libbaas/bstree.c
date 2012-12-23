@@ -25,7 +25,7 @@ static void bstree_fix_negative_black(bstree_t *t, bst_node_t *n);
 #endif
 
 
-bstree_t * bstree_init(free_func_t tfree, cmp_func_t cmp) {
+bstree_t * bstree_init(free_func_t tfree, cmp_func_t cmp, int allow_dups) {
   if (!cmp)
     return NULL;
   bstree_t *t = malloc(sizeof(bstree_t));
@@ -33,6 +33,7 @@ bstree_t * bstree_init(free_func_t tfree, cmp_func_t cmp) {
   t->cmp = cmp;
   t->size = 0;
   t->root = NULL;
+  t->allow_dups = allow_dups;
   return t;
 }
 
@@ -62,16 +63,21 @@ bst_node_t * bstree_insert(bstree_t *t, void *data) {
   bst_node_t *cur;
   for (cur = t->root; cur;) {
     /* this implies that less or equal precede a node */
-    if (t->cmp(data, cur->data) > 0) {
+    int cmp = t->cmp(data, cur->data);
+    if (cmp > 0) {
       if (!cur->r)
         break;
       cur = cur->r;
-    } else {
+    } else if (cmp < 0 || t->allow_dups) {
       if (!cur->l)
         break;
       cur = cur->l;
+    } else { /* element present and no dups allowed */
+      if (t->free)
+        t->free(cur->data);
+      cur->data = data;
+      return cur;
     }
-    /* testing for == and returning if found avoids duplicat data */
   }
   return bstree_create_child(t, cur, data);
 }
