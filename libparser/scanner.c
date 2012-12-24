@@ -49,7 +49,7 @@ scanner_t *scanner_init(const char *buffer) {
   s->buf_cap = s->buf_sz = strlen(buffer);
   s->buffer = (char*)malloc(s->buf_cap + 1);
   /* initial buffer fill */
-  memcpy(s->buffer, buffer, s->buf_sz);
+  memmove(s->buffer, buffer, s->buf_sz);
   s->buffer[s->buf_cap] = 0;
   return s;
 }

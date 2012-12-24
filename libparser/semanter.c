@@ -18,7 +18,7 @@ symbol_t * symbol_variable(char *varname) {
   symbol_t *s = malloc(sizeof(symbol_t) + len + 1);
   s->type = stVariable;
   s->variable = (char*)s + sizeof(symbol_t);
-  memcpy(s->variable, varname, len);
+  memmove(s->variable, varname, len);
   s->variable[len] = '\0';
   return s;
 }
@@ -38,7 +38,7 @@ symbol_t * symbol_function(char *funcname, size_t nargs) {
   symbol_t *s = malloc(sizeof(symbol_t) + len + 1);
   s->type = stFunction;
   s->func.name = (char*)s + sizeof(symbol_t);
-  memcpy(s->func.name, funcname, len);
+  memmove(s->func.name, funcname, len);
   s->func.name[len] = '\0';
   s->func.nargs = nargs;
   return s;

@@ -103,7 +103,7 @@ hash_elem_t * hashtbl_insert(hashtbl_t *h, char *key, void *data) {
     size_t keylen = strlen(key);
     e = (hash_elem_t*)malloc(sizeof(hash_elem_t) + keylen + 1);
     e->key = (char*)e + sizeof(hash_elem_t); /* piggyback the key */
-    memcpy(e->key, key, keylen);
+    memmove(e->key, key, keylen);
     e->key[keylen] = '\0';
     vector_append(h->buckets[b], e);
     h->size++;
@@ -201,7 +201,7 @@ size_t hashtbl_keys(hashtbl_t *h, char ***keys) {
         hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[i], j);
         size_t keylen = strlen(e->key);
         (*keys)[k] = (char*)malloc(sizeof(char) * (keylen + 1));
-        memcpy((*keys)[k], e->key, keylen);
+        memmove((*keys)[k], e->key, keylen);
         (*keys)[k][keylen] = '\0';
       }
   }

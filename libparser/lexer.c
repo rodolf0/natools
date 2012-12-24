@@ -24,7 +24,7 @@ int is_white(char x) {
 static token_t * tok_maker(char *base, size_t n) {
   token_t *t = (token_t*)malloc(sizeof(token_t) + n + 1);
   t->lexem = (char*)t + sizeof(token_t); /* piggyback lexem */
-  memcpy(t->lexem, base, n);
+  memmove(t->lexem, base, n);
   t->lexem[n] = '\0';
   return t;
 }

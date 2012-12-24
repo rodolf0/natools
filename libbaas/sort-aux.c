@@ -6,7 +6,7 @@
 #define IDX(a, i) (a + sz * (i))
 /* use a previously alloc'ed t to swap contents */
 #define SWAP(x, y) do { \
-  memcpy(t, (x), sz); memcpy((x), y, sz); memcpy((y), t, sz); } while(0)
+  memmove(t, (x), sz); memmove((x), y, sz); memmove((y), t, sz); } while(0)
 
 size_t partition(void *a, size_t n, size_t kth, size_t sz, cmp_func_t cmp) {
   /* move the pivot out of the way (swap it with last element) */
@@ -128,21 +128,21 @@ void * merge(const void *a, size_t na,
   void *c = NULL; /* sub mergeed list */
 
   if (na == 0) {
-    memcpy(r, b, nb * sz);
+    memmove(r, b, nb * sz);
   } else if (nb == 0) {
-    memcpy(r, a, na * sz);
+    memmove(r, a, na * sz);
   } else {
     /* get smallest element on to the result array then keep on merging */
     if (cmp(a, b) < 0) {
-      memcpy(r, a, sz);
+      memmove(r, a, sz);
       /* skip the first element, and merge rest */
       c = merge(a+sz, na-1, b, nb, sz, cmp);
     } else {
-      memcpy(r, b, sz);
+      memmove(r, b, sz);
       c = merge(a, na, b+sz, nb-1, sz, cmp);
     }
     /* concat the just-merged part */
-    memcpy(r+sz, c, (na+nb-1) * sz);
+    memmove(r+sz, c, (na+nb-1) * sz);
     if (c) free(c);
   }
   return r;
