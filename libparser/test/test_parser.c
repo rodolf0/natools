@@ -136,7 +136,7 @@ void check_longer() {
 }
 
 int main(int argc, char *argv[]) {
-  vars = hashtbl_init(free, NULL);
+  vars = hashtbl_init(free, NULL, 0);
   /*fprintf(stderr, "%.25Lg\n", evaluate(argv[1]));*/
   check_operators();
   check_functions();

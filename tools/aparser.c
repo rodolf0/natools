@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  hashtbl_t *vars = hashtbl_init(free, NULL);
+  hashtbl_t *vars = hashtbl_init(free, NULL, 0);
   if (interactive) {
     char histfile[256], *expr = NULL;
 

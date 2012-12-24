@@ -95,7 +95,7 @@ expr_t * parser_compile_str(const char *str) {
 long double parser_qeval(const char *expr) {
   static hashtbl_t *vars = NULL;
   if (unlikely(vars == NULL))
-    vars = hashtbl_init(free, NULL);
+    vars = hashtbl_init(free, NULL, 0);
   if (unlikely(vars && !strcmp(expr, "_shutdown"))) {
     hashtbl_destroy(vars);
     return 0.0;

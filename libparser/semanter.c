@@ -104,7 +104,7 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
   /* load known functions */
   static hashtbl_t *functions = NULL;
   if (unlikely(functions == NULL)) {
-    functions = hashtbl_init(NULL, NULL);
+    functions = hashtbl_init(NULL, NULL, 0);
     register_functions(functions);
   }
   /* stash constants into whatever symtab we get */
