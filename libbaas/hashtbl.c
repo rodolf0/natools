@@ -14,12 +14,13 @@ static int hashtbl_keycmp(const hash_elem_t *a, const char *key) {
 }
 
 
-hashtbl_t * hashtbl_init(free_func_t f, cmp_func_t data_cmp) {
+hashtbl_t * hashtbl_init(free_func_t f, cmp_func_t data_cmp, int allow_dups) {
   hashtbl_t *h = (hashtbl_t*)malloc(sizeof(hashtbl_t));
   h->free = f;
   h->cmp = data_cmp;
   h->hash = sbox_hash;
   h->size = 0;
+  h->allow_dups = allow_dups;
   h->bktnum= HASHTBL_INIT_BUCKETS;
   h->buckets = (vector_t**)malloc(sizeof(vector_t*) * h->bktnum);
   memset(h->buckets, 0, sizeof(vector_t*) * h->bktnum);
@@ -90,17 +91,25 @@ hash_elem_t * hashtbl_insert(hashtbl_t *h, char *key, void *data) {
   size_t b = h->hash((unsigned char*)key) % h->bktnum;
   if (!h->buckets[b])
     h->buckets[b] = vector_init(free, (cmp_func_t)hashtbl_keycmp);
-  /* initialize the new element */
-  size_t keylen = strlen(key);
-  hash_elem_t *e = (hash_elem_t*)malloc(sizeof(hash_elem_t) + keylen + 1);
-  e->key = (char*)e + sizeof(hash_elem_t); /* piggyback the key */
-  memcpy(e->key, key, keylen);
-  e->key[keylen] = '\0';
+
+  ssize_t idx = -1;
+  hash_elem_t *e = NULL;
+  if (!h->allow_dups && (idx = vector_find(h->buckets[b], key)) >= 0) {
+    e = (hash_elem_t*)vector_get(h->buckets[b], idx);
+    if (h->free)
+      h->free(e->data);
+  } else {
+    /* initialize the new element */
+    size_t keylen = strlen(key);
+    e = (hash_elem_t*)malloc(sizeof(hash_elem_t) + keylen + 1);
+    e->key = (char*)e + sizeof(hash_elem_t); /* piggyback the key */
+    memcpy(e->key, key, keylen);
+    e->key[keylen] = '\0';
+    vector_append(h->buckets[b], e);
+    h->size++;
+    hashtbl_rehash(h);
+  }
   e->data = data;
-  /* we could search before insertion to disallow duplicates */
-  vector_append(h->buckets[b], e);
-  h->size++;
-  hashtbl_rehash(h);
   return e;
 }
 

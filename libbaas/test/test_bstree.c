@@ -81,7 +81,10 @@ void generate_test_tree(int allow_dups) {
   bstree_t *t = bstree_init(free, (cmp_func_t)intcmp, allow_dups);
   bst_node_t *node;
 
-  int inserted = 0, removed = 0, rightrot = 0, leftrot = 0;
+  int inserted = 0, removed = 0;
+#ifndef _BALANCED_TREE_
+  int rightrot = 0, leftrot = 0;
+#endif
 
   int q = random() % 7000;
   for (i = 0; i < q; i++) {
@@ -140,8 +143,10 @@ void generate_test_tree(int allow_dups) {
     check_black_height(t->root);
 #endif
   }
+#ifndef _BALANCED_TREE_
   fprintf(stderr, "    i: %d, r: %d, rl: %d, rr:%d     ",
           inserted, removed, leftrot, rightrot);
+#endif
 
   /* check all elements are correct */
   if (allow_dups) {

@@ -11,6 +11,7 @@ typedef struct _hashtbl_t {
   cmp_func_t cmp;
   free_func_t free;
   hash_func_t hash;
+  int allow_dups;
 } hashtbl_t;
 
 typedef struct _hash_elem_t {
@@ -20,11 +21,10 @@ typedef struct _hash_elem_t {
 
 
 /* constructor / destructor */
-hashtbl_t * hashtbl_init(free_func_t f, cmp_func_t data_cmp);
+hashtbl_t * hashtbl_init(free_func_t f, cmp_func_t data_cmp, int allow_dups);
 void hashtbl_destroy(hashtbl_t *h);
 
 /* insert data or replace existent (insertion in unordered sets) */
-hash_elem_t * hashtbl_replace(hashtbl_t *h, char *key, void *data); /* PENDING */
 hash_elem_t * hashtbl_insert(hashtbl_t *h, char *key, void *data);
 void hashtbl_remove(hashtbl_t *h, hash_elem_t *e);
 

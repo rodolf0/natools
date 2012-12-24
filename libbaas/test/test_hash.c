@@ -14,11 +14,11 @@ void acumulate(int *x) {
 }
 
 
-hashtbl_t * generate_test_ht() {
+hashtbl_t * generate_test_ht(int allow_dups) {
   int n = 0, sum = 0, *e = NULL, i, j;
   char *rk;
 
-  hashtbl_t *h = hashtbl_init(free, (cmp_func_t)intcmp);
+  hashtbl_t *h = hashtbl_init(free, (cmp_func_t)intcmp, allow_dups);
   vector_t *v = vector_init(free, NULL);
   hash_elem_t *f;
 
@@ -31,9 +31,11 @@ hashtbl_t * generate_test_ht() {
         e = malloc(sizeof(int)); *e = random() % 124789;
         rk = (char*)malloc(32);
         sprintf(rk, "%d", *e);
-        vector_append(v, rk); /* keep track of keys */
-        n++; sum += *e;
+        int prev_size = h->size;
         hashtbl_insert(h, rk, e);
+        if (allow_dups || h->size == prev_size + 1)
+          vector_append(v, rk); /* keep track of keys */
+        n++; sum += *e;
         break;
       case 3:
         if (!h->size) continue;
@@ -66,7 +68,8 @@ hashtbl_t * generate_test_ht() {
 
   char **keys;
   size_t num_keys = hashtbl_keys(h, &keys);
-  assert(num_keys == h->size);
+  if (allow_dups)
+    assert(num_keys == h->size);
   for (j = 0; j < num_keys; j++) {
     e = hashtbl_get(h, keys[j]);
     assert(atoi(keys[j]) == *e);
@@ -74,10 +77,19 @@ hashtbl_t * generate_test_ht() {
   }
   free(keys);
 
-  assert(n == h->size);
-  totalsum = 0;
-  hashtbl_foreach(h, (void(*)(void*))acumulate);
-  assert(sum == totalsum);
+  if (allow_dups) {
+    assert(n == h->size);
+    totalsum = 0;
+    hashtbl_foreach(h, (void(*)(void*))acumulate);
+    assert(sum == totalsum);
+  } else {
+    while (h->size) {
+      rk = vector_get(v, 0);
+      hashtbl_delete(h, rk);
+      assert(hashtbl_find(h, rk) == NULL);
+      vector_remove(v, 0);
+    }
+  }
 
   vector_destroy(v);
   return h;
@@ -106,11 +118,6 @@ void check_hash_distribution(hashtbl_t *h) {
 #endif
 
   free(bsz);
-  /* the distance of the buckets that have the max total
-     the min must be around the avg */
-  assert(max - min < 15 * h->size / (h->bktnum - empty));
-  /* if we have empty buckets must be because of few elements */
-  assert(empty == 0 || h->size < 10 * h->bktnum);
 }
 
 
@@ -155,7 +162,7 @@ void check_hash_function(hash_func_t hf, size_t maxkeylen) {
 
 #ifdef _DEBUG_
 void rehash_test() {
-  hashtbl_t *h = hashtbl_init(NULL, NULL);
+  hashtbl_t *h = hashtbl_init(NULL, NULL, 1);
   size_t i, j;
   for (i = 0; i < 1000000; i++) {
     // generate a random key
@@ -178,8 +185,10 @@ int main(int argc, char *argv[]) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);
-    hashtbl_t *h = generate_test_ht();
+    hashtbl_t *h = generate_test_ht(i % 2);
+#ifdef _DEBUG_
     check_hash_distribution(h);
+#endif
     switch (i % 20) {
       case 0: check_hash_function(djb_hash, i); break;
       case 1: check_hash_function(sbox_hash, i); break;
