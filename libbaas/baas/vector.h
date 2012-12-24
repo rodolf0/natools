@@ -16,7 +16,8 @@ vector_t * vector_init(free_func_t f, cmp_func_t c);
 void vector_destroy(vector_t *v);
 
 /* inserting at v->size (one past the last) is allowed (append)
- * negative index counts backwards (eg: -1 -> last) */
+ * negative index counts backwards (eg: -1 -> last)
+ * returns positive insertion idx on success, negative on failure */
 ssize_t vector_append(vector_t *v, void *data);
 ssize_t vector_insert(vector_t *v, ssize_t idx, void *data);
 void vector_remove(vector_t *v, ssize_t idx);
