@@ -122,7 +122,9 @@ static lexcomp_t reserved_word(scanner_t *s) {
 }
 
 
-/* lex variable and function names */
+/* lex variable and function names:
+ * id:   [a-zA-Z_][a-zA-Z0-9_]*
+ * func: [a-zA-Z_][a-zA-Z0-9_]*( */
 lexcomp_t tokenize_identifier(scanner_t *s) {
   if (!is_alpha(scanner_peek(s)))
     return tokNoMatch;
@@ -144,7 +146,8 @@ lexcomp_t tokenize_identifier(scanner_t *s) {
 }
 
 
-/* lex text */
+/* lex text:
+ * "[^"]*" */
 lexcomp_t tokenize_text(scanner_t *s) {
   if (scanner_peek(s) != '"')
     return tokNoMatch;

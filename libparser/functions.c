@@ -92,6 +92,10 @@ long double _log(list_t *args, size_t n) {
 long double _exp(list_t *args, size_t n) {
   return expl(pop_arg(args));
 }
+
+long double _round(list_t *args, size_t n) {
+  return roundl(pop_arg(args));
+}
 #pragma GCC diagnostic pop
 
 void register_functions(hashtbl_t *h) {
@@ -113,6 +117,7 @@ void register_functions(hashtbl_t *h) {
   hashtbl_insert(h, "exp(", _exp);
 
   hashtbl_insert(h, "gamma(", _gamma);
+  hashtbl_insert(h, "round(", _round);
 }
 
 void register_constants(hashtbl_t *h) {
