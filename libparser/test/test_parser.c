@@ -19,11 +19,13 @@ long double evaluate(const char *expr) {
     fprintf(stderr, "[%s] failed with error: %d\n", expr, error);
     abort();
   }
+  parser_destroy_expr(e);
   return r;
 }
 
 #define EPSILON 1.0e-10
 #define ASSERT_EQ(x, y) assert(fabsl((x)-(y)) < EPSILON)
+#define ASSERT_EPS(x, y, eps) assert(fabsl((x)-(y)) < (eps))
 
 
 void check_operators() {
@@ -93,7 +95,7 @@ void check_functions() {
   ASSERT_EQ(evaluate("asin(sin(phi/4)) == phi/4"), 1);
 
   ASSERT_EQ(evaluate("log(exp(3))"), 3);
-  ASSERT_EQ(evaluate("log(234 * 4234) == log(234) + log(4234)"), 1);
+  ASSERT_EPS(evaluate("log(234 * 4234) - log(234) - log(4234)"), 0.0, 1.0e-5);
 
   ASSERT_EQ(roundl(evaluate("gamma(16)")), 1307674368000);
 }
@@ -132,7 +134,7 @@ void check_longer() {
   *x = 3.0;
   ASSERT_EQ(evaluate("e**tan(x)/(1+x**2)*sin((1+log(x)**2)**0.5)"), 0.0864000589547301);
   *x = 17.25;
-  ASSERT_EQ(evaluate("e**tan(x)/(1+x**2)*sin((1+log(x)**2)**0.5)"), 514696792827.6593301594257L);
+  ASSERT_EPS(evaluate("e**tan(x)/(1+x**2)*sin((1+log(x)**2)**0.5)"), 514696792827.659, 1.0e-3);
 }
 
 int main(int argc, char *argv[]) {

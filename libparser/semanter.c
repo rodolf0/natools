@@ -194,9 +194,9 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
     return 1;
   }
 
-  long double *d = (long double*)list_pop(args);
-  list_destroy(args);
+  long double *d = (long double*)list_peek_head(args);
   *r = *d;
+  list_destroy(args);
   return 0;
 }
 
