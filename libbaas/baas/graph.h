@@ -1,7 +1,9 @@
 #ifndef _GRAPH_H_
 #define _GRAPH_H_
 
-#include "list.h"
+#include "common.h"
+
+typedef struct _list_t list_t;
 
 typedef struct _graph_vertex {
   /* keep a list of reachable vertex */

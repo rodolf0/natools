@@ -1,5 +1,8 @@
 #include <stdlib.h>
+
 #include "baas/heap-list.h"
+#include "baas/list.h"
+#include "baas/heap.h"
 
 /* creates a heap out of a list */
 heap_t * heap_heapify_list(list_t *l) {

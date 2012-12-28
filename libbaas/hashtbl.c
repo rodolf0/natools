@@ -1,11 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h> /* uint32_t */
-#include "baas/hashtbl.h"
 
 #ifdef _DEBUG_
 #include <stdio.h>
 #endif
+
+#include "baas/hashtbl.h"
+#include "baas/vector.h"
 
 #define HASHTBL_INIT_BUCKETS 64
 

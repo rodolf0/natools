@@ -1,6 +1,8 @@
 #include <stdlib.h>
+
 #include "baas/graph.h"
 #include "baas/heap.h" /* for dijkstra's algorithm */
+#include "baas/list.h"
 
 graph_t * graph_init(free_func_t vfree) {
   graph_t *g = malloc(sizeof(graph_t));

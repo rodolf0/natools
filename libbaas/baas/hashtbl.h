@@ -2,7 +2,8 @@
 #define _HASHTBL_H_
 
 #include "common.h"
-#include "vector.h"
+
+typedef struct _vector_t vector_t;
 
 typedef struct _hashtbl_t {
   size_t bktnum;
