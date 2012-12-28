@@ -35,6 +35,8 @@ hashtbl_t * generate_test_ht(int allow_dups) {
         hashtbl_insert(h, rk, e);
         if (allow_dups || h->size == prev_size + 1)
           vector_append(v, rk); /* keep track of keys */
+        else
+          free(rk);
         n++; sum += *e;
         break;
       case 3:
@@ -180,7 +182,7 @@ void rehash_test() {
 }
 #endif
 
-#define ITERATIONS 100
+#define ITERATIONS 60
 int main(int argc, char *argv[]) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
