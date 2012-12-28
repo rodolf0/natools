@@ -147,16 +147,28 @@ token_t * lexer_backup(lexer_t *l) {
   if (!l || !l->curtok)
     return NULL;
   l->curtok = l->curtok->prev;
-  return (token_t*)l->curtok->data;
+  if (l->curtok)
+    return (token_t*)l->curtok->data;
+  return NULL;
 }
 
-/* drop tokens already scanned (new owner should free them) */
+/* drop already scanned tokens without destructing them */
 void lexer_shift(lexer_t *l) {
   if (!l || !l->curtok)
     return;
   while (l->tokenized->first != l->curtok)
     list_pop(l->tokenized);
   list_pop(l->tokenized);
+  l->curtok = NULL;
+}
+
+/* like shift but free all used tokens */
+void lexer_consume(lexer_t *l) {
+  if (!l || !l->curtok)
+    return;
+  while (l->tokenized->first != l->curtok)
+    token_destroy((token_t*)list_pop(l->tokenized));
+  token_destroy((token_t*)list_pop(l->tokenized));
   l->curtok = NULL;
 }
 

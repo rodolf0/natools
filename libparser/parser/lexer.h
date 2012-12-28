@@ -50,8 +50,10 @@ token_t * lexer_peek(lexer_t *l);
 token_t * lexer_current(lexer_t *l);
 token_t * lexer_backup(lexer_t *l);
 
-/* discard tokens read up to current token */
+/* drop already scanned tokens without destructing them */
 void lexer_shift(lexer_t *l);
+/* like shift but free all used tokens */
+void lexer_consume(lexer_t *l);
 
 #endif /* _LEXER_H_ */
 

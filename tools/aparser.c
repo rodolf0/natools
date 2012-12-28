@@ -5,8 +5,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "baas/xstring.h"
 #include "baas/hashtbl.h"
+#include "parser/scanner.h"
+#include "parser/lexer.h"
 #include "parser/parser.h"
 
 void help() {
@@ -41,36 +42,63 @@ int main(int argc, char *argv[]) {
     stifle_history(50);
 
     while ((expr = readline(">> "))) {
-      chomp(expr);
+      scanner_t *s = scanner_init(expr);
+      lexer_t *l = lexer_init(s);
 
-      if (!strcmp(expr, "vars")) {
+      token_t *first = lexer_advance(l);
+
+      if (!strcmp(first->lexem, "vars")) {
+        lexer_consume(l);
+
         char **keys;
         size_t j, n = hashtbl_keys(vars, &keys);
         for (j = 0; j < n; j++) {
           long double *d = (long double*)hashtbl_get(vars, keys[j]);
-          printf("%s: %.15Lg\n", keys[j], *d);
+          printf("%s: %.20Lg\n", keys[j], *d);
           free(keys[j]);
         }
         free(keys);
 
-      } else if (strcmp(expr, "")) {
-        expr_t *e = parser_compile_str(expr);
-        long double d = 0.0;
-        parser_eval(e, &d, vars);
-        printf("%.25Lg\n", d);
-        parser_destroy_expr(e);
+      } else {
+        token_t *maybe_assign = lexer_advance(l);
+        /* identify an assignment */
+        if (first->lexcomp == tokId && maybe_assign->lexcomp == tokAsign) {
+          lexer_shift(l);
+          expr_t *e = parser_compile(l);
+          long double *r = malloc(sizeof(long double));
+          if (!parser_eval(e, r, vars)) {
+            hashtbl_insert(vars, first->lexem, r);
+          } else {
+            free(r);
+          }
+          parser_destroy_expr(e);
+          token_destroy(maybe_assign);
+          token_destroy(first);
+        } else {
+          lexer_backup(l); /* maybe = */
+          lexer_backup(l); /* first */
+          long double r = 0.0;
+          expr_t *e = parser_compile(l);
+          parser_eval(e, &r, vars);
+          printf("%.20Lg\n", r);
+          parser_destroy_expr(e);
+        }
       }
 
+      lexer_destroy(l);
+      scanner_destroy(s);
       add_history(expr);
       free(expr);
     }
+
     printf("\n");
     write_history(histfile);
 
-  } else if (optind < argc)
-    printf("%.25Lg\n", parser_qeval(argv[optind]));
-  else
+  } else if (optind < argc) {
+    printf("%.20Lg\n", parser_qeval(argv[optind]));
+  } else {
     help();
+  }
 
   hashtbl_destroy(vars);
   return ret;
