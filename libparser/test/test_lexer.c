@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <math.h>
 
+#include "../parser/scanner.h"
 #include "../parser/lexer.h"
 
 #define EPSILON 1.0e-10
@@ -23,9 +24,8 @@ void test_numbers() {
     free(t);
   }
   free(t);
-  /*fprintf(stderr, "%.20Lf == %.20Lf\n", sum, mysum);*/
   ASSERT_EQ(sum, mysum);
-  assert(prod == myprod);
+  ASSERT_EQ(prod, myprod);
   scanner_destroy(s);
 }
 

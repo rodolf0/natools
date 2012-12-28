@@ -1,10 +1,10 @@
 #ifndef _PARSER_PRIV_H_
 #define _PARSER_PRIV_H_
 
-#include "baas/list.h"
 #include "parser/lexer.h"
-#include "baas/hashtbl.h"
 
+typedef struct _list_t list_t;
+typedef struct _hashtbl_t hashtbl_t;
 typedef struct _expr_t expr_t;
 
 /* precedence relation between two operators */

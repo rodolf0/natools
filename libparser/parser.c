@@ -3,13 +3,16 @@
 #include <string.h>
 
 #include "parser-priv.h"
+#include "baas/list.h"
+#include "baas/hashtbl.h"
+#include "parser/scanner.h"
 #include "parser/parser.h"
 
 
-expr_t * parser_compile(scanner_t *s) {
-  if (!s) {
+expr_t * parser_compile(lexer_t *l) {
+  if (!l) {
 #ifdef _VERBOSE_
-    fprintf(stderr, "parser: Invalid scanner\n");
+    fprintf(stderr, "parser: Invalid lexer\n");
 #endif
     return NULL;
   }
@@ -17,7 +20,7 @@ expr_t * parser_compile(scanner_t *s) {
   list_t *stack = list_init((free_func_t)token_destroy, NULL);
   list_push(stack, token_init(tokStackEmpty, ""));
   list_t *partial = list_init(free, NULL);
-  token_t *st, *bf = adjust_token(lexer_nextitem(s), NULL);
+  token_t *st, *bf = adjust_token(lexer_advance(l), NULL);
 
   int error = 0;
   while (error == 0) {
@@ -26,12 +29,12 @@ expr_t * parser_compile(scanner_t *s) {
       case LT:
         list_push(stack, token_init(tokOMango, ""));
         list_push(stack, bf);
-        bf = adjust_token(lexer_nextitem(s), bf);
+        bf = adjust_token(lexer_advance(l), bf);
         break;
       case EQ:
         list_push(stack, token_init(tokEMango, ""));
         list_push(stack, bf);
-        bf = adjust_token(lexer_nextitem(s), bf);
+        bf = adjust_token(lexer_advance(l), bf);
         break;
       case GT:
         error = semanter_reduce(stack, partial);
@@ -69,7 +72,9 @@ expr_t * parser_compile(scanner_t *s) {
   }
 
   token_destroy(bf);
+  lexer_shift(l);
   list_destroy(stack);
+
   if (error > 0) {
     list_destroy(partial);
     return NULL;
@@ -86,7 +91,9 @@ void parser_destroy_expr(expr_t *e) {
 /* wrapper functions to avoid constructing everything */
 expr_t * parser_compile_str(const char *str) {
   scanner_t *s = scanner_init(str);
-  expr_t *e = parser_compile(s);
+  lexer_t *l = lexer_init(s);
+  expr_t *e = parser_compile(l);
+  lexer_destroy(l);
   scanner_destroy(s);
   return e;
 }

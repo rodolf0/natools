@@ -2,8 +2,9 @@
 #ifdef _VERBOSE_
 #include <stdio.h>
 #endif
-#include "parser/lexer.h"
 
+#include "parser/scanner.h"
+#include "parser/lexer.h"
 
 int is_num(char x);
 int is_alpha(char x);

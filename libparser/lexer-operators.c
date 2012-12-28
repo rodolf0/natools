@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "parser/scanner.h"
 #include "parser/lexer.h"
 
 

@@ -1,3 +1,5 @@
+#include <sys/types.h>
+
 #include "parser-priv.h"
 
 /* map a lexical component type to an index in the precedence matrix */

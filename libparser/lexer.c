@@ -2,7 +2,15 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "baas/list.h"
+#include "parser/scanner.h"
 #include "parser/lexer.h"
+
+typedef struct _lexer_t {
+  scanner_t *s;
+  list_t *tokenized;
+  list_node_t *curtok;
+} lexer_t;
 
 /* utility functions */
 int is_num(char x) {
@@ -29,6 +37,18 @@ static token_t * tok_maker(char *base, size_t n) {
   return t;
 }
 
+token_t * token_init(lexcomp_t lc, char *lexem) {
+  token_t *t = tok_maker(lexem, strlen(lexem));
+  t->lexcomp = lc;
+  return t;
+}
+
+void token_destroy(token_t *t) {
+  if (!t)
+    return;
+  free(t);
+}
+
 
 /* known tokenizers */
 lexcomp_t tokenize_identifier(scanner_t *s);
@@ -39,7 +59,7 @@ lexcomp_t tokenize_relops(scanner_t *s);
 lexcomp_t tokenize_bitops(scanner_t *s);
 lexcomp_t tokenize_miscops(scanner_t *s);
 
-/* get the next token */
+/* get the next token out of a scanner */
 token_t * lexer_nextitem(scanner_t *s) {
   /* try to match longest tokens first */
   static lexcomp_t (*tokenizers[])(scanner_t*) = {
@@ -75,15 +95,69 @@ token_t * lexer_nextitem(scanner_t *s) {
 }
 
 
-token_t * token_init(lexcomp_t lc, char *lexem) {
-  token_t *t = tok_maker(lexem, strlen(lexem));
-  t->lexcomp = lc;
+lexer_t * lexer_init(scanner_t *s) {
+  if (!s)
+    return NULL;
+  lexer_t *l = malloc(sizeof(lexer_t));
+  l->s = s;
+  l->tokenized = list_init((free_func_t)token_destroy, NULL);
+  l->curtok = NULL;
+  return l;
+}
+
+void lexer_destroy(lexer_t *l) {
+  if (!l)
+    return;
+  list_destroy(l->tokenized);
+  free(l);
+}
+
+token_t * lexer_advance(lexer_t *l) {
+  if (!l)
+    return NULL;
+  /* ingest data */
+  if (!l->curtok) {
+    if (l->tokenized->size == 0)
+      list_queue(l->tokenized, lexer_nextitem(l->s));
+    l->curtok = l->tokenized->first;
+    return (token_t*)l->curtok->data;
+  }
+  if (!l->curtok->next)
+    list_queue(l->tokenized, lexer_nextitem(l->s));
+  l->curtok = l->curtok->next;
+  return (token_t*)l->curtok->data;
+}
+
+token_t * lexer_peek(lexer_t *l) {
+  if (!l)
+    return NULL;
+  list_node_t *n = l->curtok;
+  token_t *t = lexer_advance(l);
+  l->curtok = n;
   return t;
 }
 
-void token_destroy(token_t *t) {
-  if (!t) return;
-  free(t);
+token_t * lexer_current(lexer_t *l) {
+  if (!l)
+    return NULL;
+  return (token_t*)l->curtok->data;
+}
+
+token_t * lexer_backup(lexer_t *l) {
+  if (!l || !l->curtok)
+    return NULL;
+  l->curtok = l->curtok->prev;
+  return (token_t*)l->curtok->data;
+}
+
+/* drop tokens already scanned (new owner should free them) */
+void lexer_shift(lexer_t *l) {
+  if (!l || !l->curtok)
+    return;
+  while (l->tokenized->first != l->curtok)
+    list_pop(l->tokenized);
+  list_pop(l->tokenized);
+  l->curtok = NULL;
 }
 
 /* vim: set sw=2 sts=2 : */

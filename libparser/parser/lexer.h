@@ -1,8 +1,6 @@
 #ifndef _LEXER_H_
 #define _LEXER_H_
 
-#include "scanner.h"
-
 /* lexical components */
 typedef enum _lexcomp_t {
   /* math operators */
@@ -34,12 +32,26 @@ typedef struct _token_t {
   char *lexem;
 } token_t;
 
-
 token_t * token_init(lexcomp_t lexcomp, char *lexem);
 void token_destroy(token_t *t);
 
+typedef struct _scanner_t scanner_t;
+
 /* extract token from the stream (user must later free) */
 token_t * lexer_nextitem(scanner_t *s);
+
+typedef struct _lexer_t lexer_t;
+
+lexer_t * lexer_init(scanner_t *s);
+void lexer_destroy(lexer_t *l);
+
+token_t * lexer_advance(lexer_t *l);
+token_t * lexer_peek(lexer_t *l);
+token_t * lexer_current(lexer_t *l);
+token_t * lexer_backup(lexer_t *l);
+
+/* discard tokens read up to current token */
+void lexer_shift(lexer_t *l);
 
 #endif /* _LEXER_H_ */
 

@@ -1,9 +1,6 @@
 #ifndef _SCANNER_H_
 #define _SCANNER_H_
 
-#include <stdio.h>
-#include <sys/types.h> /* size_t */
-
 typedef struct _scanner_t scanner_t;
 
 /* action type fn to invoke when accepting a char string */

@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "baas/hashtbl.h"
+#include "baas/list.h"
 #include "parser-priv.h"
 
 
@@ -96,7 +98,7 @@ static long double semanter_operator(lexcomp_t lc, long double lhs, long double 
 int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
   if (!e || !r) {
 #ifdef _VERBOSE_
-  fprintf(stderr, "eval error: null expression or result var\n");
+    fprintf(stderr, "eval error: null expression or result var\n");
 #endif
     return 1;
   }
