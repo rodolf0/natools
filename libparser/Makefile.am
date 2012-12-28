@@ -6,7 +6,7 @@ lib_LTLIBRARIES = libparser.la
 libparser_la_SOURCES = \
 	scanner.c \
 	lexer.c lexer-ids.c lexer-operators.c \
-	parser.c operator-precedence.c semanter.c functions.c
+	parser.c semanter.c functions.c
 
 libparser_includedir = $(includedir)/parser
 libparser_include_HEADERS = \
