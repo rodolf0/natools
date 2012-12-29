@@ -238,19 +238,18 @@ int semanter_reduce(list_t *stack, list_t *partial) {
         break;
 
       /* ignore these, no semantic value */
-      case tokEMango  :
-        funcparams++;
       case tokComma   : case tokStackEmpty : case tokNoMatch :
       case tokCMango  : case tokOParen     : case tokCParen  :
-      default:
+      case tokAsign   : case tokText:
         break;
 
+      case tokEMango:
+        funcparams++;
+        break;
       /* reduction done */
       case tokOMango:
-        token_destroy(op);
         return 0;
     }
-    token_destroy(op);
   }
   return 0;
 }

@@ -63,7 +63,6 @@ int main(int argc, char *argv[]) {
         token_t *maybe_assign = lexer_advance(l);
         /* identify an assignment */
         if (first->lexcomp == tokId && maybe_assign->lexcomp == tokAsign) {
-          lexer_shift(l);
           expr_t *e = parser_compile(l);
           long double *r = malloc(sizeof(long double));
           if (!parser_eval(e, r, vars)) {
@@ -72,8 +71,6 @@ int main(int argc, char *argv[]) {
             free(r);
           }
           parser_destroy_expr(e);
-          token_destroy(maybe_assign);
-          token_destroy(first);
         } else {
           lexer_backup(l); /* maybe = */
           lexer_backup(l); /* first */

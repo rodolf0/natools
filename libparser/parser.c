@@ -144,22 +144,24 @@ expr_t * parser_compile(lexer_t *l) {
     return NULL;
   }
 
-  list_t *stack = list_init((free_func_t)token_destroy, NULL);
-  list_push(stack, token_init(tokStackEmpty, ""));
-  list_t *partial = list_init(free, NULL);
-  token_t *st, *bf = adjust_token(lexer_advance(l), NULL);
+  list_t *stack = list_init(NULL, NULL),
+         *partial = list_init(free, NULL),
+         *track= list_init((free_func_t)token_destroy, NULL);
+  token_t *st = token_init(tokStackEmpty, ""),
+          *bf = adjust_token(lexer_advance(l), NULL);
+
+  list_push(stack, st); /* initialize the stack to the empty token */
+  list_push(track, st);
 
   int error = 0;
+  op_prec_t p;
   while (error == 0) {
     st = (token_t*)list_peek_head(stack);
-    switch (parser_precedence(st->lexcomp, bf->lexcomp)) {
+    switch ((p = parser_precedence(st->lexcomp, bf->lexcomp))) {
       case LT:
-        list_push(stack, token_init(tokOMango, ""));
-        list_push(stack, bf);
-        bf = adjust_token(lexer_advance(l), bf);
-        break;
       case EQ:
-        list_push(stack, token_init(tokEMango, ""));
+        st = token_init((p == LT) ? tokOMango : tokEMango, "");
+        list_push(stack, st); list_push(track, st);
         list_push(stack, bf);
         bf = adjust_token(lexer_advance(l), bf);
         break;
@@ -198,10 +200,8 @@ expr_t * parser_compile(lexer_t *l) {
     }
   }
 
-  token_destroy(bf);
-  lexer_shift(l);
   list_destroy(stack);
-
+  list_destroy(track);
   if (error > 0) {
     list_destroy(partial);
     return NULL;
