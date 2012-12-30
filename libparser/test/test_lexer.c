@@ -10,7 +10,7 @@
 #define EPSILON 1.0e-10
 #define ASSERT_EQ(x, y) assert(fabsl((x)-(y)) < EPSILON)
 
-void test_numbers() {
+void test_numbers(void) {
   token_t *t;
   scanner_t *s = scanner_init("123 123.45 123e2 987E+3 432.324e3 245.1e-14");
   const long double sum = 1431870.4500000000024L, prod = 195330978.95594071194L;
@@ -30,7 +30,7 @@ void test_numbers() {
 }
 
 
-void test_lexer() {
+void test_lexer(void) {
   token_t *t;
   char buf[1024];
 
@@ -101,7 +101,7 @@ void test_lexer() {
   scanner_destroy(s);
 }
 
-void test_unkown() {
+void test_unkown(void) {
   scanner_t *s = scanner_init("..32");
   token_t *t = lexer_nextitem(s);
   assert(t->lexcomp == tokNoMatch);
@@ -110,7 +110,7 @@ void test_unkown() {
 }
 
 
-int main(int argc, char *argv[]) {
+int main(void) {
   test_numbers();
   test_lexer();
   test_unkown();

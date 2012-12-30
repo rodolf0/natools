@@ -28,7 +28,7 @@ long double evaluate(const char *expr) {
 #define ASSERT_EPS(x, y, eps) assert(fabsl((x)-(y)) < (eps))
 
 
-void check_operators() {
+void check_operators(void) {
   ASSERT_EQ(evaluate("23+45"), 68);
   ASSERT_EQ(evaluate("23-45"), -22);
   ASSERT_EQ(evaluate("-23"), -23);
@@ -74,7 +74,7 @@ void check_operators() {
   ASSERT_EQ(evaluate("2**(3-1)"), 4);
 }
 
-void check_functions() {
+void check_functions(void) {
   long double *a = malloc(sizeof(long double));
   *a = 46;
   hashtbl_insert(vars, "a", a);
@@ -100,7 +100,7 @@ void check_functions() {
   ASSERT_EQ(roundl(evaluate("gamma(16)")), 1307674368000);
 }
 
-void check_precedence() {
+void check_precedence(void) {
   ASSERT_EQ(evaluate("3 + 4 * 5"), 23);
   ASSERT_EQ(evaluate("(3 + 4) * 5"), 35);
 
@@ -127,7 +127,7 @@ void check_precedence() {
   ASSERT_EQ(evaluate("max(3, 4) - -min(-3, 4)"), 1);
 }
 
-void check_longer() {
+void check_longer(void) {
   ASSERT_EQ(evaluate("5.23e+3**4**-2 + avg(34>>2, phi < pi, max(phi, pi, 3.2))"), 5.774346129827);
   long double *x = malloc(sizeof(long double));
   hashtbl_insert(vars, "x", x);
@@ -137,7 +137,7 @@ void check_longer() {
   ASSERT_EPS(evaluate("e**tan(x)/(1+x**2)*sin((1+log(x)**2)**0.5)"), 514696792827.659, 1.0e-3);
 }
 
-int main(int argc, char *argv[]) {
+int main(void) {
   vars = hashtbl_init(free, NULL, 0);
   /*fprintf(stderr, "%.25Lg\n", evaluate(argv[1]));*/
   check_operators();

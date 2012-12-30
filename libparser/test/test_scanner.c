@@ -12,7 +12,7 @@ char * test_accept_fn(char *start, size_t len) {
   return r;
 }
 
-void test_buffer_walk() {
+void test_buffer_walk(void) {
   char *b = "this is a small test buffer";
   scanner_t *s = scanner_init(b);
 
@@ -59,7 +59,7 @@ void test_file_walk(const char *file) {
 }
 
 
-void test_eof_bof() {
+void test_eof_bof(void) {
   char *b = "test";
   scanner_t *s = scanner_init(b);
 
@@ -88,7 +88,7 @@ void test_eof_bof() {
   scanner_destroy(s);
 }
 
-void test_eof_bof_after_accept() {
+void test_eof_bof_after_accept(void) {
   char *b = "test this";
   scanner_t *s = scanner_init(b);
 
@@ -115,7 +115,7 @@ void test_eof_bof_after_accept() {
   scanner_destroy(s);
 }
 
-int main(int argc, char *argv[]) {
+int main(void) {
   test_buffer_walk();
   test_file_walk("test_scanner.c");
   test_eof_bof();

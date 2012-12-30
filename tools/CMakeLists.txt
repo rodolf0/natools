@@ -1,10 +1,6 @@
 add_executable(aparser
   aparser.c
 )
-
-target_link_libraries(aparser
-  parser baas na
-  readline m
-)
+target_link_libraries(aparser parser na readline)
 
 install(TARGETS aparser RUNTIME DESTINATION bin)

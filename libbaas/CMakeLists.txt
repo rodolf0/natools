@@ -28,6 +28,8 @@ DESTINATION include/baas)
 
 
 ######### testing #########
+enable_testing()
+
 add_executable(test_bignum test/test_bignum.c bignum.c)
 add_executable(test_bits test/test_bits.c bits.c)
 add_executable(test_bstree test/test_bstree.c bstree.c)
@@ -37,11 +39,11 @@ add_executable(test_list test/test_list.c list.c)
 add_executable(test_sort test/test_sort.c sort.c sort-aux.c)
 add_executable(test_vector test/test_vector.c vector.c)
 
-add_test(test_bignum test_bignum)
-add_test(test_bits test_bits)
-add_test(test_bstree test_bstree)
-add_test(test_hash test_hash)
-add_test(test_heap test_heap)
-add_test(test_list test_list)
-add_test(test_sort test_sort)
-add_test(test_vector test_vector)
+add_test(bignum test_bignum)
+add_test(bits test_bits)
+add_test(bstree test_bstree)
+add_test(hash test_hash)
+add_test(heap test_heap)
+add_test(list test_list)
+add_test(sort test_sort)
+add_test(vector test_vector)

@@ -6,6 +6,7 @@ add_library(na SHARED
   interpolation.c
   natools.c
 )
+target_link_libraries(na parser)
 
 install(TARGETS na LIBRARY DESTINATION lib)
 install(FILES
