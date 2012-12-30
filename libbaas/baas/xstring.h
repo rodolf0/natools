@@ -1,4 +1,4 @@
-#ifndef _XSTRING_H
+#ifndef _XSTRING_H_
 #define _XSTRING_H_
 
 size_t strcount(const char *where, const char *what);
