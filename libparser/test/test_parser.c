@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <math.h>
 
-#include "../parser/parser.h"
+#include "parser/parser.h"
 #include "baas/hashtbl.h"
 
 static hashtbl_t *vars = NULL;

@@ -4,8 +4,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include "../parser/scanner.h"
-#include "../parser/lexer.h"
+#include "parser/scanner.h"
+#include "parser/lexer.h"
 
 #define EPSILON 1.0e-10
 #define ASSERT_EQ(x, y) assert(fabsl((x)-(y)) < EPSILON)

@@ -5,6 +5,9 @@ add_library(parser SHARED
 )
 target_link_libraries(parser baas m)
 
+# let the parser complain on errors
+add_definitions(-D_VERBOSE_)
+
 install(TARGETS parser LIBRARY DESTINATION lib)
 install(FILES
   parser/scanner.h

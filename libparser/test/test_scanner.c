@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "../parser/scanner.h"
+#include "parser/scanner.h"
 
 char * test_accept_fn(char *start, size_t len) {
   char *r = malloc(sizeof(char) * len + 1);

@@ -3,13 +3,13 @@
 #include <string.h>
 #include <assert.h>
 
-#include "../na/function.h"
-#include "../na/calculus.h"
+#include "na/function.h"
+#include "na/calculus.h"
 
 #define EPSILON 1.0e-5
 #define ASSERT_EQ(x, y) assert(fabsl((x)-(y)) < EPSILON)
 
-void test_derivates() {
+void test_derivates(void) {
   function_t *f = function_create("x**2");
   ASSERT_EQ(derivate_1(f, 0.2), 0.4);
   ASSERT_EQ(derivate_1(f, 0.0), 0.0);
@@ -33,7 +33,7 @@ void test_derivates() {
   function_destroy(f);
 }
 
-void test_arclength() {
+void test_arclength(void) {
   function_t *f = function_create("2**x - log(x)");
   ASSERT_EQ(arc_length(f, 0.5, 2.3), 3.0663188081);
   function_destroy(f);
@@ -51,7 +51,7 @@ void test_arclength() {
   function_destroy(f);
 }
 
-void test_integration() {
+void test_integration(void) {
   function_t *f = function_create("2**x - log(x)");
   ASSERT_EQ(integrate_simpson(f, 0.5, 2.3), 4.60212);
   function_destroy(f);
@@ -62,7 +62,7 @@ void test_integration() {
 }
 
 
-int main(int argc, char *argv[]) {
+int main(void) {
   test_derivates();
   test_arclength();
   test_integration();

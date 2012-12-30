@@ -21,6 +21,7 @@ install(FILES
   baas/hashtbl.h
   baas/heap.h baas/heap-list.h
   baas/list.h
+  baas/mod-arithmetic.h
   baas/sort.h
   baas/vector.h
   baas/xstring.h
