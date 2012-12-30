@@ -40,7 +40,7 @@ void test_buffer_walk(void) {
 }
 
 void test_file_walk(const char *file) {
-  char buf[4000];
+  char buf[3008];
   FILE *f = fopen(file, "rb");
   int i, j, n = fread(buf, sizeof(char), sizeof(buf), f);
   fclose(f);
