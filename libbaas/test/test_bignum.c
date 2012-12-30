@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "../baas/bignum.h"
+#include "baas/bignum.h"
 
 static const char digit[] = "0123456789";
 
-void test_bignum() {
+void test_bignum(void) {
   char num1[8], num2[8], *result;
   int i, nlen;
 
@@ -29,7 +29,7 @@ void test_bignum() {
   free(result);
 }
 
-void test_bignum2() {
+void test_bignum2(void) {
   char *result;
   const char *num1 = "98143278943523452345789012347890543257890123473890543257"
                      "8902341789054325789012347890234578902345";
@@ -50,7 +50,7 @@ void test_bignum2() {
 }
 
 #define ITERATIONS 10000
-int main(int argc, char *argv[]) {
+int main(void) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);

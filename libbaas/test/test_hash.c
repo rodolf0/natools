@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include "../baas/hashtbl.h"
-#include "../baas/vector.h"
+
+#include "baas/hashtbl.h"
+#include "baas/vector.h"
 
 int intcmp(const int *a, const int *b) {
   return *a > *b ? 1 : (*a < *b ? -1 : 0);
@@ -15,14 +16,15 @@ void acumulate(int *x) {
 
 
 hashtbl_t * generate_test_ht(int allow_dups) {
-  int n = 0, sum = 0, *e = NULL, i, j;
+  size_t n = 0, i, j;
+  int sum = 0, *e = NULL;
   char *rk;
 
   hashtbl_t *h = hashtbl_init(free, (cmp_func_t)intcmp, allow_dups);
   vector_t *v = vector_init(free, NULL);
   hash_elem_t *f;
 
-  int q = random() % 17000;
+  size_t q = random() % 17000;
   for (i = 0; i < q; i++) {
     switch (random() % 6) {
       case 0:
@@ -31,7 +33,7 @@ hashtbl_t * generate_test_ht(int allow_dups) {
         e = malloc(sizeof(int)); *e = random() % 124789;
         rk = (char*)malloc(32);
         sprintf(rk, "%d", *e);
-        int prev_size = h->size;
+        size_t prev_size = h->size;
         hashtbl_insert(h, rk, e);
         if (allow_dups || h->size == prev_size + 1)
           vector_append(v, rk); /* keep track of keys */
@@ -58,8 +60,8 @@ hashtbl_t * generate_test_ht(int allow_dups) {
         if (!h->size) continue;
         j = random() % v->size;
         rk = vector_get(v, j);
-        int i = atoi(rk);
-        f = hashtbl_find(h, &i);
+        int k = atoi(rk);
+        f = hashtbl_find(h, &k);
         n--; sum -= *(int*)f->data;
         hashtbl_remove(h, f);
         vector_remove(v, j);
@@ -104,7 +106,7 @@ void check_hash_distribution(hashtbl_t *h) {
 
   int min = 0, max = 0, empty = 0;
 
-  for (i = 0; i < h->bktnum; i++) {
+  for (i = 0; (size_t)i < h->bktnum; i++) {
     if (h->buckets[i]) {
       bsz[i] = h->buckets[i]->size;
       if (bsz[i] < min || i == 0) min = bsz[i];
@@ -183,7 +185,7 @@ void rehash_test() {
 #endif
 
 #define ITERATIONS 60
-int main(int argc, char *argv[]) {
+int main(void) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);

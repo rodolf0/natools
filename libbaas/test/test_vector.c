@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include "../baas/vector.h"
+
+#include "baas/vector.h"
 
 int intcmp(const int *a, const int *b) {
   if (!a && !b)
@@ -22,10 +23,10 @@ void acumulate(int *x) {
 }
 
 
-vector_t * generate_test_vector() {
+vector_t * generate_test_vector(void) {
   vector_t *v = vector_init(free, (cmp_func_t)intcmp);
-  int n = 0, i, sum = 0, *e;
-  size_t idx;
+  size_t n = 0, i, idx;
+  int sum = 0, *e;
 
   for (i = 0; i < 10000; i++) {
     switch (random() % 20) {
@@ -110,8 +111,8 @@ void test_search(vector_t *v) {
 }
 
 void test_resize(vector_t *v) {
-  int j, sum = 0;
-  size_t newsize = v->size * (60 + random() % 10) / 100;
+  size_t j, newsize = v->size * (60 + random() % 10) / 100;
+  int sum = 0;
 
   for (j = 0; j < newsize; j++) {
     sum += *(int*)vector_get(v, j);
@@ -136,7 +137,7 @@ void test_resize(vector_t *v) {
 
 
 #define ITERATIONS 1000
-int main(int argc, char *argv[]) {
+int main(void) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);

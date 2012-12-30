@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "../baas/bits.h"
 
-void test_ints_to_bits() {
+#include "baas/bits.h"
+
+void test_ints_to_bits(void) {
   char bits[33];
   int len;
 
@@ -38,13 +39,13 @@ void test_ints_to_bits() {
   assert(!strcmp(bits + 32 - len, "10011010101111001000111101110"));
 }
 
-void test_bitcount() {
+void test_bitcount(void) {
   int n = random();
   assert(bitcount(n) == bitcount2(n));
 }
 
 #define ITERATIONS 100
-int main(int argc, char *argv[]) {
+int main(void) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);

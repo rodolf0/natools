@@ -19,3 +19,5 @@ add_subdirectory(libbaas)
 add_subdirectory(libparser)
 add_subdirectory(libna)
 add_subdirectory(tools)
+
+enable_testing()

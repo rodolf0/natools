@@ -1,14 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include "../baas/heap.h"
+
+#include "baas/heap.h"
 
 int intcmp(const int *a, const int *b) {
   return *a > *b ? 1 : (*a < *b ? -1 : 0);
 }
 
-void generate_test_heap() {
-  int n = 0, i, j, sum = 0, *e=NULL;
+void generate_test_heap(void) {
+  size_t n = 0, i, j;
+  int sum = 0, *e=NULL;
   heap_t *h = heap_init(free, (cmp_func_t)intcmp);
 
   for (i = 0; i < 1000; i++) {
@@ -59,7 +61,7 @@ void generate_test_heap() {
 }
 
 #define LOTS_OF_INTS 1000
-void test_heapify() {
+void test_heapify(void) {
   size_t i;
   /* initialize data */
   int *array = malloc(sizeof(int) * LOTS_OF_INTS);
@@ -89,7 +91,7 @@ void test_heapify() {
 
 
 #define ITERATIONS 1000
-int main(int argc, char *argv[]) {
+int main(void) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);

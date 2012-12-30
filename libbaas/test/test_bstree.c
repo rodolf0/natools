@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include "../baas/bstree.h"
+
+#include "baas/bstree.h"
 
 /* subtree rotations: accesible not in header cause they
  * will unbalance the RB tree. We use them here to test
@@ -77,7 +78,8 @@ void check_black_height(bst_node_t *n) {
 
 
 void generate_test_tree(int allow_dups) {
-  int n = 0, i, sum = 0, *e=NULL;
+  size_t n = 0, i;
+  int sum = 0, *e=NULL;
   bstree_t *t = bstree_init(free, (cmp_func_t)intcmp, allow_dups);
   bst_node_t *node;
 
@@ -86,7 +88,7 @@ void generate_test_tree(int allow_dups) {
   int rightrot = 0, leftrot = 0;
 #endif
 
-  int q = random() % 7000;
+  size_t q = random() % 7000;
   for (i = 0; i < q; i++) {
 #ifdef _BALANCED_TREE_
     switch (random() % 3) {
@@ -172,7 +174,7 @@ void generate_test_tree(int allow_dups) {
 
 
 #define ITERATIONS 50
-int main(int argc, char *argv[]) {
+int main(void) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);

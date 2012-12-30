@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "../baas/sort.h"
+
+#include "baas/sort.h"
 
 /* mostly usefull for argv[...] */
 int str_cmp(char **a, char **b) {
@@ -50,15 +51,15 @@ void free_random_strings(char **s, int n) {
 
 /* check elements are truly ordered */
 void check_ordered(void *elems, int n, int sz, cmp_func_t cmp) {
-  int j; void *min = elems+0*sz;
+  int j; void *min = (char*)elems+0*sz;
   for (j = 0; j < n; j++) {
-    assert(cmp(min, elems+j*sz) <= 0);
-    min = elems+j*sz;
+    assert(cmp(min, (char*)elems+j*sz) <= 0);
+    min = (char*)elems+j*sz;
   }
 }
 
 #define NUM_ELEMS 1000
-void test_mergesort() {
+void test_mergesort(void) {
   /* test with ints */
   int *ints = generate_random_ints(NUM_ELEMS);
   int *sorted_i = mergesort(ints, NUM_ELEMS, sizeof(int), (cmp_func_t)int_cmp);
@@ -89,7 +90,7 @@ void test_quicksort(void (*qs)(void *a, size_t n, size_t sz, cmp_func_t cmp)) {
 }
 
 
-void test_selection() {
+void test_selection(void) {
   /* test with ints */
   int *ints = generate_random_ints(NUM_ELEMS);
   int k = random() % NUM_ELEMS; /* select the k'th elem */
@@ -100,7 +101,7 @@ void test_selection() {
 
 
 #define ITERATIONS 250
-int main(int argc, char *argv[]) {
+int main(void) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);

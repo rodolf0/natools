@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include "../baas/list.h"
+
+#include "baas/list.h"
 
 int intcmp(const int *a, const int *b) {
   return *a > *b ? 1 : (*a < *b ? -1 : 0);
@@ -10,8 +11,9 @@ int intcmp_r(const int *a, const int *b) {
   return *a > *b ? -1 : (*a < *b ? 1 : 0);
 }
 
-list_t * generate_test_list() {
-  int n = 0, i, j, sum = 0, *e=NULL;
+list_t * generate_test_list(void) {
+  size_t n = 0, i, j;
+  int sum = 0, *e=NULL;
   list_t *l = list_init(free, (cmp_func_t)intcmp);
   list_node_t *ln;
 
@@ -69,7 +71,8 @@ list_t * generate_test_list() {
   }
 
   /* check list threading */
-  int forward = 0, backward = 0, ctrlsum1 = 0, ctrlsum2 = 0;
+  size_t forward = 0, backward = 0;
+  int ctrlsum1 = 0, ctrlsum2 = 0;
   for (ln = l->first; ln; ln = ln->next)
   { forward++; ctrlsum1 += *(int*)ln->data; }
   for (ln = l->last; ln; ln = ln->prev)
@@ -130,7 +133,7 @@ int test_looping(list_t *l) {
 }
 
 int test_listops(list_t *l) {
-  int lsize = l->size;
+  size_t lsize = l->size;
 
   /* check duplication */
   list_t *a, *b;
@@ -190,7 +193,7 @@ int test_listops(list_t *l) {
 
 
 #define ITERATIONS 1000
-int main(int argc, char *argv[]) {
+int main(void) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
     fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);
