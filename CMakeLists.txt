@@ -5,14 +5,14 @@ set (natools_VERSION_MAJOR 0)
 set (natools_VERSION_MINOR 20)
  
 add_definitions(
-  -g -O2 
+  -std=c11
+  -g -O2
   -Wall -Wextra -Werror 
   -Wshadow
   -Wstrict-prototypes
   -Wpointer-arith
   -Wcast-qual
   -Winline
-  -freg-struct-return 
 )
 
 add_subdirectory(libbaas)
