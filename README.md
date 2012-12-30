@@ -17,3 +17,6 @@ Miscelanous math functionality...
 * numerical calculus functions (eg: derivate, integrate by simpson)
 * root finders for non-linear equations (eg: newton, secant, bisection)
 * interpolation (eg: newton, lagrange, finite_differences)
+
+#### building
+`mkdir -p build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/tmp && make && ctest`
