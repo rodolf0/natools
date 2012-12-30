@@ -1,3 +1,5 @@
+include_directories(BEFORE ../libna ../libbaas ../libparser)
+
 add_executable(aparser
   aparser.c
 )

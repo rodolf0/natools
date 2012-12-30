@@ -66,4 +66,22 @@ void chomp(char *s) {
     s[l--] = '\0';
 }
 
+
+static inline int is_white(char x) {
+  return x == ' '  || x == '\t' ||
+         x == '\n' || x == '\r';
+}
+
+/* remove spaces from start and end of 's' (changes original string) */
+char * trim(char *s) {
+  if (!s)
+    return NULL;
+  char *start = s;
+  while (is_white(*start)) start++;
+  size_t len = strlen(start) - 1;
+  while (len > 0 && is_white(start[len]))
+    start[len--] = '\0';
+  return start;
+}
+
 /* vim: set sw=2 sts=2 : */

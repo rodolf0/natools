@@ -1,3 +1,5 @@
+include_directories(BEFORE ../libbaas ../libparser)
+
 add_library(na SHARED
   function.c
   combinatorics.c

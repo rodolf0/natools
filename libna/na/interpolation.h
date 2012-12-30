@@ -1,7 +1,7 @@
 #ifndef _INTERPOLATION_H_
 #define _INTERPOLATION_H_
 
-#include "natools/natools.h"
+#include "na/natools.h"
 
 typedef struct _function_t function_t;
 

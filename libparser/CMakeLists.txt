@@ -1,3 +1,5 @@
+include_directories(BEFORE ../libbaas)
+
 add_library(parser SHARED
   scanner.c
   lexer.c lexer-ids.c lexer-operators.c

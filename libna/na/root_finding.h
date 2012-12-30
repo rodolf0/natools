@@ -1,8 +1,8 @@
 #ifndef _ROOT_SEARCH_H_
 #define _ROOT_SEARCH_H_
 
-#include "natools/natools.h"
-#include "natools/function.h"
+#include "na/natools.h"
+#include "na/function.h"
 
 extern int root_search_verbose;
 

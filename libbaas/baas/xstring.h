@@ -8,7 +8,11 @@ size_t strcount(const char *where, const char *what);
 size_t strrep(char *dest, const char *source,
 							const char *what, const char *with);
 
+/* remove */
 void chomp(char *s);
+
+/* remove spaces surrounding 's' (changes original string) */
+char * trim(char *s);
 
 #endif /* _XSTRING_H_ */
 
