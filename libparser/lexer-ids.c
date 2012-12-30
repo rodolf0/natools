@@ -19,8 +19,8 @@ typedef statefn (*nextstate)(scanner_t *s);
 static statefn integer(scanner_t *s);
 static statefn fractional(scanner_t *s);
 static statefn exponent(scanner_t *s);
-static void done() { }
-static void error() { }
+static void done(void) { }
+static void error(void) { }
 
 lexcomp_t tokenize_number(scanner_t *s) {
   if (!is_num(scanner_peek(s)))

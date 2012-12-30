@@ -87,7 +87,7 @@ int interpolate_lagrange(vector2_t *x, int n, long double x0, long double *r) {
  *
  * D(f,i) is the ith derivate of f
  * */
-function_t *aproximate_taylor();
+/*function_t *aproximate_taylor();*/
 
 
 /* vim: set sw=2 sts=2 : */

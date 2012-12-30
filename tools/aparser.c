@@ -10,10 +10,6 @@
 #include "parser/lexer.h"
 #include "parser/parser.h"
 
-void help() {
-  fprintf(stderr, "usage: aparser {-i | <expresion>}\n");
-}
-
 int main(int argc, char *argv[]) {
   int ret = 0, interactive = 0;
 
@@ -21,7 +17,7 @@ int main(int argc, char *argv[]) {
   while ((ret = getopt(argc, argv, "hi")) != -1) {
     switch (ret) {
       case 'h':
-        help();
+        fprintf(stderr, "usage: aparser {-i | <expresion>}\n");
         return 0;
         break;
       case 'i':
@@ -94,7 +90,7 @@ int main(int argc, char *argv[]) {
   } else if (optind < argc) {
     printf("%.20Lg\n", parser_qeval(argv[optind]));
   } else {
-    help();
+    fprintf(stderr, "usage: aparser {-i | <expresion>}\n");
   }
 
   hashtbl_destroy(vars);

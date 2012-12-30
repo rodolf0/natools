@@ -3,7 +3,7 @@
 #include "baas/sort.h"
 
 /* get to offset i of size sz from a */
-#define IDX(a, i) (a + sz * (i))
+#define IDX(a, i) ((char*)a + sz * (i))
 /* use a previously alloc'ed t to swap contents */
 #define SWAP(x, y) do { \
   memmove(t, (x), sz); memmove((x), y, sz); memmove((y), t, sz); } while(0)
@@ -136,13 +136,13 @@ void * merge(const void *a, size_t na,
     if (cmp(a, b) < 0) {
       memmove(r, a, sz);
       /* skip the first element, and merge rest */
-      c = merge(a+sz, na-1, b, nb, sz, cmp);
+      c = merge((const char*)a+sz, na-1, b, nb, sz, cmp);
     } else {
       memmove(r, b, sz);
-      c = merge(a, na, b+sz, nb-1, sz, cmp);
+      c = merge(a, na, (const char*)b+sz, nb-1, sz, cmp);
     }
     /* concat the just-merged part */
-    memmove(r+sz, c, (na+nb-1) * sz);
+    memmove((char*)r+sz, c, (na+nb-1) * sz);
     if (c) free(c);
   }
   return r;

@@ -9,7 +9,7 @@ void * mergesort(const void *a, size_t n, size_t sz, cmp_func_t cmp) {
     return merge(a, 1, NULL, 0, sz, cmp); // let merge malloc
 
   void *left = mergesort(a, n/2, sz, cmp);
-  void *right = mergesort(a + sz*(int)(n/2), n-n/2, sz, cmp);
+  void *right = mergesort((const char*)a + sz*(int)(n/2), n-n/2, sz, cmp);
   void *all = merge(left, n/2, right, n-n/2, sz, cmp);
   free(left); free(right);
   return all;
@@ -23,7 +23,7 @@ void quicksort(void *a, size_t n, size_t sz, cmp_func_t cmp) {
   p = partition(a, n, p, sz, cmp);
   /* exclude the pivot and partition the new lists */
   quicksort(a, p, sz, cmp);
-  quicksort(a + (p+1)*sz, n - p-1, sz, cmp);
+  quicksort((char*)a + (p+1)*sz, n - p-1, sz, cmp);
 }
 
 
@@ -35,7 +35,7 @@ void quicksort3(void *a, size_t n, size_t sz, cmp_func_t cmp) {
   partition3(a, n, p, &equal_idx, &greater_idx, sz, cmp);
   /* exclude equal values and partition the new lists */
   quicksort3(a, equal_idx, sz, cmp);
-  quicksort3(a + greater_idx*sz, n - greater_idx, sz, cmp);
+  quicksort3((char*)a + greater_idx*sz, n - greater_idx, sz, cmp);
 }
 
 
@@ -48,9 +48,9 @@ void * selection(void *a, size_t n, size_t k, size_t sz, cmp_func_t cmp) {
   if (k < b) /* b is the idx for middle list. Search the smaller */
     return selection(a, b, k, sz, cmp);
   else if (k < c)
-    return a + b*sz; /* pivot idx uppon partition return */
+    return (char*)a + b*sz; /* pivot idx uppon partition return */
   else /* k > c, search the greater list */
-    return selection(a + c*sz, n-c, k-c, sz, cmp);
+    return selection((char*)a + c*sz, n-c, k-c, sz, cmp);
 }
 
 /* vim: set sw=2 sts=2 : */

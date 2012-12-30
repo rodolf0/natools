@@ -137,7 +137,7 @@ heap_t * heap_heapify(void *data, size_t n, size_t sz,
   /* set pointers to each of the elements of data */
   ssize_t i; // need sign to stop loop
   for (i = 0; i < (ssize_t)n; i++)
-    h->data[i] = (data + i*sz);
+    h->data[i] = ((char*)data + i*sz);
   /* sift down every element starting from the last parent */
   for (i = heap_parent(n); i >= 0; i--)
     heap_sift_down(h, h->data[i], i);
