@@ -23,6 +23,7 @@ DESTINATION include/na)
 
 ######### testing #########
 enable_testing()
+include_directories(BEFORE .)
 
 add_executable(test_calculus test/test_calculus.c)
 target_link_libraries(test_calculus na)

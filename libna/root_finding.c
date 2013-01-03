@@ -2,9 +2,8 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "na/function.h"
-#include "na/calculus.h"
 #include "na/root_finding.h"
+#include "na/calculus.h"
 
 int root_search_verbose = 0;
 

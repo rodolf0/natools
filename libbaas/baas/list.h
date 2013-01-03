@@ -3,13 +3,13 @@
 
 #include "common.h"
 
-typedef struct _list_node_t {
-  struct _list_node_t *prev;
-  struct _list_node_t *next;
+typedef struct list_node_t {
+  struct list_node_t *prev;
+  struct list_node_t *next;
   void *data;
 } list_node_t;
 
-typedef struct _list_t {
+typedef struct list_t {
   list_node_t *first;
   list_node_t *last;
 

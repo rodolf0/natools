@@ -1,9 +1,10 @@
 #ifndef _PARSER_H_
 #define _PARSER_H_
 
-typedef struct _lexer_t lexer_t;
-typedef struct _hashtbl_t hashtbl_t;
-typedef struct _expr_t expr_t;
+#include <baas/hashtbl.h>
+#include "lexer.h"
+
+typedef struct expr_t expr_t;
 
 /* compile an expression from a string for later evaluation */
 expr_t * parser_compile(lexer_t *s);

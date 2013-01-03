@@ -4,8 +4,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "baas/hashtbl.h"
-#include "baas/list.h"
 #include "parser-priv.h"
 
 static inline long double pop_arg(list_t *args) {

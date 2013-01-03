@@ -6,7 +6,7 @@
 
 #define SCANNER_BUF_SZ 1024
 
-typedef struct _scanner_t {
+struct scanner_t {
   FILE *fp;
   char *buffer;
   size_t buf_sz;
@@ -14,7 +14,7 @@ typedef struct _scanner_t {
   /* boundaries of current scanned item */
   size_t start;
   size_t length;
-} scanner_t;
+};
 
 
 scanner_t * scanner_init_file(const char *file) {

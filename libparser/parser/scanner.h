@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-typedef struct _scanner_t scanner_t;
+typedef struct scanner_t scanner_t;
 
 /* action type fn to invoke when accepting a char string */
 typedef void * (*acceptfn)(char *start, size_t len);

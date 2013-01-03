@@ -6,11 +6,11 @@
 #include "parser/scanner.h"
 #include "parser/lexer.h"
 
-typedef struct _lexer_t {
+struct lexer_t {
   scanner_t *s;
   list_t *tokenized;
   list_node_t *curtok;
-} lexer_t;
+};
 
 /* utility functions */
 int is_num(char x) {

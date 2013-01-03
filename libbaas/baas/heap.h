@@ -9,7 +9,7 @@
  *  according to some comparison function */
 /* http://en.wikipedia.org/wiki/Binary_heap */
 
-typedef struct _heap_t {
+typedef struct heap_t {
   size_t size;   /* space actually used */
   size_t bufsz;  /* space alloc'ed */
   void **data;

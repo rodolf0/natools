@@ -1,7 +1,7 @@
 #ifndef _CALCULUS_H_
 #define _CALCULUS_H_
 
-typedef struct _function_t function_t;
+#include "function.h"
 
 /* 1st, 2nd order derivates */
 long double derivate_1(function_t *f, long double x0);

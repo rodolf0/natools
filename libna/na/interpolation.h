@@ -1,9 +1,8 @@
 #ifndef _INTERPOLATION_H_
 #define _INTERPOLATION_H_
 
-#include "na/natools.h"
-
-typedef struct _function_t function_t;
+#include "natools.h"
+#include "function.h"
 
 int interpolate_newton(vector2_t *x, int n, long double x0, long double *r);
 long double finite_difference(function_t *f, int n, long double x0, long double h);

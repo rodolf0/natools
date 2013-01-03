@@ -21,18 +21,18 @@ typedef enum {
   breadthfirst
 } bst_traversal_t;
 
-typedef struct _bst_node_t {
-  struct _bst_node_t *parent;
-  struct _bst_node_t *r;
-  struct _bst_node_t *l;
+typedef struct bst_node_t {
+  struct bst_node_t *parent;
+  struct bst_node_t *r;
+  struct bst_node_t *l;
   void *data;
 #ifdef _BALANCED_TREE_
   bst_color_t color;
 #endif
 } bst_node_t;
 
-typedef struct _bstree {
-  struct _bst_node_t *root;
+typedef struct bstree_t {
+  struct bst_node_t *root;
   size_t size;
   cmp_func_t cmp;
   free_func_t free;

@@ -1,8 +1,5 @@
-#include "na/function.h"
-#include "na/natools.h"
 #include "na/interpolation.h"
 #include "na/combinatorics.h"
-
 
 /* Newton's interpolation polynomial:
  *

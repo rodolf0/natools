@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-typedef struct _vector_t {
+typedef struct vector_t {
   size_t size;
   size_t cap;
   void **data;

@@ -2,10 +2,9 @@
 #define _HASHTBL_H_
 
 #include "common.h"
+#include "vector.h"
 
-typedef struct _vector_t vector_t;
-
-typedef struct _hashtbl_t {
+typedef struct hashtbl_t {
   size_t bktnum;
   vector_t **buckets;
   size_t size;
@@ -15,7 +14,7 @@ typedef struct _hashtbl_t {
   int allow_dups;
 } hashtbl_t;
 
-typedef struct _hash_elem_t {
+typedef struct hash_elem_t {
   char *key;
   void *data;
 } hash_elem_t;

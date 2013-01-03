@@ -1,8 +1,8 @@
 #ifndef _HEAP_LIST_H_
 #define _HEAP_LIST_H_
 
-typedef struct _heap_t heap_t;
-typedef struct _list_t list_t;
+#include "heap.h"
+#include "list.h"
 
 /* create a heap from a list in log time.
  * the heap won't free element's data uppon destruction */

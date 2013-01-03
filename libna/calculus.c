@@ -1,6 +1,5 @@
 #include <math.h>
 
-#include "na/function.h"
 #include "na/calculus.h"
 #include "na/interpolation.h"
 

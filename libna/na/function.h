@@ -1,7 +1,7 @@
 #ifndef _FUNCTION_H_
 #define _FUNCTION_H_
 
-typedef struct _function_t function_t;
+typedef struct function_t function_t;
 
 function_t * function_create(const char *func);
 void function_destroy(function_t *f);

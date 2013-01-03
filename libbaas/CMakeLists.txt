@@ -30,6 +30,7 @@ DESTINATION include/baas)
 
 ######### testing #########
 enable_testing()
+include_directories(BEFORE .)
 
 add_executable(test_bignum test/test_bignum.c bignum.c)
 add_executable(test_bits test/test_bits.c bits.c)

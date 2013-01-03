@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "baas/hashtbl.h"
-#include "baas/list.h"
 #include "parser-priv.h"
 
 

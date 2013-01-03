@@ -1,11 +1,8 @@
 #ifndef _PARSER_PRIV_H_
 #define _PARSER_PRIV_H_
 
-#include "parser/lexer.h"
-
-typedef struct _list_t list_t;
-typedef struct _hashtbl_t hashtbl_t;
-typedef struct _expr_t expr_t;
+#include "parser/parser.h"
+#include "baas/list.h"
 
 /* precedence relation between two operators */
 typedef enum {

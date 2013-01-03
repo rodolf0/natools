@@ -2,10 +2,9 @@
 #define _GRAPH_H_
 
 #include "common.h"
+#include "list.h"
 
-typedef struct _list_t list_t;
-
-typedef struct _graph_vertex {
+typedef struct graph_vertex_t {
   /* keep a list of reachable vertex */
   list_t *edges;
   /* vertex data */
@@ -17,20 +16,20 @@ typedef struct _graph_vertex {
     /* times of pre visit / post visit */
     int pre_clock, post_clock;
     /* node from wich this was reached */
-    struct _graph_vertex *prev;
+    struct graph_vertex_t *prev;
     /* total distance to here */
     double distance;
   } path;
 } graph_vertex_t;
 
-typedef struct _graph_edge {
+typedef struct graph_edge_t {
   /* vertex that the edge connects to */
   graph_vertex_t *connection;
   /* edge traversal cost */
   double weight;
 } graph_edge_t;
 
-typedef struct _graph {
+typedef struct graph_t {
   list_t *vertex;
   /* function to free vertex data */
   free_func_t free;

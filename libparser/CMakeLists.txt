@@ -20,6 +20,7 @@ DESTINATION include/parser)
 
 ######### testing #########
 enable_testing()
+include_directories(BEFORE .)
 
 add_executable(test_scanner test/test_scanner.c)
 target_link_libraries(test_scanner parser)

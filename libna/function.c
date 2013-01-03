@@ -1,14 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "parser/lexer.h"
+#include "na/function.h"
 #include "parser/parser.h"
-#include "baas/hashtbl.h"
 
-typedef struct _function_t {
+struct function_t {
   expr_t *expr;
   hashtbl_t *vars;
-} function_t;
+};
 
 function_t * function_create(const char *func) {
   function_t *f = malloc(sizeof(function_t));

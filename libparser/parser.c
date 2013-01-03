@@ -4,10 +4,6 @@
 #include <sys/types.h>
 
 #include "parser-priv.h"
-#include "baas/list.h"
-#include "baas/hashtbl.h"
-#include "parser/scanner.h"
-#include "parser/parser.h"
 
 
 /* map a lexical component type to an index in the precedence matrix */
