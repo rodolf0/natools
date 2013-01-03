@@ -54,7 +54,8 @@ ssize_t vector_insert(vector_t *v, ssize_t idx, void *data) {
     return -2;
   vector_recapacitate(v);
   /* make room for the new element */
-  memmove(v->data + idx + 1, v->data + idx, sizeof(void*) * (v->size - idx));
+  if ((size_t)idx < v->size)
+    memmove(v->data + idx + 1, v->data + idx, sizeof(void*) * (v->size - idx));
   v->data[idx] = data;
   v->size++;
   return idx;
@@ -71,7 +72,8 @@ void vector_remove(vector_t *v, ssize_t idx) {
   if (v->free)
     v->free(v->data[idx]);
   /* overwrite the old element */
-  memmove(v->data + idx, v->data + idx + 1, sizeof(void*) * (v->size-idx-1));
+  if ((size_t)idx < v->size - 1)
+    memmove(v->data + idx, v->data + idx + 1, sizeof(void*) * (v->size-idx-1));
   v->size--;
   vector_recapacitate(v);
 }
