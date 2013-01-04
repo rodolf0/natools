@@ -49,3 +49,6 @@ add_test(heap test_heap)
 add_test(list test_list)
 add_test(sort test_sort)
 add_test(vector test_vector)
+
+####### benchmarking ######
+add_executable(benchmark_append test/benchmark_append.c vector.c list.c bstree.c hashtbl.c)
