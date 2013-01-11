@@ -98,6 +98,7 @@ int main(void) {
 
   fprintf(stderr, "Vector: %d, List: %d, BSTree: %d, HashTbl: %d\n",
           tv, tl, tt, th);
+	return 0;
 }
 
 /* vim: set sw=2 sts=2 : */
