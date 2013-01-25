@@ -10,6 +10,7 @@ add_library(baas SHARED
   vector.c
   xstring.c
 )
+set_target_properties(baas PROPERTIES COMPILE_FLAGS -DNDEBUG)
 
 install(TARGETS baas LIBRARY DESTINATION lib)
 install(FILES

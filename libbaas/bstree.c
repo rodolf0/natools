@@ -1,9 +1,7 @@
 #include <stdlib.h>
-#include "baas/bstree.h"
-
-#ifdef _DEBUG_
 #include <assert.h>
-#endif
+
+#include "baas/bstree.h"
 
 
 /* functions for internal use only, not static to allow testing n hacking */
@@ -157,16 +155,12 @@ static bst_node_t * bstree_fix_double_red(bstree_t *t, bst_node_t *n) {
   if (!t || !n || !n->parent)
     return NULL;
 
-#ifdef _DEBUG_
   assert(n->color == red && n->parent->color == red);
-#endif
   if (n->color != red || n->parent->color != red)
     return NULL;
 
   bst_node_t *g = grandparent(n);
-#ifdef _DEBUG_
   assert(g->color == black || g->color == double_black);
-#endif
   /* if red nodes are in zigzag, then align them */
   if (n == n->parent->r && n->parent == g->l) {
     bstree_rotate_left(t, n->parent);
@@ -183,9 +177,7 @@ static bst_node_t * bstree_fix_double_red(bstree_t *t, bst_node_t *n) {
     bstree_rotate_left(t, g);
   }
 
-#ifdef _DEBUG_
   assert(g->color == black || g->color == double_black);
-#endif
   if (g->color == black) {
     n->color = black;
     n->parent->color = red;
@@ -213,9 +205,7 @@ static inline bst_node_t * bstree_check_two_reds(bstree_t *t, bst_node_t *n) {
 static void bstree_fix_negative_black(bstree_t *t, bst_node_t *n) {
   if (!t || !n || !n->parent)
     return;
-#ifdef _DEBUG_
   assert(n->color == negative_black && n->parent->color == double_black);
-#endif
 
   n->color = black;
   n->parent->color = black;
@@ -237,10 +227,7 @@ static void bstree_bubble_up(bstree_t *t, bst_node_t *n) {
   if (!t || !n)
     return;
 
-#ifdef _DEBUG_
   assert(n->color == double_black || n->color == black);
-#endif
-
   if (n->color == double_black)
     n->color = black;
   else if (n->color == black)
@@ -261,9 +248,7 @@ static void bstree_bubble_up(bstree_t *t, bst_node_t *n) {
 
     bst_node_t *xs;
     if (s && s->color == negative_black) {
-#ifdef _DEBUG_
       assert(s->parent->color == double_black);
-#endif
       bstree_fix_negative_black(t, s);
     } else if (s && s->color == red) {
       if ((xs = bstree_check_two_reds(t, s)))
