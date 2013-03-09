@@ -25,7 +25,7 @@ void print_variables(hashtbl_t *v) {
   size_t j, n = hashtbl_keys(v, &keys);
   for (j = 0; j < n; j++) {
     long double *d = (long double*)hashtbl_get(vars, keys[j]);
-    printf("%s: %.20Lg\n", keys[j], *d);
+    printf("%s: %.15Lg\n", keys[j], *d);
     free(keys[j]);
   }
   free(keys);
@@ -53,7 +53,7 @@ int parse_expression(lexer_t *l) {
   int err = parser_eval(e, &r, vars);
   parser_destroy_expr(e);
   if (!err)
-    printf("%.20Lg\n", r);
+    printf("%.15Lg\n", r);
   return err;
 }
 
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
     write_history(histfile);
 
   } else while (optind < argc) {
-    printf("%.20Lg\n", parser_qeval(argv[optind++]));
+    printf("%.15Lg\n", parser_qeval(argv[optind++]));
   }
 
   hashtbl_destroy(vars);

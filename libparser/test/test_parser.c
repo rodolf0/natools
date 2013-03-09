@@ -139,7 +139,7 @@ void check_longer(void) {
 
 int main(void) {
   vars = hashtbl_init(free, NULL, 0);
-  /*fprintf(stderr, "%.25Lg\n", evaluate(argv[1]));*/
+  /*fprintf(stderr, "%.15Lg\n", evaluate(argv[1]));*/
   check_operators();
   check_functions();
   check_precedence();

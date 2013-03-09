@@ -162,7 +162,7 @@ int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, long double *
       break;
 
     if (root_search_verbose)
-      fprintf(stderr, "i=%zu: x=%.20Lg f(x)=%.20Lg\n", j, m, fm);
+      fprintf(stderr, "i=%zu: x=%.15Lg f(x)=%.15Lg\n", j, m, fm);
   }
 
   *r = m;
