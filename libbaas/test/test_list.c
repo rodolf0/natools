@@ -101,6 +101,12 @@ int * dupfunc(int *x) {
   *r = *x * 2;
   return r;
 }
+int minimum;
+void check_order(int *x) {
+  assert(minimum <= *x);
+  minimum = *x;
+}
+
 /* end of aux test functions*/
 
 
@@ -137,58 +143,40 @@ int test_listops(list_t *l) {
   size_t lsize = l->size;
 
   /* check duplication */
-  list_t *a, *b;
   list_t *l2 = list_dup(l);
   l2->free = NULL; /* avoid double free hereafter */
   assert(l2->size == lsize);
 
   /* check splits n concats */
+  list_t *a, *b;
   list_split_half(l2, &a, &b);
   assert(a->size + b->size == lsize);
   /* test duplication after split */
   list_t *c = list_dup(a);
   list_t *d = list_dup(b);
-  assert(c->size + d->size == lsize);
   assert(c->size == a->size);
   assert(d->size == b->size);
   /* check concatenation */
   l2 = list_concat(a, b);
   assert(l2->size == lsize);
-  /* check re-split */
-  list_split_half(l2, &a, &b);
-  assert(a->size + b->size == lsize);
-  assert(a->size == c->size);
-  assert(b->size == d->size);
-
-  /* check merge */
-  l2 = list_merge(a, b);
-  assert(l2->size == lsize);
-  int csize = c->size, dsize = d->size;
-  l2 = list_merge(l2, c);
-  assert(l2->size == lsize + csize);
-  l2 = list_merge(l2, d);
-  assert(l2->size == lsize + csize + dsize);
 
   /* check merge sort */
   l2 = list_mergesort(l2);
-  assert(l2->size == lsize + csize + dsize);
-  int prev = (l2->first ? *(int*)l2->first->data : 0);
-  list_node_t *ln;
-  for (ln = l2->first; ln; ln = ln->next) {
-    assert(*(int*)ln->data >= prev);
-    prev = *(int*)ln->data;
-  }
-  /* reverse sort order */
-  l2->cmp = (cmp_func_t)intcmp_r;
-  l2 = list_mergesort(l2);
-  assert(l2->size == lsize + csize + dsize);
-  prev = (l2->first ? *(int*)l2->first->data : 223456789);
-  for (ln = l2->first; ln; ln = ln->next) {
-    assert(*(int*)ln->data <= prev);
-    prev = *(int*)ln->data;
-  }
-
+  minimum = 0;
+  list_foreach(l2, (void (*)(void*))check_order);
   list_destroy(l2);
+
+  c = list_mergesort(c);
+  d = list_mergesort(d);
+  minimum = 0; list_foreach(c, (void (*)(void*))check_order);
+  minimum = 0; list_foreach(d, (void (*)(void*))check_order);
+
+  /* check merge */
+  l2 = list_merge(c, d);
+  assert(l2->size == lsize);
+  minimum = 0; list_foreach(l2, (void (*)(void*))check_order);
+  list_destroy(l2);
+
   return 0;
 }
 
