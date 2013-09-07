@@ -1,13 +1,18 @@
 /* use GNU_SOURCE for long double constants */
+#ifndef __USE_GNU
 #define __USE_GNU
+#endif
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
+
 #include <math.h>
 #include <stdlib.h>
 
 #include "parser-priv.h"
 
 static inline long double pop_arg(list_t *args) {
-  long double *a = list_pop(args);
+  long double *a = (long double*)list_pop(args);
   long double r = *a;
   free(a);
   return r;
@@ -99,39 +104,39 @@ long double _round(list_t *args, size_t n) {
 #pragma GCC diagnostic pop
 
 void register_functions(hashtbl_t *h) {
-  hashtbl_insert(h, "max(", _max);
-  hashtbl_insert(h, "min(", _min);
-  hashtbl_insert(h, "sum(", _sum);
-  hashtbl_insert(h, "avg(", _avg);
-  hashtbl_insert(h, "random(", _random);
-  hashtbl_insert(h, "abs(", _abs);
+  hashtbl_insert(h, "max(", (void*)_max);
+  hashtbl_insert(h, "min(", (void*)_min);
+  hashtbl_insert(h, "sum(", (void*)_sum);
+  hashtbl_insert(h, "avg(", (void*)_avg);
+  hashtbl_insert(h, "random(", (void*)_random);
+  hashtbl_insert(h, "abs(", (void*)_abs);
 
-  hashtbl_insert(h, "sin(", _sin);
-  hashtbl_insert(h, "cos(", _cos);
-  hashtbl_insert(h, "tan(", _tan);
-  hashtbl_insert(h, "asin(", _asin);
-  hashtbl_insert(h, "acos(", _acos);
-  hashtbl_insert(h, "atan(", _atan);
-  hashtbl_insert(h, "atan2(", _atan2);
-  hashtbl_insert(h, "log(", _log);
-  hashtbl_insert(h, "exp(", _exp);
+  hashtbl_insert(h, "sin(", (void*)_sin);
+  hashtbl_insert(h, "cos(", (void*)_cos);
+  hashtbl_insert(h, "tan(", (void*)_tan);
+  hashtbl_insert(h, "asin(", (void*)_asin);
+  hashtbl_insert(h, "acos(", (void*)_acos);
+  hashtbl_insert(h, "atan(", (void*)_atan);
+  hashtbl_insert(h, "atan2(", (void*)_atan2);
+  hashtbl_insert(h, "log(", (void*)_log);
+  hashtbl_insert(h, "exp(", (void*)_exp);
 
-  hashtbl_insert(h, "gamma(", _gamma);
-  hashtbl_insert(h, "round(", _round);
+  hashtbl_insert(h, "gamma(", (void*)_gamma);
+  hashtbl_insert(h, "round(", (void*)_round);
 }
 
 void register_constants(hashtbl_t *h) {
   long double *x;
-  x = malloc(sizeof(long double)); *x = M_PIl;
+  x = (long double*)malloc(sizeof(long double)); *x = M_PIl;
   hashtbl_insert(h, "pi", x);
 
-  x = malloc(sizeof(long double)); *x = M_El;
+  x = (long double*)malloc(sizeof(long double)); *x = M_El;
   hashtbl_insert(h, "e", x);
 
-  x = malloc(sizeof(long double)); *x = (1.0 + sqrtl(5)) / 2.0;
+  x = (long double*)malloc(sizeof(long double)); *x = (1.0 + sqrtl(5)) / 2.0;
   hashtbl_insert(h, "phi", x);
 
-  x = malloc(sizeof(long double)); *x = 27021984;
+  x = (long double*)malloc(sizeof(long double)); *x = 27021984;
   hashtbl_insert(h, "_stashed", x);
 }
 

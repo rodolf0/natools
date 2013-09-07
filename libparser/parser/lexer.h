@@ -36,7 +36,7 @@ typedef struct token_t {
   char *lexem;
 } token_t;
 
-token_t * token_init(lexcomp_t lexcomp, char *lexem);
+token_t * token_init(lexcomp_t lexcomp, const char *lexem);
 void token_destroy(token_t *t);
 
 /* extract token from the stream (user must later free) */

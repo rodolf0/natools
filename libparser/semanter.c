@@ -1,4 +1,6 @@
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,7 +10,7 @@
 
 
 symbol_t * symbol_number(long double d) {
-  symbol_t *s = malloc(sizeof(symbol_t));
+  symbol_t *s = (symbol_t*)malloc(sizeof(symbol_t));
   s->type = stNumber;
   s->number = d;
   return s;
@@ -16,7 +18,7 @@ symbol_t * symbol_number(long double d) {
 
 symbol_t * symbol_variable(char *varname) {
   int len = strlen(varname);
-  symbol_t *s = malloc(sizeof(symbol_t) + len + 1);
+  symbol_t *s = (symbol_t*)malloc(sizeof(symbol_t) + len + 1);
   s->type = stVariable;
   s->variable = (char*)s + sizeof(symbol_t);
   memmove(s->variable, varname, len);
@@ -25,7 +27,7 @@ symbol_t * symbol_variable(char *varname) {
 }
 
 symbol_t * symbol_operator(lexcomp_t lc) {
-  symbol_t *s = malloc(sizeof(symbol_t));
+  symbol_t *s = (symbol_t*)malloc(sizeof(symbol_t));
   if (lc == tokUnaryMinus || lc == tokBitNot || lc == tokNot)
     s->type = stUniOperator;
   else
@@ -36,7 +38,7 @@ symbol_t * symbol_operator(lexcomp_t lc) {
 
 symbol_t * symbol_function(char *funcname, size_t nargs) {
   int len = strlen(funcname);
-  symbol_t *s = malloc(sizeof(symbol_t) + len + 1);
+  symbol_t *s = (symbol_t*)malloc(sizeof(symbol_t) + len + 1);
   s->type = stFunction;
   s->func.name = (char*)s + sizeof(symbol_t);
   memmove(s->func.name, funcname, len);
@@ -124,7 +126,7 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
 
     switch (s->type) {
       case stNumber:
-        d = malloc(sizeof(long double));
+        d = (long double*)malloc(sizeof(long double));
         *d = s->number;
         list_push(args, d);
         break;
@@ -144,14 +146,14 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
           list_destroy(args);
           return 1;
         }
-        d = malloc(sizeof(long double));
+        d = (long double*)malloc(sizeof(long double));
         *d = *v;
         list_push(args, d);
         break;
 
       case stBinOperator:
         /* rhs operand */
-        if (!(v = list_pop(args))) {
+        if (!(v = (long double*)list_pop(args))) {
 #ifdef _VERBOSE_
           fprintf(stderr, "eval error: missing rhs operand\n");
 #endif
@@ -160,7 +162,7 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
         }
       case stUniOperator:
         /* lhs operand, don't pop it... use it to store the result too */
-        if (!(d = list_peek_head(args))) {
+        if (!(d = (long double*)list_peek_head(args))) {
 #ifdef _VERBOSE_
           fprintf(stderr, "eval error: missing lhs operand\n");
 #endif
@@ -172,14 +174,14 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
         break;
 
       case stFunction:
-        if (!(f = hashtbl_get(functions, s->func.name))) {
+        if (!(f = (long double(*)(list_t*, size_t))hashtbl_get(functions, s->func.name))) {
 #ifdef _VERBOSE_
           fprintf(stderr, "eval error: unknown function [%s]\n", s->func.name);
 #endif
           list_destroy(args);
           return 1;
         }
-        d = malloc(sizeof(long double));
+        d = (long double*)malloc(sizeof(long double));
         *d = f(args, s->func.nargs);
         list_push(args, d);
         break;

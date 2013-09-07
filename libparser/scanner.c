@@ -43,7 +43,7 @@ scanner_t * scanner_init_fp(FILE *fp) {
 }
 
 scanner_t *scanner_init(const char *buffer) {
-  scanner_t *s = malloc(sizeof(scanner_t));
+  scanner_t *s = (scanner_t*)malloc(sizeof(scanner_t));
   memset(s, 0, sizeof(scanner_t));
   s->length = s->start = 0;
   s->buf_cap = s->buf_sz = strlen(buffer);

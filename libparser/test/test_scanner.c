@@ -6,14 +6,14 @@
 #include "parser/scanner.h"
 
 char * test_accept_fn(char *start, size_t len) {
-  char *r = malloc(sizeof(char) * len + 1);
+  char *r = (char*)malloc(sizeof(char) * len + 1);
   memcpy(r, start, len);
   r[len] = '\0';
   return r;
 }
 
 void test_buffer_walk(void) {
-  char *b = "this is a small test buffer";
+  const char *b = "this is a small test buffer";
   scanner_t *s = scanner_init(b);
 
   assert(scanner_peek(s) == 't');
@@ -26,9 +26,9 @@ void test_buffer_walk(void) {
   assert(scanner_advance(s) == ' ');
   assert(scanner_backup(s) == 's');
 
-  char *this = (char*)scanner_accept(s, (acceptfn)test_accept_fn);
-  assert(strcmp(this, "this") == 0);
-  free(this);
+  char *xthis = (char*)scanner_accept(s, (acceptfn)test_accept_fn);
+  assert(strcmp(xthis, "this") == 0);
+  free(xthis);
 
   size_t i = 4;
   char c;
@@ -60,7 +60,7 @@ void test_file_walk(const char *file) {
 
 
 void test_eof_bof(void) {
-  char *b = "test";
+  const char *b = "test";
   scanner_t *s = scanner_init(b);
 
   assert(scanner_peek(s) == 't');
@@ -89,7 +89,7 @@ void test_eof_bof(void) {
 }
 
 void test_eof_bof_after_accept(void) {
-  char *b = "test this";
+  const char *b = "test this";
   scanner_t *s = scanner_init(b);
 
   assert(scanner_advance(s) == 't');
