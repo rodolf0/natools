@@ -1,4 +1,6 @@
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h> /* uint32_t */
@@ -88,7 +90,7 @@ static void hashtbl_rehash(hashtbl_t *h) {
 }
 
 
-hash_elem_t * hashtbl_insert(hashtbl_t *h, char *key, void *data) {
+hash_elem_t * hashtbl_insert(hashtbl_t *h, const char *key, void *data) {
   if (!h)
     return NULL;
   size_t b = h->hash((unsigned char*)key) % h->bktnum;
@@ -134,7 +136,7 @@ void hashtbl_remove(hashtbl_t *h, hash_elem_t *e) {
 }
 
 
-void * hashtbl_get(hashtbl_t *h, char *key) {
+void * hashtbl_get(hashtbl_t *h, const char *key) {
   if (!h)
     return NULL;
   size_t b = h->hash((unsigned char*)key) % h->bktnum;
@@ -147,7 +149,7 @@ void * hashtbl_get(hashtbl_t *h, char *key) {
 }
 
 
-void hashtbl_delete(hashtbl_t *h, char *key) {
+void hashtbl_delete(hashtbl_t *h, const char *key) {
   if (!h)
     return;
   size_t b = h->hash((unsigned char*)key) % h->bktnum;
@@ -185,7 +187,7 @@ hash_elem_t * hashtbl_find(hashtbl_t *h, void *data) {
       vector_t *v = h->buckets[i];
       for (j = 0; j < v->size; j++)
         if (h->cmp(((hash_elem_t*)vector_get(v, j))->data, data) == 0)
-          return vector_get(v, j);
+          return (hash_elem_t*)vector_get(v, j);
     }
   return NULL;
 }

@@ -5,7 +5,7 @@
 #include "baas/list.h"
 
 graph_t * graph_init(free_func_t vfree) {
-  graph_t *g = malloc(sizeof(graph_t));
+  graph_t *g = (graph_t*)malloc(sizeof(graph_t));
   /* let stdlib's free clean graph_vertex_t structures */
   g->vertex = list_init(free, NULL);
   g->free = vfree; /* this one is for node data */
@@ -27,7 +27,7 @@ void graph_destroy(graph_t *g) {
 }
 
 graph_vertex_t * graph_add_vertex(graph_t *g, void *d) {
-  graph_vertex_t *v = malloc(sizeof(graph_vertex_t));
+  graph_vertex_t *v = (graph_vertex_t*)malloc(sizeof(graph_vertex_t));
   v->data = d;
   v->edges = NULL;
   /* add tracking info  */
@@ -40,7 +40,7 @@ graph_vertex_t * graph_add_vertex(graph_t *g, void *d) {
 
 graph_edge_t * graph_add_edge(graph_vertex_t *orig,
                     graph_vertex_t *dest, double weight) {
-  graph_edge_t *e = malloc(sizeof(graph_edge_t));
+  graph_edge_t *e = (graph_edge_t*)malloc(sizeof(graph_edge_t));
   e->connection = dest;
   e->weight = weight;
   /* provide free func to clean up on graph_edge_t alloc's */
@@ -80,7 +80,7 @@ void graph_explore_dfs(graph_t *g, graph_vertex_t *s, graph_vertex_t *e,
   list_t *stack = list_init(NULL, NULL);
   list_push(stack, s);
 
-  while ((s = list_peek_head(stack))) {
+  while ((s = (graph_vertex_t*)list_peek_head(stack))) {
     int clock = 0;
     list_node_t *it;
     /* break if searching for a specific destination */
@@ -88,7 +88,7 @@ void graph_explore_dfs(graph_t *g, graph_vertex_t *s, graph_vertex_t *e,
 
     /* back at the parent: call post-operations */
     if (s->path.visited) {
-      s = list_pop(stack);
+      s = (graph_vertex_t*)list_pop(stack);
       if (post) post(s);
       s->path.post_clock = clock++;
       continue;
@@ -122,7 +122,7 @@ void graph_explore_bfs(graph_t *g, graph_vertex_t *s, graph_vertex_t *e,
   list_t *queue = list_init(NULL, NULL);
   list_queue(queue, s);
 
-  while ((s = list_pop(queue))) {
+  while ((s = (graph_vertex_t*)list_pop(queue))) {
     int clock = 0;
     list_node_t *it;
     /* break if searching for a specific destination */
@@ -163,7 +163,7 @@ void graph_explore_dijkstra(graph_t *g, graph_vertex_t *s,
   heap_t *prioq = heap_init(NULL, (cmp_func_t)min_path_cmp);
   heap_insert(prioq, s);
 
-  while ((s = heap_pop(prioq))) {
+  while ((s = (graph_vertex_t*)heap_pop(prioq))) {
     int clock = 0;
     list_node_t *it;
     /* break if searching for a specific destination */

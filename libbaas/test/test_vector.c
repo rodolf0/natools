@@ -1,4 +1,6 @@
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -36,7 +38,7 @@ vector_t * generate_test_vector(void) {
       case 2:
       case 3:
         idx = -(random() % (1+v->size));
-        e = malloc(sizeof(int)); *e = random() % 123456789;
+        e = (int*)malloc(sizeof(int)); *e = random() % 123456789;
         n++; sum += *e;
         vector_insert(v, idx, e);
         break;
@@ -45,7 +47,7 @@ vector_t * generate_test_vector(void) {
       case 6:
       case 7:
         idx = random() % (1+v->size);
-        e = malloc(sizeof(int)); *e = random() % 123456789;
+        e = (int*)malloc(sizeof(int)); *e = random() % 123456789;
         n++; sum += *e;
         vector_insert(v, idx, e);
         break;
@@ -54,7 +56,7 @@ vector_t * generate_test_vector(void) {
       case 10:
         if (!v->size) break;
         idx = random() % v->size;
-        e = vector_get(v, idx);
+        e = (int*)vector_get(v, idx);
         n--; sum -= *e;
         vector_remove(v, idx);
         break;
@@ -63,7 +65,7 @@ vector_t * generate_test_vector(void) {
       case 13:
         if (!v->size) break;
         idx = -(random() % (1+v->size));
-        e = vector_get(v, idx);
+        e = (int*)vector_get(v, idx);
         n--; sum -= *e;
         vector_remove(v, idx);
         break;
@@ -72,9 +74,9 @@ vector_t * generate_test_vector(void) {
       case 16:
         if (!v->size) break;
         idx = -(random() % (1+v->size));
-        e = vector_get(v, idx);
+        e = (int*)vector_get(v, idx);
         sum -= *e;
-        e = malloc(sizeof(int)); *e = random() % 123456789;
+        e = (int*)malloc(sizeof(int)); *e = random() % 123456789;
         sum += *e;
         vector_set(v, idx, e);
         break;
@@ -83,9 +85,9 @@ vector_t * generate_test_vector(void) {
       case 19:
         if (!v->size) break;
         idx = random() % v->size;
-        e = vector_get(v, idx);
+        e = (int*)vector_get(v, idx);
         sum -= *e;
-        e = malloc(sizeof(int)); *e = random() % 123456789;
+        e = (int*)malloc(sizeof(int)); *e = random() % 123456789;
         sum += *e;
         vector_set(v, idx, e);
         break;
@@ -104,9 +106,9 @@ vector_t * generate_test_vector(void) {
 void test_search(vector_t *v) {
   int i;
   for (i = 0; i < 100; i++) {
-    int *search = vector_get(v, random() % v->size);
+    int *search = (int*)vector_get(v, random() % v->size);
     if (!search) continue; /* after resize lots of null elems */
-    int *find = vector_get(v, vector_find(v, search));
+    int *find = (int*)vector_get(v, vector_find(v, search));
     assert(*search == *find);
   }
 }

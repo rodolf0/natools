@@ -9,7 +9,7 @@ vector_t * vector_init(free_func_t f, cmp_func_t c) {
   vector_t *v = (vector_t*)malloc(sizeof(vector_t));
   v->cap = VECTOR_INIT_CAPACITY;
   v->size = 0;
-  v->data = malloc(v->cap * sizeof(void*));
+  v->data = (void**)malloc(v->cap * sizeof(void*));
   v->free = f;
   v->cmp = c;
   return v;
@@ -34,10 +34,10 @@ static inline void vector_recapacitate(vector_t *v) {
   /* WARNING: if realloc fails we loose our data pointer */
   if (v->size + 1 == v->cap) {
     v->cap *= 2;
-    v->data = realloc(v->data, sizeof(void*) * v->cap);
+    v->data = (void**)realloc(v->data, sizeof(void*) * v->cap);
   } else if (v->size > VECTOR_INIT_CAPACITY && v->size < v->cap/3) {
     v->cap = (v->cap/2 < VECTOR_INIT_CAPACITY ? VECTOR_INIT_CAPACITY:v->cap/2);
-    v->data = realloc(v->data, sizeof(void*) * v->cap);
+    v->data = (void**)realloc(v->data, sizeof(void*) * v->cap);
   }
 }
 
@@ -114,7 +114,7 @@ void vector_resize(vector_t *v, const size_t len) {
   if (len > v->cap) {
     while (len > v->cap)
       v->cap *= 2;
-    v->data = realloc(v->data, sizeof(void*) * v->cap);
+    v->data = (void**)realloc(v->data, sizeof(void*) * v->cap);
   }
   if (len > v->size) {
     memset(v->data + v->size, 0, sizeof(void*) * (len - v->size));
@@ -123,7 +123,7 @@ void vector_resize(vector_t *v, const size_t len) {
 }
 
 
-ssize_t vector_find(vector_t *v, void *data) {
+ssize_t vector_find(vector_t *v, const void *data) {
   if (!v || !v->cmp)
     return -2;
   size_t i;

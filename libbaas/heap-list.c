@@ -6,9 +6,9 @@
 
 /* creates a heap out of a list */
 heap_t * heap_heapify_list(list_t *l) {
-  heap_t *h = malloc(sizeof(heap_t));
+  heap_t *h = (heap_t*)malloc(sizeof(heap_t));
   h->bufsz = l->size;
-  h->data = malloc(h->bufsz * sizeof(void *));
+  h->data = (void**)malloc(h->bufsz * sizeof(void *));
   h->free = NULL; /* l->free will result in double free */
   h->cmp = l->cmp;
   h->size = 0;

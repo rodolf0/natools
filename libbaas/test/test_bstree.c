@@ -1,4 +1,6 @@
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -98,14 +100,14 @@ void generate_test_tree(int allow_dups) {
 #endif
       case 0:
       case 1:
-        e = malloc(sizeof(int)); *e = random() % 512;
+        e = (int*)malloc(sizeof(int)); *e = random() % 512;
         n++; sum += *e;
         bstree_insert(t, e);
         inserted++;
         break;
       case 2:
         /* try n find a possibly inserted number to remove it */
-        e = malloc(sizeof(int)); *e = random() % 512;
+        e = (int*)malloc(sizeof(int)); *e = random() % 512;
         node = bstree_find(t, e);
         if (node) {
           n--; sum -= *(int*)node->data;

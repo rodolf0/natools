@@ -1,4 +1,6 @@
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -23,25 +25,25 @@ list_t * generate_test_list(void) {
       case 0:
       case 1:
       case 2:
-        e = malloc(sizeof(int)); *e = random() % 123456789;
+        e = (int*)malloc(sizeof(int)); *e = random() % 123456789;
         n++; sum += *e;
         list_push(l, e);
         break;
       case 3:
       case 4:
       case 5:
-        e = malloc(sizeof(int)); *e = random() % 123456789;
+        e = (int*)malloc(sizeof(int)); *e = random() % 123456789;
         n++; sum += *e;
         list_queue(l, e);
         break;
       case 6:
       case 7:
-        e = list_pop(l);
+        e = (int*)list_pop(l);
         if (e) { n--; sum -= *e; free(e); }
         break;
       case 8:
       case 9:
-        e = list_dequeue(l);
+        e = (int*)list_dequeue(l);
         if (e) { n--; sum -= *e; free(e); }
         break;
       case 10:
@@ -97,7 +99,7 @@ void acumulate(int *x) {
   totalsum += *x;
 }
 int * dupfunc(int *x) {
-  int *r = malloc(sizeof(int));
+  int *r = (int*)malloc(sizeof(int));
   *r = *x * 2;
   return r;
 }

@@ -1,4 +1,6 @@
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,7 +18,7 @@ int int_cmp(const int *a, const int *b) {
 
 /****** Data generation ********/
 int * generate_random_ints(int n) {
-  int i, *r = malloc(sizeof(int) * n);
+  int i, *r = (int*)malloc(sizeof(int) * n);
   for (i = 0; i < n; i++)
     r[i] = random() % 1024;
   return r;
@@ -28,13 +30,13 @@ void free_random_ints(int *r) {
 
 char ** generate_random_strings(int n) {
   int i, j;
-  char *alphanums = "abcdefghijklmnopqrstuvwxyz1234567890";
+  const char *alphanums = "abcdefghijklmnopqrstuvwxyz1234567890";
   int alphalen = strlen(alphanums);
 
-  char **r = malloc(sizeof(char*) * n);
+  char **r = (char**)malloc(sizeof(char*) * n);
   for (i = 0; i < n; i++) {
     int len = 1 + random() % 255;
-    r[i] = malloc(sizeof(char) * len);
+    r[i] = (char*)malloc(sizeof(char) * len);
     for (j = 0; j < len; j++)
       r[i][j] = alphanums[random() % alphalen];
     r[i][len-1] = '\0';
@@ -63,13 +65,13 @@ void check_ordered(void *elems, int n, int sz, cmp_func_t cmp) {
 void test_mergesort(void) {
   /* test with ints */
   int *ints = generate_random_ints(NUM_ELEMS);
-  int *sorted_i = mergesort(ints, NUM_ELEMS, sizeof(int), (cmp_func_t)int_cmp);
+  int *sorted_i = (int*)mergesort(ints, NUM_ELEMS, sizeof(int), (cmp_func_t)int_cmp);
   check_ordered(sorted_i, NUM_ELEMS, sizeof(int), (cmp_func_t)int_cmp);
   free(sorted_i);
   free_random_ints(ints);
   /* test with chars */
   char **chars = generate_random_strings(NUM_ELEMS);
-  char **sorted_c = mergesort(chars, NUM_ELEMS, sizeof(char*),
+  char **sorted_c = (char**)mergesort(chars, NUM_ELEMS, sizeof(char*),
                               (cmp_func_t)str_cmp);
   check_ordered(sorted_c, NUM_ELEMS, sizeof(char*), (cmp_func_t)str_cmp);
   free(sorted_c);
@@ -95,7 +97,7 @@ void test_selection(void) {
   /* test with ints */
   int *ints = generate_random_ints(NUM_ELEMS);
   int k = random() % NUM_ELEMS; /* select the k'th elem */
-  int *e = selection(ints, NUM_ELEMS, k, sizeof(int), (cmp_func_t)int_cmp);
+  int *e = (int*)selection(ints, NUM_ELEMS, k, sizeof(int), (cmp_func_t)int_cmp);
   assert(ints[k] == *e);
   free_random_ints(ints);
 }

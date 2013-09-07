@@ -25,11 +25,11 @@ hashtbl_t * hashtbl_init(free_func_t f, cmp_func_t data_cmp, int allow_dups);
 void hashtbl_destroy(hashtbl_t *h);
 
 /* insert data or replace existent (insertion in unordered sets) */
-hash_elem_t * hashtbl_insert(hashtbl_t *h, char *key, void *data);
+hash_elem_t * hashtbl_insert(hashtbl_t *h, const char *key, void *data);
 void hashtbl_remove(hashtbl_t *h, hash_elem_t *e);
 
-void * hashtbl_get(hashtbl_t *h, char *key);
-void hashtbl_delete(hashtbl_t *h, char *key);
+void * hashtbl_get(hashtbl_t *h, const char *key);
+void hashtbl_delete(hashtbl_t *h, const char *key);
 
 void hashtbl_foreach(hashtbl_t *h, void (*f)(void*));
 hash_elem_t * hashtbl_find(hashtbl_t *h, void *data);

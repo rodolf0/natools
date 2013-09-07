@@ -26,7 +26,7 @@ static void bstree_fix_negative_black(bstree_t *t, bst_node_t *n);
 bstree_t * bstree_init(free_func_t tfree, cmp_func_t cmp, int allow_dups) {
   if (!cmp)
     return NULL;
-  bstree_t *t = malloc(sizeof(bstree_t));
+  bstree_t *t = (bstree_t*)malloc(sizeof(bstree_t));
   t->free = tfree;
   t->cmp = cmp;
   t->size = 0;
@@ -96,27 +96,27 @@ bst_node_t * bstree_create_child(bstree_t *t, bst_node_t *parent, void *data) {
   } else if (t->root)
     return NULL; /* can't insert root on a rooted tree */
 
-  bst_node_t *new = malloc(sizeof(bst_node_t));
-  new->parent = new->r = new->l = NULL;
-  new->data = data;
+  bst_node_t *xnew = (bst_node_t*)malloc(sizeof(bst_node_t));
+  xnew->parent = xnew->r = xnew->l = NULL;
+  xnew->data = data;
 
   if (!parent) {
-    t->root = new;
+    t->root = xnew;
   } else {
-    new->parent = parent;
+    xnew->parent = parent;
     if (cmp > 0)
-      parent->r = new;
+      parent->r = xnew;
     else
-      parent->l = new;
+      parent->l = xnew;
   }
 
 #ifdef _BALANCED_TREE_
-  new->color = red; /* choose red so that black height is not affected */
-  red_black_rebalance_insert(t, new);
+  xnew->color = red; /* choose red so that black height is not affected */
+  red_black_rebalance_insert(t, xnew);
 #endif
 
   t->size++;
-  return new;
+  return xnew;
 }
 
 

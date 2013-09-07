@@ -6,10 +6,10 @@
 heap_t * heap_init(free_func_t hfree, cmp_func_t hcmp) {
   if (!hcmp)
     return NULL;
-  heap_t *h = malloc(sizeof(heap_t));
+  heap_t *h = (heap_t*)malloc(sizeof(heap_t));
   h->bufsz = HEAP_INIT_SIZE;
   h->size = 0;
-  h->data = malloc(HEAP_INIT_SIZE * sizeof(void *));
+  h->data = (void**)malloc(HEAP_INIT_SIZE * sizeof(void *));
   h->free = hfree;
   h->cmp = hcmp;
   return h;
@@ -31,10 +31,10 @@ static inline void heap_resize(heap_t *h) {
   /* TODO: check realloc return value (may overwrite our cur value if fail) */
   if (h->size == h->bufsz) {
     h->bufsz *= 2;
-    h->data = realloc(h->data, sizeof(void*) * h->bufsz);
+    h->data = (void**)realloc(h->data, sizeof(void*) * h->bufsz);
   } else if (h->bufsz > HEAP_INIT_SIZE && h->size < h->bufsz/3) {
     h->bufsz = (h->bufsz/2 < HEAP_INIT_SIZE ? HEAP_INIT_SIZE : h->bufsz/2);
-    h->data = realloc(h->data, sizeof(void*) * h->bufsz);
+    h->data = (void**)realloc(h->data, sizeof(void*) * h->bufsz);
   }
 }
 
@@ -130,10 +130,10 @@ ssize_t heap_find(heap_t *h, void *e) {
 heap_t * heap_heapify(void *data, size_t n, size_t sz,
                       free_func_t hfree, cmp_func_t hcmp) {
   /* create the special formed heap */
-  heap_t *h = malloc(sizeof(heap_t));
+  heap_t *h = (heap_t*)malloc(sizeof(heap_t));
   h->bufsz = n; h->size = n;
   h->free = hfree; h->cmp = hcmp;
-  h->data = malloc(n * sizeof(void *));
+  h->data = (void**)malloc(n * sizeof(void *));
   /* set pointers to each of the elements of data */
   ssize_t i; // need sign to stop loop
   for (i = 0; i < (ssize_t)n; i++)

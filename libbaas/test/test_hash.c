@@ -1,4 +1,6 @@
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -30,8 +32,8 @@ hashtbl_t * generate_test_ht(int allow_dups) {
     switch (random() % 6) {
       case 0:
       case 1:
-      case 2:
-        e = malloc(sizeof(int)); *e = random() % 124789;
+      case 2: {
+        e = (int*)malloc(sizeof(int)); *e = random() % 124789;
         rk = (char*)malloc(32);
         sprintf(rk, "%d", *e);
         size_t prev_size = h->size;
@@ -41,18 +43,19 @@ hashtbl_t * generate_test_ht(int allow_dups) {
         else
           free(rk);
         n++; sum += *e;
+      }
         break;
       case 3:
         if (!h->size) continue;
-        rk = vector_get(v, random() % v->size);
-        e = hashtbl_get(h, rk);
+        rk = (char*)vector_get(v, random() % v->size);
+        e = (int*)hashtbl_get(h, rk);
         assert(atoi(rk) == *e);
         break;
       case 4:
         if (!h->size) continue;
         j = random() % v->size;
-        rk = vector_get(v, j);
-        e = hashtbl_get(h, rk);
+        rk = (char*)vector_get(v, j);
+        e = (int*)hashtbl_get(h, rk);
         n--; sum -= *e;
         hashtbl_delete(h, rk);
         vector_remove(v, j);
@@ -60,7 +63,7 @@ hashtbl_t * generate_test_ht(int allow_dups) {
       case 5:
         if (!h->size) continue;
         j = random() % v->size;
-        rk = vector_get(v, j);
+        rk = (char*)vector_get(v, j);
         int k = atoi(rk);
         f = hashtbl_find(h, &k);
         n--; sum -= *(int*)f->data;
@@ -76,7 +79,7 @@ hashtbl_t * generate_test_ht(int allow_dups) {
   if (allow_dups)
     assert(num_keys == h->size);
   for (j = 0; j < num_keys; j++) {
-    e = hashtbl_get(h, keys[j]);
+    e = (int*)hashtbl_get(h, keys[j]);
     assert(atoi(keys[j]) == *e);
     free(keys[j]);
   }
@@ -89,7 +92,7 @@ hashtbl_t * generate_test_ht(int allow_dups) {
     assert(sum == totalsum);
   } else {
     while (h->size) {
-      rk = vector_get(v, 0);
+      rk = (char*)vector_get(v, 0);
       hashtbl_delete(h, rk);
       assert(hashtbl_find(h, rk) == NULL);
       vector_remove(v, 0);
@@ -103,7 +106,7 @@ hashtbl_t * generate_test_ht(int allow_dups) {
 
 void check_hash_distribution(hashtbl_t *h) {
   int i;
-  int *bsz = malloc(sizeof(int) * h->bktnum);
+  int *bsz = (int*)malloc(sizeof(int) * h->bktnum);
 
   int min = 0, max = 0, empty = 0;
 
@@ -137,7 +140,7 @@ void check_hash_function(hash_func_t hf, size_t maxkeylen) {
   for (i = 0; i < nbkt * 100; i++) {
     // generate a random key
     size_t keylen = 2 + random() % maxkeylen;
-    unsigned char *key = malloc(keylen+1);
+    unsigned char *key = (unsigned char*)malloc(keylen+1);
     for (j = 0; j < keylen; j++)
       key[j] = 1 + random() % 254;
     key[keylen] = '\0';

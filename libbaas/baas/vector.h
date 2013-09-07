@@ -32,7 +32,7 @@ void vector_set(vector_t *v, ssize_t idx, void *data);
 void vector_resize(vector_t *v, const size_t len);
 
 /* retrieve the index where data is located or -1 */
-ssize_t vector_find(vector_t *v, void *data);
+ssize_t vector_find(vector_t *v, const void *data);
 
 void vector_foreach(vector_t *v, void (*f)(void*));
 
