@@ -127,10 +127,10 @@ void register_functions(hashtbl_t *h) {
 
 void register_constants(hashtbl_t *h) {
   long double *x;
-  x = (long double*)malloc(sizeof(long double)); *x = M_PIl;
+  x = (long double*)malloc(sizeof(long double)); *x = M_PI;
   hashtbl_insert(h, "pi", x);
 
-  x = (long double*)malloc(sizeof(long double)); *x = M_El;
+  x = (long double*)malloc(sizeof(long double)); *x = M_E;
   hashtbl_insert(h, "e", x);
 
   x = (long double*)malloc(sizeof(long double)); *x = (1.0 + sqrtl(5)) / 2.0;

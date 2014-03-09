@@ -13,6 +13,7 @@ add_definitions(
   -Wpointer-arith
   -Wcast-qual
   -Winline
+  -D_POSIX_C_SOURCE=200112
 )
 
 add_subdirectory(libbaas)
