@@ -1,6 +1,29 @@
 #include <stdlib.h>
 #include "baas/list.h"
 
+struct list_node_t {
+  struct list_node_t *prev;
+  struct list_node_t *next;
+  void *data;
+};
+
+struct list_t {
+  list_node_t *first;
+  list_node_t *last;
+
+  size_t size;
+  free_func_t free;
+  cmp_func_t cmp;
+};
+
+list_node_t *list_first(const list_t *l) { return l ? l->first : NULL; }
+list_node_t *list_last(const list_t *l) { return l ? l->last : NULL; }
+size_t list_size(const list_t *l) { return l ? l->size : 0; }
+
+list_node_t *list_node_next(const list_node_t *n) { return n ? n->next : NULL; }
+list_node_t *list_node_prev(const list_node_t *n) { return n ? n->prev : NULL; }
+void *list_node_data(const list_node_t *n) { return n ? n->data : NULL; }
+
 list_t * list_init(free_func_t lfree, cmp_func_t cmp) {
   list_t *l = (list_t*)malloc(sizeof(list_t));
   l->first = NULL;

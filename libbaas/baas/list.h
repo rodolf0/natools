@@ -3,24 +3,20 @@
 
 #include "common.h"
 
-typedef struct list_node_t {
-  struct list_node_t *prev;
-  struct list_node_t *next;
-  void *data;
-} list_node_t;
-
-typedef struct list_t {
-  list_node_t *first;
-  list_node_t *last;
-
-  size_t size;
-  free_func_t free;
-  cmp_func_t cmp;
-} list_t;
+typedef struct list_node_t list_node_t;
+typedef struct list_t list_t;
 
 /* constructor / destructor */
 list_t * list_init(free_func_t, cmp_func_t);
 void list_destroy(list_t *l);
+
+list_node_t *list_first(const list_t *l);
+list_node_t *list_last(const list_t *l);
+size_t list_size(const list_t *l);
+
+list_node_t *list_node_next(const list_node_t *n);
+list_node_t *list_node_prev(const list_node_t *n);
+void *list_node_data(const list_node_t *n);
 
 /* push and pop items at the head of the list */
 list_node_t * list_push(list_t *l, void *d);
