@@ -240,14 +240,14 @@ int list_cmp(const list_t *l, const list_t *o) {
     fprintf(stderr, "list cmp error: no comparison function\n");
     return 0;
   }
-  list_node_t *a = list_first(l),
-              *b = list_first(o);
+  list_node_t *a = l->first,
+              *b = o->first;
   while (a && b) {
-    int c = l->cmp(list_data(a), list_data(b));
+    int c = l->cmp(a->data, b->data);
     if (c < 0) return -1;
     if (c > 0) return 1;
-    a = list_next(a);
-    b = list_next(b);
+    a = a->next;
+    b = b->next;
   }
   if (a) return 1;
   if (b) return -1;
@@ -257,7 +257,7 @@ int list_cmp(const list_t *l, const list_t *o) {
 void list_reverse(list_t *l) {
   if (!l) return;
   list_node_t *t;
-  for (list_node_t *n = list_first(l); n; n = t) {
+  for (list_node_t *n = l->first; n; n = t) {
     t = n->next;
     /* reverse n's links */
     n->next = n->prev;
@@ -267,6 +267,31 @@ void list_reverse(list_t *l) {
   l->first = l->last;
   l->last = t;
   return;
+}
+
+void list_unique(list_t *l) {
+  if (!l || l->size < 2) return;
+  if (!l->cmp) {
+    fprintf(stderr, "list unique error: no comparison function\n");
+    return;
+  }
+  list_node_t *p = l->first;
+  for (list_node_t *n = p->next; p && n; n = p->next) {
+    if (l->cmp(p->data, n->data) == 0) {
+      if (l->free)
+        l->free(n->data);
+      /* drop n: make p skip n, link to next */
+      p->next = n->next;
+      if (n->next)
+        n->next->prev = p;
+      else
+        l->last = p;
+      l->size--;
+      free(n);
+    } else {
+      p = p->next;
+    }
+  }
 }
 
 list_t * list_concat(list_t *l1, list_t *l2) {

@@ -224,6 +224,25 @@ void test_reverse(list_t *l) {
   list_destroy(o);
 }
 
+void test_unique(list_t *l) {
+  if (list_size(l) < 2) return;
+  list_t *o = list_mergesort(list_dup(l));
+  /* count dups */
+  int dups = 0;
+  list_node_t *cur = list_first(o);
+  for (list_node_t *n = list_next(cur); cur && n; n = list_next(n)) {
+    if (*(int*)list_data(cur) == *(int*)list_data(n)) {
+      dups++;
+    } else {
+      cur = n;
+    }
+  }
+  list_unique(o);
+  assert_list(o);
+  assert(list_size(o) + dups == list_size(l));
+  list_destroy(o);
+}
+
 void test_concat(list_t *l) {
   size_t s2 = 1 + list_size(l)/3;
   list_t *l1 = list_dup(l);
@@ -337,6 +356,7 @@ int main(void) {
     test_dup(l);
     test_cmp(l);
     test_reverse(l);
+    test_unique(l);
     test_concat(l);
     test_split(l);
 

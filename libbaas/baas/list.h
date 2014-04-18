@@ -51,7 +51,7 @@ int list_cmp(const list_t *l, const list_t *o);
 /* reverse list */
 void list_reverse(list_t *l);
 /* drop consecutive duplicate elements (needs to be sorted) */
-list_t * list_unique(list_t *l);
+void list_unique(list_t *l);
 /* concat lists, l1 l2 are freed, l1's free+cmp */
 list_t * list_concat(list_t *l1, list_t *l2);
 /* merge 2 pre-sorted lists, l1 l2 freed, l1's free+cmp */
