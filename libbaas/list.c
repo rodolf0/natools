@@ -254,6 +254,21 @@ int list_cmp(const list_t *l, const list_t *o) {
   return 0;
 }
 
+void list_reverse(list_t *l) {
+  if (!l) return;
+  list_node_t *t;
+  for (list_node_t *n = list_first(l); n; n = t) {
+    t = n->next;
+    /* reverse n's links */
+    n->next = n->prev;
+    n->prev = t;
+  }
+  t = l->first;
+  l->first = l->last;
+  l->last = t;
+  return;
+}
+
 list_t * list_concat(list_t *l1, list_t *l2) {
   if (!l1 && !l2) return NULL;
   if (!l2) return l1;

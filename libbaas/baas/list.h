@@ -49,7 +49,7 @@ list_t * list_dup(const list_t *l);
 /* lexicographic compare of list to other */
 int list_cmp(const list_t *l, const list_t *o);
 /* reverse list */
-list_t * list_reverse(list_t *l);
+void list_reverse(list_t *l);
 /* drop consecutive duplicate elements (needs to be sorted) */
 list_t * list_unique(list_t *l);
 /* concat lists, l1 l2 are freed, l1's free+cmp */

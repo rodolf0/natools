@@ -207,6 +207,23 @@ void test_cmp(list_t *l) {
   list_destroy(o);
 }
 
+void test_reverse(list_t *l) {
+  list_t *o = list_dup(l);
+  list_reverse(o);
+  assert(list_size(o) == list_size(l));
+  assert(list_data(list_first(l)) == list_data(list_last(o)));
+  assert(list_data(list_last(l)) == list_data(list_first(o)));
+  assert_list(o);
+  list_node_t *a = list_first(l),
+              *b = list_last(o);
+  while (a && b) {
+    assert(list_data(a) == list_data(b));
+    a = list_next(a);
+    b = list_prev(b);
+  }
+  list_destroy(o);
+}
+
 void test_concat(list_t *l) {
   size_t s2 = 1 + list_size(l)/3;
   list_t *l1 = list_dup(l);
@@ -319,6 +336,7 @@ int main(void) {
 
     test_dup(l);
     test_cmp(l);
+    test_reverse(l);
     test_concat(l);
     test_split(l);
 
