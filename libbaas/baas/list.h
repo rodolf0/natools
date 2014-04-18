@@ -24,6 +24,7 @@ void * list_dequeue(list_t *l);
 size_t list_size(const list_t *l);
 list_node_t * list_first(const list_t *l);
 list_node_t * list_last(const list_t *l);
+list_node_t * list_nth(const list_t *l, size_t n); /* 1-based */
 list_node_t * list_next(const list_node_t *n);
 list_node_t * list_prev(const list_node_t *n);
 
@@ -42,15 +43,16 @@ void list_foreach(const list_t *l, void (*f)(void *));
 /* run f on each element of l and return a result list. INFO: no cmp/free  */
 list_t * list_map(const list_t *l, void * (*f)(void *));
 
-/* return the concat of both lists, l1 and l2 will be destroyed */
-list_t * list_concat(list_t *l1, list_t *l2);
-/* return a copy of the list. INFO: data elements will point to the same */
+/* copy the list. INFO: same pointers to data, no free-func */
 list_t * list_dup(const list_t *l);
-/* merge 2 lists into a new list, old lists will be destroyed */
+/* concat lists, l1 l2 are freed, l1's free+cmp */
+list_t * list_concat(list_t *l1, list_t *l2);
+/* merge 2 pre-sorted lists, l1 l2 freed, l1's free+cmp */
 list_t * list_merge(list_t *l1, list_t *l2);
-/* split l in half returning left and right lists, l is destroyed */
-void list_split(list_t *l, list_t **a, list_t **b);
-/* sort the list using mergesort algorithm, original will be destroyed */
+/* divide l, put atmost na elements in a,
+ * rest in b, l is freed, a b get l1's free+cmp */
+void list_split(list_t *l, size_t na, list_t **a, list_t **b);
+/* sort the list using mergesort algorithm, l is freed */
 list_t * list_mergesort(list_t *l);
 
 #endif /*  _LIST_H_ */

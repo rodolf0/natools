@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "baas/list.h"
 #include "baas/common.h"
 
@@ -22,7 +23,6 @@ list_t * list_init(free_func_t lfree, cmp_func_t cmp) {
   list_t *l = (list_t*)zmalloc(sizeof(list_t));
   l->free = lfree;
   l->cmp = cmp;
-  l->size = 0;
   return l;
 }
 
@@ -128,6 +128,14 @@ list_node_t *list_last(const list_t *l) {
   return l ? l->last : NULL;
 }
 
+list_node_t * list_nth(const list_t *l, size_t n) {
+  if (!l || n == 0 || n > l->size) return NULL;
+  list_node_t *nth = l->first;
+  while (--n && nth)
+    nth = nth->next;
+  return nth; /* assert(n == 0) */
+}
+
 list_node_t *list_next(const list_node_t *n) {
   return n ? n->next : NULL;
 }
@@ -151,7 +159,11 @@ void * list_peek_tail(const list_t *l) {
 
 /*******************************************************/
 list_node_t * list_find(const list_t *l, void *d) {
-  if (!l || !l->cmp) return NULL;
+  if (!l) return NULL;
+  if (!l->cmp) {
+    fprintf(stderr, "list find error: no comparison function\n");
+    return NULL;
+  }
   for (list_node_t *node = l->first; node; node = node->next) {
     if (l->cmp(node->data, d) == 0)
       return node;
@@ -195,104 +207,127 @@ list_t * list_map(const list_t *l, void * (*f)(void *)) {
 
 
 /*******************************************************/
-list_t * list_concat(list_t *l1, list_t *l2) {
-  if (!l1 && !l2) return NULL;
-  else if (!l1) return l2;
-  else if (!l2) return l1;
-  list_t *r = list_init(l1->free, l1->cmp);
-  if (r == NULL) return NULL;
-  /* glue lists together */
-  r->first = (l1->first ? l1->first : l2->first);
-  r->last = (l2->last ? l2->last : l1->last);
-  r->size = l1->size + l2->size;
-  if (l2->first)
-    l2->first->prev = l1->last;
-  if (l1->last)
-    l1->last->next = l2->first;
-  /* free the list structure without releasing it's nodes */
-  free(l1);
-  free(l2);
-  return r;
-}
-
 list_t * list_dup(const list_t *l) {
   if (!l) return NULL;
-  list_t *r = list_init(l->free, l->cmp);
+  list_t *r = list_init(NULL, l->cmp);
   if (r == NULL) return NULL;
   for (list_node_t *node = l->first; node; node = node->next)
     list_queue(r, node->data);
   return r;
 }
 
-list_t * list_merge(list_t *l1, list_t *l2) {
+list_t * list_concat(list_t *l1, list_t *l2) {
   if (!l1 && !l2) return NULL;
-  else if (!l1) return l2;
-  else if (!l2) return l1;
-  if (!l1->cmp) return NULL;
-  list_t *r = list_init(l1->free, l1->cmp);
-  if (r == NULL) return NULL;
-  /* merge lists; they must be sorted */
-  while (l1->size && l2->size) {
-    if (l1->cmp(l1->first->data, l2->first->data) <= 0)
-      list_queue(r, list_pop(l1));
-    else
-      list_queue(r, list_pop(l2));
+  if (!l2) return l1;
+  if (!l1) return l2;
+  if (l1 == l2) return list_concat(l1, list_dup(l1));
+  if (l2->size == 0)  {
+    list_destroy(l2);
+    return l1;
   }
-  /* append remaining elements */
-  while (l1->size) list_queue(r, list_pop(l1));
-  while (l2->size) list_queue(r, list_pop(l2));
-  /* free original lists metadata */
-  free(l1);
+  if (l1->size == 0) {
+    l2->cmp = l1->cmp;
+    l2->free = l1->free;
+    list_destroy(l1);
+    return l2;
+  }
+  l1->last->next = l2->first;
+  l2->first->prev = l1->last;
+  l1->last = l2->last;
+  l1->size += l2->size;
   free(l2);
-  return r;
+  return l1;
 }
 
-void list_split(list_t *l, list_t **a, list_t **b) {
+list_t * list_merge(list_t *l1, list_t *l2) {
+  if (!l1 && !l2) return NULL;
+  if (l1 == l2) return l1;
+  if (!l1) return l2;
+  if (!l2) return l1;
+  if (l2->size == 0)  {
+    list_destroy(l2);
+    return l1;
+  }
+  if (l1->size == 0) {
+    l2->cmp = l1->cmp;
+    l2->free = l1->free;
+    list_destroy(l1);
+    return l2;
+  }
+  if (!l1->cmp) {
+    fprintf(stderr, "list merge error: no comparison function\n");
+    return NULL;
+  }
+  list_t t = {.first = NULL, .last = NULL, .size = 0,
+              .cmp = l1->cmp, .free = l1->free};
+  while (l1->size > 0 || l2->size > 0) {
+    list_t *l;
+    if (l1->size == 0) l = l2;
+    else if (l2->size == 0) l = l1;
+    else l = (t.cmp(l1->first->data, l2->first->data) <= 0) ? l1 : l2;
+    list_node_t *n = l->first;
+    /* unhook node from prev list */
+    l->first = n->next;
+    if (l->first)
+      l->first->prev = NULL;
+    l->size--;
+    if (l->size == 0) l->last = NULL;
+    /* hook node to new list */
+    n->next = NULL;
+    n->prev = t.last;
+    if (t.last)
+      t.last->next = n;
+    t.last = n;
+    if (t.size == 0) t.first = t.last; /* first node */
+    t.size++;
+  }
+  free(l2);
+  *l1 = t; /* use l1's boxing */
+  return l1;
+}
+
+void list_split(list_t *l, size_t na, list_t **a, list_t **b) {
   if (!l) {
     *a = *b = NULL;
     return;
   }
-  /* initialize the lists */
-  *a = list_init(l->free, l->cmp);
+  if (na == 0) {
+    *a = list_init(l->free, l->cmp);
+    *b = l;
+    return;
+  }
+  if (list_size(l) <= na) {
+    *b = list_init(l->free, l->cmp);
+    *a = l;
+    return;
+  }
+  *a = l;
   *b = list_init(l->free, l->cmp);
-  if (*a == NULL || *b == NULL) {
-    list_destroy(*a);
-    list_destroy(*b);
+  if (*b == NULL) {
     *a = *b = NULL;
     return;
   }
-  /* search for the middle node */
-  size_t half = (l->size+1) / 2;
-  list_node_t *b_first;
-  for (b_first = l->first;
-       b_first && half;
-       half--, b_first = b_first->next);
-  /* adjust lists a and b */
-  if (l->size > 0) {
-    (*a)->first = l->first;
-    (*a)->last = (l->size > 1 ? b_first->prev : l->first);
-    (*a)->size = (l->size+1)/2;
-    /* second list only has elements if more than 1 in original list */
-    if (l->size > 1) {
-      (*b)->first = b_first;
-      (*b)->last = l->last;
-      (*b)->size = l->size - (*a)->size;
-    }
-  }
-  /* unlink cutting node */
-  if (b_first) {
-    if (b_first->prev)
-      b_first->prev->next = NULL;
-    b_first->prev = NULL;
-  }
-  free(l);
+  list_node_t *nth = list_nth(l, na);
+  list_t *bb = *b, *aa = *a;
+  /* build second list */
+  bb->first = nth->next;
+  bb->last = l->last;
+  bb->size = l->size - na;
+  /* re-use l's box for first list */
+  aa->first = l->first; /* noop */
+  aa->last = nth;
+  aa->size = na;
+  /* unhook lists */
+  nth->next->prev = NULL;
+  nth->next = NULL;
+  return;
 }
 
 list_t * list_mergesort(list_t *l) {
   if (!l) return NULL;
   if (l->size <= 1) return l;
   list_t *a, *b;
-  list_split(l, &a, &b);
+  list_split(l, l->size/2, &a, &b);
   if (a == NULL || b == NULL) return NULL;
   return list_merge(list_mergesort(a), list_mergesort(b));
 }
