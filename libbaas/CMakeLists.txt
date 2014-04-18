@@ -5,6 +5,7 @@ add_library(baas SHARED
   hashtbl.c
   heap.c
   list.c
+  memory.c
   sort.c sort-aux.c
   vector.c
   xstring.c
@@ -36,7 +37,7 @@ add_executable(test_bits test/test_bits.c bits.c)
 add_executable(test_bstree test/test_bstree.c bstree.c)
 add_executable(test_hash test/test_hash.c hashtbl.c vector.c)
 add_executable(test_heap test/test_heap.c heap.c)
-add_executable(test_list test/test_list.c list.c)
+add_executable(test_list test/test_list.c list.c memory.c)
 add_executable(test_sort test/test_sort.c sort.c sort-aux.c)
 add_executable(test_vector test/test_vector.c vector.c)
 
@@ -50,4 +51,4 @@ add_test(sort test_sort)
 add_test(vector test_vector)
 
 ####### benchmarking ######
-add_executable(benchmark_append test/benchmark_append.c vector.c list.c bstree.c hashtbl.c)
+add_executable(benchmark_append test/benchmark_append.c vector.c list.c bstree.c hashtbl.c memory.c)

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "baas/list.h"
+#include "baas/common.h"
 
 struct list_node_t {
   struct list_node_t *prev;
@@ -16,28 +17,17 @@ struct list_t {
   cmp_func_t cmp;
 };
 
-list_node_t *list_first(const list_t *l) { return l ? l->first : NULL; }
-list_node_t *list_last(const list_t *l) { return l ? l->last : NULL; }
-size_t list_size(const list_t *l) { return l ? l->size : 0; }
-
-list_node_t *list_node_next(const list_node_t *n) { return n ? n->next : NULL; }
-list_node_t *list_node_prev(const list_node_t *n) { return n ? n->prev : NULL; }
-void *list_node_data(const list_node_t *n) { return n ? n->data : NULL; }
-
+/*******************************************************/
 list_t * list_init(free_func_t lfree, cmp_func_t cmp) {
-  list_t *l = (list_t*)malloc(sizeof(list_t));
-  l->first = NULL;
-  l->last = NULL;
+  list_t *l = (list_t*)zmalloc(sizeof(list_t));
   l->free = lfree;
   l->cmp = cmp;
   l->size = 0;
   return l;
 }
 
-
 void list_destroy(list_t *l) {
-  if (!l)
-    return;
+  if (!l) return;
   list_node_t *t, *n = l->first;
   while ((t = n)) {
     if (l->free)
@@ -49,6 +39,7 @@ void list_destroy(list_t *l) {
   free(l);
 }
 
+/*******************************************************/
 free_func_t list_set_free(list_t *l, free_func_t f) {
   free_func_t old = l->free;
   l->free = f;
@@ -61,196 +52,186 @@ cmp_func_t list_set_cmp(list_t *l, cmp_func_t c) {
   return old;
 }
 
-/* push item at the head of the list, return the created node */
+/*******************************************************/
 list_node_t * list_push(list_t *l, void *d) {
-  if (!l)
-    return NULL;
-
-  list_node_t *n = (list_node_t*)malloc(sizeof(list_node_t));
-  n->data = d; n->prev = NULL; n->next = l->first;
-
-  /* lock for concurrent access */
+  if (!l) return NULL;
+  list_node_t *n = (list_node_t*)zmalloc(sizeof(list_node_t));
+  if (n == NULL) return NULL;
+  n->data = d;
+  n->next = l->first;
+  /* hook node at the head */
   if (l->first)
     l->first->prev = n;
   l->first = n;
-  /* if this is the only element, then it's both first and last */
+  /* hook node at the tail if only one */
   if (l->size == 0) l->last = n;
   l->size++;
-  /* unlock */
-
   return n;
 }
 
-
-/* pop item from the head of the list */
 void * list_pop(list_t *l) {
-  if (!l || !l->first)
-    return NULL;
-
+  if (!l || !l->first) return NULL;
   void *d = l->first->data;
   list_node_t *n = l->first;
-  /* lock for concurrent access */
+  /* attach head to next node */
   l->first = l->first->next;
   if (l->first)
     l->first->prev = NULL;
   l->size--;
-  /* if no elements left, then last pointer was pointing here too */
+  /* if no elements left, tail was pointing here too */
   if (l->size == 0) l->last= NULL;
-  /* unlock */
-
   free(n);
-
   return d;
 }
 
-
-/* enqueue item at the tail of the list */
 list_node_t * list_queue(list_t *l, void *d) {
-  if (!l)
-    return NULL;
-
-  list_node_t *n = (list_node_t*)malloc(sizeof(list_node_t));
-  n->data = d; n->prev = l->last; n->next = NULL;
-
-  /* lock for concurrent access */
+  if (!l) return NULL;
+  list_node_t *n = (list_node_t*)zmalloc(sizeof(list_node_t));
+  if (n == NULL) return NULL;
+  n->data = d;
+  n->prev = l->last;
+  /* hook node at the tail */
   if (l->last)
     l->last->next = n;
   l->last = n;
-  /* if this is the only element, then it's both first and last */
+  /* if only one element, it's both first and last */
   if (l->size == 0) l->first = n;
   l->size++;
-  /* unlock */
-
   return n;
 }
 
-
-/* dequeue item from the tail of the list */
 void * list_dequeue(list_t *l) {
-  if (!l || !l->last)
-    return NULL;
-
+  if (!l || !l->last) return NULL;
   void *d = l->last->data;
   list_node_t *n = l->last;
-  /* lock for concurrent access */
+  /* attach tail to previous node */
   l->last = l->last->prev;
   if (l->last)
     l->last->next = NULL;
   l->size--;
-  /* if no elements left, then first pointer was pointing here too */
+  /* if no elements left, head was pointing here too */
   if (l->size == 0) l->first = NULL;
-  /* unlock */
-
   free(n);
-
   return d;
 }
 
+/*******************************************************/
+size_t list_size(const list_t *l) {
+  return l ? l->size : 0;
+}
 
-/* peek elements without removing them */
-void * list_peek_head(list_t *l) {
+list_node_t *list_first(const list_t *l) {
+  return l ? l->first : NULL;
+}
+
+list_node_t *list_last(const list_t *l) {
+  return l ? l->last : NULL;
+}
+
+list_node_t *list_next(const list_node_t *n) {
+  return n ? n->next : NULL;
+}
+
+list_node_t *list_prev(const list_node_t *n) {
+  return n ? n->prev : NULL;
+}
+
+/*******************************************************/
+void *list_data(const list_node_t *n) {
+  return n ? n->data : NULL;
+}
+
+void * list_peek_head(const list_t *l) {
   return (l && l->first) ? l->first->data : NULL;
 }
 
-void * list_peek_tail(list_t *l) {
+void * list_peek_tail(const list_t *l) {
   return (l && l->last) ? l->last->data : NULL;
 }
 
-
-void list_remove(list_t *l, list_node_t *n) {
-  if (!l || !l->first)
-    return;
-  /* lock for concurrent access */
-  if (n->next)
-    n->next->prev = n->prev;
-  if (n->prev)
-    n->prev->next = n->next;
-  if (l->first == n)
-    l->first = n->next;
-  if (l->last == n)
-    l->last = n->prev;
-  l->size--;
-  /* unlock */
-  if (l->free)
-    l->free(n->data);
-  free(n);
-}
-
-
-/* execute f with each element of the list */
-void list_foreach(list_t *l, void (*f)(void *)) {
-  if (!l || !f)
-    return;
-
-  list_node_t *node;
-  for (node = l->first; node; node = node->next)
-    (*f)(node->data);
-}
-
-/* run f on each element of l and return a result list. INFO: no cmp/free  */
-list_t * list_map(list_t *l, void * (*f)(void *)) {
-  if (!l || !f)
-    return NULL;
-
-  list_t *r = list_init(NULL, NULL);
-  list_node_t *node;
-  for (node = l->first; node; node = node->next)
-    list_queue(r, (*f)(node->data));
-
-  return r;
-}
-
-/* find data in list */
-list_node_t * list_find(list_t *l, void *d) {
-  if (!l || !l->cmp)
-    return NULL;
-
-  list_node_t *node;
-  for (node = l->first; node; node = node->next) {
+/*******************************************************/
+list_node_t * list_find(const list_t *l, void *d) {
+  if (!l || !l->cmp) return NULL;
+  for (list_node_t *node = l->first; node; node = node->next) {
     if (l->cmp(node->data, d) == 0)
       return node;
   }
   return NULL;
 }
 
+void list_remove(list_t *l, list_node_t *n) {
+  if (!l || l->size == 0) return;
+  /* thread surroundings */
+  if (n->next)
+    n->next->prev = n->prev;
+  if (n->prev)
+    n->prev->next = n->next;
+  /* adjust ends */
+  if (l->first == n)
+    l->first = n->next;
+  if (l->last == n)
+    l->last = n->prev;
+  l->size--;
+  if (l->free)
+    l->free(n->data);
+  free(n);
+}
 
-/* return the concat of both lists, l1 and l2 will be destroyed */
+/*******************************************************/
+void list_foreach(const list_t *l, void (*f)(void *)) {
+  if (!l || !f) return;
+  for (list_node_t *node = l->first; node; node = node->next)
+    (*f)(node->data);
+}
+
+list_t * list_map(const list_t *l, void * (*f)(void *)) {
+  if (!l || !f) return NULL;
+  list_t *r = list_init(NULL, NULL);
+  if (r == NULL) return NULL;
+  for (list_node_t *node = l->first; node; node = node->next)
+    list_queue(r, (*f)(node->data));
+  return r;
+}
+
+
+/*******************************************************/
 list_t * list_concat(list_t *l1, list_t *l2) {
-  if (!l1 || !l2)
-    return NULL;
-  /* result list */
+  if (!l1 && !l2) return NULL;
+  else if (!l1) return l2;
+  else if (!l2) return l1;
   list_t *r = list_init(l1->free, l1->cmp);
+  if (r == NULL) return NULL;
   /* glue lists together */
   r->first = (l1->first ? l1->first : l2->first);
   r->last = (l2->last ? l2->last : l1->last);
   r->size = l1->size + l2->size;
-  if (l2->first) l2->first->prev = l1->last;
-  if (l1->last) l1->last->next = l2->first;
+  if (l2->first)
+    l2->first->prev = l1->last;
+  if (l1->last)
+    l1->last->next = l2->first;
   /* free the list structure without releasing it's nodes */
-  free(l1); free(l2);
+  free(l1);
+  free(l2);
   return r;
 }
 
-
-/* return a copy of the list. INFO: data elements will point to the same */
-list_t * list_dup(list_t *l) {
-  if (!l)
-    return NULL;
+list_t * list_dup(const list_t *l) {
+  if (!l) return NULL;
   list_t *r = list_init(l->free, l->cmp);
-  list_node_t *node;
-  for (node = l->first; node; node = node->next)
+  if (r == NULL) return NULL;
+  for (list_node_t *node = l->first; node; node = node->next)
     list_queue(r, node->data);
   return r;
 }
 
-
-/* merge 2 lists into a new list, old lists will be destroyed */
 list_t * list_merge(list_t *l1, list_t *l2) {
-  if (!l1 || !l2 || !l1->cmp)
-    return NULL;
-  /* result list */
+  if (!l1 && !l2) return NULL;
+  else if (!l1) return l2;
+  else if (!l2) return l1;
+  if (!l1->cmp) return NULL;
   list_t *r = list_init(l1->free, l1->cmp);
-  /* merge lists */
+  if (r == NULL) return NULL;
+  /* merge lists; they must be sorted */
   while (l1->size && l2->size) {
     if (l1->cmp(l1->first->data, l2->first->data) <= 0)
       list_queue(r, list_pop(l1));
@@ -260,23 +241,32 @@ list_t * list_merge(list_t *l1, list_t *l2) {
   /* append remaining elements */
   while (l1->size) list_queue(r, list_pop(l1));
   while (l2->size) list_queue(r, list_pop(l2));
-  /* free empty lists */
-  free(l1); free(l2);
+  /* free original lists metadata */
+  free(l1);
+  free(l2);
   return r;
 }
 
-/* split l in half returning left and right lists, l is destroyed */
-void list_split_half(list_t *l, list_t **a, list_t **b) {
+void list_split(list_t *l, list_t **a, list_t **b) {
   if (!l) {
-    *a = NULL; *b = NULL;
+    *a = *b = NULL;
     return;
   }
   /* initialize the lists */
   *a = list_init(l->free, l->cmp);
   *b = list_init(l->free, l->cmp);
+  if (*a == NULL || *b == NULL) {
+    list_destroy(*a);
+    list_destroy(*b);
+    *a = *b = NULL;
+    return;
+  }
   /* search for the middle node */
-  size_t half = (l->size+1) / 2; list_node_t *b_first;
-  for (b_first = l->first; b_first && half; half--, b_first = b_first->next);
+  size_t half = (l->size+1) / 2;
+  list_node_t *b_first;
+  for (b_first = l->first;
+       b_first && half;
+       half--, b_first = b_first->next);
   /* adjust lists a and b */
   if (l->size > 0) {
     (*a)->first = l->first;
@@ -291,21 +281,19 @@ void list_split_half(list_t *l, list_t **a, list_t **b) {
   }
   /* unlink cutting node */
   if (b_first) {
-    if (b_first->prev) b_first->prev->next = NULL;
+    if (b_first->prev)
+      b_first->prev->next = NULL;
     b_first->prev = NULL;
   }
-  /* cleanup*/
   free(l);
 }
 
-/* sort the list using mergesort algorithm */
 list_t * list_mergesort(list_t *l) {
-  if (!l)
-    return NULL;
-  if (l->size <= 1)
-    return l;
+  if (!l) return NULL;
+  if (l->size <= 1) return l;
   list_t *a, *b;
-  list_split_half(l, &a, &b);
+  list_split(l, &a, &b);
+  if (a == NULL || b == NULL) return NULL;
   return list_merge(list_mergesort(a), list_mergesort(b));
 }
 

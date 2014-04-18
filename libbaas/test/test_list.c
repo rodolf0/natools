@@ -51,9 +51,9 @@ list_t * generate_test_list(void) {
         j = random() % list_size(l);
         ln = list_first(l);
         while (j--)
-          ln = list_node_next(ln);
+          ln = list_next(ln);
         n--;
-        sum -= *(int*)list_node_data(ln);
+        sum -= *(int*)list_data(ln);
         list_remove(l, ln);
         break;
     }
@@ -62,11 +62,11 @@ list_t * generate_test_list(void) {
     if (list_size(l) > 0) {
       assert(list_first(l) != NULL);
       assert(list_last(l) != NULL);
-      assert(list_node_prev(list_first(l)) == NULL);
-      assert(list_node_next(list_last(l)) == NULL);
+      assert(list_prev(list_first(l)) == NULL);
+      assert(list_next(list_last(l)) == NULL);
       /* just cause we know there's integers */
-      assert(list_node_data(list_last(l)) != NULL);
-      assert(list_node_data(list_first(l)) != NULL);
+      assert(list_data(list_last(l)) != NULL);
+      assert(list_data(list_first(l)) != NULL);
     }
     if (list_size(l) == 1) {
       assert(list_first(l) == list_last(l));
@@ -76,10 +76,10 @@ list_t * generate_test_list(void) {
   /* check list threading */
   size_t forward = 0, backward = 0;
   int ctrlsum1 = 0, ctrlsum2 = 0;
-  for (ln = list_first(l); ln; ln = list_node_next(ln))
-  { forward++; ctrlsum1 += *(int*)list_node_data(ln); }
-  for (ln = list_last(l); ln; ln = list_node_prev(ln))
-  { backward++; ctrlsum2 += *(int*)list_node_data(ln); }
+  for (ln = list_first(l); ln; ln = list_next(ln))
+  { forward++; ctrlsum1 += *(int*)list_data(ln); }
+  for (ln = list_last(l); ln; ln = list_prev(ln))
+  { backward++; ctrlsum2 += *(int*)list_data(ln); }
 
   /* check list size n elements */
   assert(n == forward);
@@ -116,8 +116,8 @@ int test_looping(list_t *l) {
   int ctrlsum = 0;
   list_node_t *ln;
 
-  for (ln = list_first(l); ln; ln = list_node_next(ln))
-  { ctrlsum += *(int*)list_node_data(ln); }
+  for (ln = list_first(l); ln; ln = list_next(ln))
+  { ctrlsum += *(int*)list_data(ln); }
 
   /* check foreach */
   totalsum = 0;
@@ -132,8 +132,8 @@ int test_looping(list_t *l) {
   assert(2 * ctrlsum == totalsum);
 
   /* check find */
-  for (ln = list_first(l); ln; ln = list_node_next(ln)) {
-    int f = *(int*)list_node_data(ln) * 2;
+  for (ln = list_first(l); ln; ln = list_next(ln)) {
+    int f = *(int*)list_data(ln) * 2;
     assert(list_find(two, &f) != NULL);
   }
 
@@ -151,7 +151,7 @@ int test_listops(list_t *l) {
 
   /* check splits n concats */
   list_t *a, *b;
-  list_split_half(l2, &a, &b);
+  list_split(l2, &a, &b);
   assert(list_size(a) + list_size(b) == lsize);
   /* test duplication after split */
   list_t *c = list_dup(a);
