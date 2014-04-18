@@ -6,8 +6,8 @@ if ! type -path clang-format &> /dev/null; then
 fi
 
 wdir=$(cd "$(dirname "$0")"; pwd)
-srcdir="$wdir"
-remove_eol_spaces=yes
+srcdir="${srcdir:-$wdir}"
+remove_eol_spaces=no
 
 function format_source {
   if ! [ -d "$srcdir" ]; then
@@ -16,12 +16,12 @@ function format_source {
   fi
   find "$srcdir" -iname \*.c \
               -o -iname \*.h |
-    xargs -r -n 1 -I@ clang-format -style=LLVM -i @
+    xargs -n 1 -I@ clang-format -style=LLVM -i @
 
   if [ "$remove_eol_spaces" = yes ]; then
     find "$srcdir" -iname \*.c \
                 -o -iname \*.h |
-      xargs -r -n 1 -I@ sed -i 's!\s*$!!' @
+      xargs -n 1 -I@ sed -i 's!\s*$!!' @
   fi
 }
 
