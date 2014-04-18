@@ -10,6 +10,10 @@ typedef struct list_t list_t;
 list_t * list_init(free_func_t, cmp_func_t);
 void list_destroy(list_t *l);
 
+/* set free/cmp functions. return previous version */
+free_func_t list_set_free(list_t *l, free_func_t);
+cmp_func_t list_set_cmp(list_t *l, cmp_func_t);
+
 list_node_t *list_first(const list_t *l);
 list_node_t *list_last(const list_t *l);
 size_t list_size(const list_t *l);

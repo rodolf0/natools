@@ -120,7 +120,7 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
   list_t *args = list_init(free, NULL);
   const symbol_t *s;
 
-  while (n && (s = (const symbol_t*)n->data)) {
+  while (n && (s = (const symbol_t*)list_node_data(n))) {
     long double *d = NULL, *v = NULL;
     long double (*f)(list_t*, size_t);
 

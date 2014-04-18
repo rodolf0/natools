@@ -128,7 +128,7 @@ int test_looping(list_t *l) {
   totalsum = 0;
   list_t *two = (list_t*)list_map(l, (void *(*)(void *))dupfunc);
   list_foreach(two, (void (*)(void*))acumulate);
-  two->free = free; two->cmp = (cmp_func_t)intcmp;
+  list_set_free(two, free); list_set_cmp(two, (cmp_func_t)intcmp);
   assert(2 * ctrlsum == totalsum);
 
   /* check find */
@@ -146,7 +146,7 @@ int test_listops(list_t *l) {
 
   /* check duplication */
   list_t *l2 = list_dup(l);
-  l2->free = NULL; /* avoid double free hereafter */
+  list_set_free(l2, NULL); /* avoid double free hereafter */
   assert(list_size(l2) == lsize);
 
   /* check splits n concats */

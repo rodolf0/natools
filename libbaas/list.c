@@ -49,6 +49,17 @@ void list_destroy(list_t *l) {
   free(l);
 }
 
+free_func_t list_set_free(list_t *l, free_func_t f) {
+  free_func_t old = l->free;
+  l->free = f;
+  return old;
+}
+
+cmp_func_t list_set_cmp(list_t *l, cmp_func_t c) {
+  cmp_func_t old = l->cmp;
+  l->cmp = c;
+  return old;
+}
 
 /* push item at the head of the list, return the created node */
 list_node_t * list_push(list_t *l, void *d) {
