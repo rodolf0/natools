@@ -11,7 +11,7 @@ char * big_add(const char *x, const char *y) {
   int ylen = strlen(y);
   // add a digit for carry
   int rlen = (xlen > ylen ? xlen : ylen) + 1;
-  char *ret = (char*)malloc(rlen + 1);
+  char *ret = (char*)zmalloc(rlen + 1);
 
   int i, r, carry;
   // single digit adition
@@ -34,10 +34,10 @@ char * big_mul(const char *x, const char *y) {
   int ylen = strlen(y);
   // temporary result for each step
   int alen = xlen + 1; // add place for carry digit
-  char *a = (char*)malloc(alen + 1);
+  char *a = (char*)zmalloc(alen + 1);
   // add a digit for carry
   int rlen = xlen + ylen;
-  char *ret = (char*)malloc(rlen + 1);
+  char *ret = (char*)zmalloc(rlen + 1);
   int r, i, j, carry;
   // set the initial result to 0 since we'll be acumulating
   memset(ret, '0', rlen);
