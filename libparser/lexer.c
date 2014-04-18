@@ -117,15 +117,15 @@ token_t * lexer_advance(lexer_t *l) {
     return NULL;
   /* ingest data */
   if (!l->curtok) {
-    if (l->tokenized->size == 0)
+    if (list_size(l->tokenized) == 0)
       list_queue(l->tokenized, lexer_nextitem(l->s));
-    l->curtok = l->tokenized->first;
-    return (token_t*)l->curtok->data;
+    l->curtok = list_first(l->tokenized);
+    return (token_t*)list_node_data(l->curtok);
   }
-  if (!l->curtok->next)
+  if (!list_node_next(l->curtok))
     list_queue(l->tokenized, lexer_nextitem(l->s));
-  l->curtok = l->curtok->next;
-  return (token_t*)l->curtok->data;
+  l->curtok = list_node_next(l->curtok);
+  return (token_t*)list_node_data(l->curtok);
 }
 
 token_t * lexer_peek(lexer_t *l) {
@@ -140,15 +140,15 @@ token_t * lexer_peek(lexer_t *l) {
 token_t * lexer_current(lexer_t *l) {
   if (!l)
     return NULL;
-  return (token_t*)l->curtok->data;
+  return (token_t*)list_node_data(l->curtok);
 }
 
 token_t * lexer_backup(lexer_t *l) {
   if (!l || !l->curtok)
     return NULL;
-  l->curtok = l->curtok->prev;
+  l->curtok = list_node_prev(l->curtok);
   if (l->curtok)
-    return (token_t*)l->curtok->data;
+    return (token_t*)list_node_data(l->curtok);
   return NULL;
 }
 
@@ -156,7 +156,7 @@ token_t * lexer_backup(lexer_t *l) {
 void lexer_shift(lexer_t *l) {
   if (!l || !l->curtok)
     return;
-  while (l->tokenized->first != l->curtok)
+  while (list_first(l->tokenized) != l->curtok)
     list_pop(l->tokenized);
   list_pop(l->tokenized);
   l->curtok = NULL;
@@ -166,7 +166,7 @@ void lexer_shift(lexer_t *l) {
 void lexer_consume(lexer_t *l) {
   if (!l || !l->curtok)
     return;
-  while (l->tokenized->first != l->curtok)
+  while (list_first(l->tokenized) != l->curtok)
     token_destroy((token_t*)list_pop(l->tokenized));
   token_destroy((token_t*)list_pop(l->tokenized));
   l->curtok = NULL;

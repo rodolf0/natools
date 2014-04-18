@@ -116,7 +116,7 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
   }
 
   const list_t *l = (const list_t*)e;
-  const list_node_t *n = l->last;
+  const list_node_t *n = list_last(l);
   list_t *args = list_init(free, NULL);
   const symbol_t *s;
 
@@ -186,10 +186,10 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
         list_push(args, d);
         break;
     }
-    n = n->prev;
+    n = list_node_prev(n);
   }
 
-  if (args->size != 1) {
+  if (list_size(args) != 1) {
 #ifdef _VERBOSE_
     fprintf(stderr, "eval error: corrupt args stack\n");
 #endif
