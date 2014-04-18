@@ -185,6 +185,28 @@ void test_dup(list_t *l) {
   list_destroy(l2);
 }
 
+void test_cmp(list_t *l) {
+  assert(list_cmp(l, l) == 0);
+  assert(list_cmp(l, NULL) == 1);
+  assert(list_cmp(NULL, l) == -1);
+  list_t *o = list_dup(l);
+  assert(list_cmp(l, o) == 0);
+  l = list_mergesort(l);
+  list_set_cmp(o, (cmp_func_t)intcmp_r);
+  o = list_mergesort(o);
+  /* there's a chance all elements are equal...
+   * which would break this test */
+  if (list_size(o) > 10)
+    assert(list_cmp(l, o) == -1);
+  /* try comparing with fewer elements */
+  list_set_cmp(o, (cmp_func_t)intcmp);
+  o = list_mergesort(o);
+  list_dequeue(o);
+  assert(list_cmp(l, o) == 1);
+  assert(list_cmp(o, l) == -1);
+  list_destroy(o);
+}
+
 void test_concat(list_t *l) {
   size_t s2 = 1 + list_size(l)/3;
   list_t *l1 = list_dup(l);
@@ -296,6 +318,7 @@ int main(void) {
     test_find(l);
 
     test_dup(l);
+    test_cmp(l);
     test_concat(l);
     test_split(l);
 

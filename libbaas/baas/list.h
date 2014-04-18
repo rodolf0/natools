@@ -46,7 +46,7 @@ void list_foreach(const list_t *l, void (*f)(void *));
 list_t * list_map(const list_t *l, void * (*f)(void *));
 /* copy the list. INFO: same pointers to data, no free-func */
 list_t * list_dup(const list_t *l);
-/* compares list to other */
+/* lexicographic compare of list to other */
 int list_cmp(const list_t *l, const list_t *o);
 /* reverse list */
 list_t * list_reverse(list_t *l);

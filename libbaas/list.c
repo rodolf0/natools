@@ -231,6 +231,29 @@ list_t * list_dup(const list_t *l) {
   return r;
 }
 
+int list_cmp(const list_t *l, const list_t *o) {
+  if (!l && !o) return 0;
+  if (!o) return 1;
+  if (!l) return -1;
+  if (l->size == 0 && o->size == 0) return 0;
+  if (!l->cmp) {
+    fprintf(stderr, "list cmp error: no comparison function\n");
+    return 0;
+  }
+  list_node_t *a = list_first(l),
+              *b = list_first(o);
+  while (a && b) {
+    int c = l->cmp(list_data(a), list_data(b));
+    if (c < 0) return -1;
+    if (c > 0) return 1;
+    a = list_next(a);
+    b = list_next(b);
+  }
+  if (a) return 1;
+  if (b) return -1;
+  return 0;
+}
+
 list_t * list_concat(list_t *l1, list_t *l2) {
   if (!l1 && !l2) return NULL;
   if (!l2) return l1;
