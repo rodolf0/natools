@@ -37,14 +37,21 @@ void * list_peek_tail(const list_t *l);
 list_node_t * list_find(const list_t *l, void *d);
 /* unlink a node from the list */
 void list_remove(list_t *l, list_node_t *n);
+/* insert d after <prev> node, or begining if prev is null */
+list_node_t * list_insert(list_t *l, list_node_t *prev, void *d);
 
 /* execute f with each element of the list */
 void list_foreach(const list_t *l, void (*f)(void *));
 /* run f on each element of l and return a result list. INFO: no cmp/free  */
 list_t * list_map(const list_t *l, void * (*f)(void *));
-
 /* copy the list. INFO: same pointers to data, no free-func */
 list_t * list_dup(const list_t *l);
+/* compares list to other */
+int list_cmp(const list_t *l, const list_t *o);
+/* reverse list */
+list_t * list_reverse(list_t *l);
+/* drop consecutive duplicate elements (needs to be sorted) */
+list_t * list_unique(list_t *l);
 /* concat lists, l1 l2 are freed, l1's free+cmp */
 list_t * list_concat(list_t *l1, list_t *l2);
 /* merge 2 pre-sorted lists, l1 l2 freed, l1's free+cmp */

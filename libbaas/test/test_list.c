@@ -77,16 +77,23 @@ list_t * generate_test_list(size_t size) {
   while (list_size(l) < size) {
     /* flip a coin to exersice different insertion ops */
     int choice = random() % 100;
-    if (choice < 35) {
+    if (choice < 20) {
       int *e = _rint();
       sum += *e;
       count++;
-      list_push(l, e);
+      assert(list_push(l, e));
+    } else if (choice < 40) {
+      int *e = _rint();
+      sum += *e;
+      count++;
+      assert(list_queue(l, e));
     } else if (choice < 70) {
       int *e = _rint();
       sum += *e;
       count++;
-      list_queue(l, e);
+      int pos = random() % (2 * (1 + list_size(l)));
+      list_node_t *nth = list_nth(l, pos); /* can be NULL */
+      assert(list_insert(l, nth, e));
     } else if (choice < 80) {
       int *e = list_pop(l);
       if (e) {

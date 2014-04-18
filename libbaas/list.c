@@ -12,7 +12,6 @@ struct list_node_t {
 struct list_t {
   list_node_t *first;
   list_node_t *last;
-
   size_t size;
   free_func_t free;
   cmp_func_t cmp;
@@ -187,6 +186,22 @@ void list_remove(list_t *l, list_node_t *n) {
   if (l->free)
     l->free(n->data);
   free(n);
+}
+
+list_node_t * list_insert(list_t *l, list_node_t *prev, void *d) {
+  if (!l) return NULL;
+  if (!prev) return list_push(l, d);
+  if (!prev->next) return list_queue(l, d); /* assert prev == l->last */
+  list_node_t *n = (list_node_t*)zmalloc(sizeof(list_node_t));
+  if (n == NULL) return NULL;
+  n->data = d;
+  n->prev = prev;
+  n->next = prev->next;
+  /* hook node after <prev> */
+  prev->next->prev = n;
+  prev->next = n;
+  l->size++;
+  return n;
 }
 
 /*******************************************************/
