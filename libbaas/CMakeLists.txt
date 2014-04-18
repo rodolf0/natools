@@ -2,9 +2,8 @@ add_library(baas SHARED
   bignum.c
   bits.c
   bstree.c
-  graph.c
   hashtbl.c
-  heap.c heap-list.c
+  heap.c
   list.c
   sort.c sort-aux.c
   vector.c
@@ -18,9 +17,8 @@ install(FILES
   baas/bits.h
   baas/bstree.h
   baas/common.h
-  baas/graph.h
   baas/hashtbl.h
-  baas/heap.h baas/heap-list.h
+  baas/heap.h
   baas/list.h
   baas/mod-arithmetic.h
   baas/sort.h
