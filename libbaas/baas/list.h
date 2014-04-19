@@ -44,7 +44,9 @@ list_node_t * list_insert(list_t *l, list_node_t *prev, void *d);
 void list_foreach(const list_t *l, void (*f)(void *));
 /* run f on each element of l and return a result list. INFO: no cmp/free  */
 list_t * list_map(const list_t *l, void * (*f)(void *));
-/* copy the list. INFO: same pointers to data, no free-func */
+/* copy the [from, to) range, INFO: same pointers, no free-func */
+list_t * list_slice(const list_t *l, list_node_t *from, list_node_t *to);
+/* copy whole list, same as slice(list_first, NULL) */
 list_t * list_dup(const list_t *l);
 /* lexicographic compare of list to other */
 int list_cmp(const list_t *l, const list_t *o);
@@ -54,6 +56,12 @@ void list_reverse(list_t *l);
 void list_unique(list_t *l);
 /* concat lists, l1 l2 are freed, l1's free+cmp */
 list_t * list_concat(list_t *l1, list_t *l2);
+#if 0
+/* free [from, to) and replace the range with o
+ * if from is null, append o at the end if to is null, drop until the end
+ * if from==to, nothing is dropped, o is inserted before from */
+list_t * list_splice(list_t *l, list_node_t *from, list_node_t *to, list_t *o);
+#endif
 /* merge 2 pre-sorted lists, l1 l2 freed, l1's free+cmp */
 list_t * list_merge(list_t *l1, list_t *l2);
 /* divide l, put atmost na elements in a,

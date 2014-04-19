@@ -220,15 +220,18 @@ list_t * list_map(const list_t *l, void * (*f)(void *)) {
   return r;
 }
 
-
 /*******************************************************/
-list_t * list_dup(const list_t *l) {
+list_t * list_slice(const list_t *l, list_node_t *from, list_node_t *to) {
   if (!l) return NULL;
   list_t *r = list_init(NULL, l->cmp);
   if (r == NULL) return NULL;
-  for (list_node_t *node = l->first; node; node = node->next)
-    list_queue(r, node->data);
+  for (list_node_t *n = from; n && n != to; n = n->next)
+    list_queue(r, n->data);
   return r;
+}
+
+list_t * list_dup(const list_t *l) {
+  return list_slice(l, l->first, NULL);
 }
 
 int list_cmp(const list_t *l, const list_t *o) {
@@ -300,13 +303,13 @@ list_t * list_concat(list_t *l1, list_t *l2) {
   if (!l1) return l2;
   if (l1 == l2) return list_concat(l1, list_dup(l1));
   if (l2->size == 0)  {
-    list_destroy(l2);
+    free(l2);
     return l1;
   }
   if (l1->size == 0) {
     l2->cmp = l1->cmp;
     l2->free = l1->free;
-    list_destroy(l1);
+    free(l1);
     return l2;
   }
   l1->last->next = l2->first;
@@ -323,13 +326,13 @@ list_t * list_merge(list_t *l1, list_t *l2) {
   if (!l1) return l2;
   if (!l2) return l1;
   if (l2->size == 0)  {
-    list_destroy(l2);
+    free(l2);
     return l1;
   }
   if (l1->size == 0) {
     l2->cmp = l1->cmp;
     l2->free = l1->free;
-    list_destroy(l1);
+    free(l1);
     return l2;
   }
   if (!l1->cmp) {

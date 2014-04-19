@@ -172,16 +172,37 @@ void test_find(list_t *l) {
   assert(*(int*)list_data(f) == *(int*)list_data(n));
 }
 
-void test_dup(list_t *l) {
-  list_t *l2 = list_dup(l);
-  assert(list_size(l2) == list_size(l));
-  list_node_t *n = list_first(l), *n2 = list_first(l2);
-  do {
-    assert(n != n2);
-    assert(*(int*)list_data(n) == *(int*)list_data(n2));
-    n = list_next(n);
-    n2 = list_next(n2);
-  } while (n && n2);
+void test_slice(list_t *l) {
+  /* choose a random slice: can be out of bounds to get null from/to */
+  int start = random() % (list_size(l) + 1);
+  int end = random() % (list_size(l) + 1);
+  list_node_t *from, *to;
+  if (start <= end) {
+    from = list_nth(l, start);
+    to = list_nth(l, end);
+  } else {
+    from = list_nth(l, end);
+    to = list_nth(l, start);
+  }
+  /* do the slicing */
+  list_t *l2 = list_slice(l, from, to);
+  assert(list_size(l) >= list_size(l2));
+  assert_list(l2);
+  if (from && from != to) {
+    assert(list_data(from) == list_data(list_first(l2)));
+    if (list_prev(to))
+      assert(list_data(list_prev(to)) == list_data(list_last(l2)));
+  }
+  /* check slice equivalence */
+  list_node_t *i = list_first(l2);
+  size_t dist = 0;
+  while (from && from != to) {
+    assert(*(int*)list_data(from) == *(int*)list_data(i));
+    from = list_next(from);
+    i = list_next(i);
+    dist++;
+  }
+  assert(dist == list_size(l2));
   list_destroy(l2);
 }
 
@@ -351,15 +372,17 @@ int main(void) {
 
     test_foreach(l);
     test_map(l);
-    test_find(l);
 
-    test_dup(l);
+    for (int j = 5; j < 1; j++) {
+      test_find(l);
+      test_slice(l);
+    }
+
     test_cmp(l);
     test_reverse(l);
     test_unique(l);
     test_concat(l);
     test_split(l);
-
     test_merge_sort(l);
 
     list_destroy(l);
