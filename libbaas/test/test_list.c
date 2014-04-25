@@ -35,8 +35,6 @@ int * dupfunc(int *x) {
 }
 
 /**************************************************/
-
-
 void assert_list(list_t *l) {
   if (!l || list_size(l) == 0) return;
 
@@ -388,7 +386,6 @@ int main(void) {
     list_destroy(l);
   }
   fprintf(stderr, "\n");
-
   return 0;
 }
 

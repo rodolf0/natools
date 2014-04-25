@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "baas/list.h"
-#include "baas/common.h"
 
 struct list_node_t {
   struct list_node_t *prev;
