@@ -54,6 +54,10 @@ size_t vector_capacity(const vector_t *v) {
   return v ? v->cap : 0;
 }
 
+void ** vector_raw(vector_t *v) {
+  return v ? v->data : NULL;
+}
+
 /*******************************************************/
 vector_t * vector_resize(vector_t *v, const size_t size) {
   if (!v) return NULL;
@@ -78,7 +82,7 @@ vector_t * vector_resize(vector_t *v, const size_t size) {
 }
 
 /*******************************************************/
-void * vector_get(vector_t *v, ssize_t idx) {
+void * vector_get(const vector_t *v, ssize_t idx) {
   if (!v) return NULL;
   if (idx < 0) idx += v->size;
   if (idx < 0 || (size_t)idx >= v->size) return NULL;
@@ -124,7 +128,7 @@ vector_t * vector_remove(vector_t *v, ssize_t idx) {
 }
 
 /*******************************************************/
-ssize_t vector_find(vector_t *v, const void *data) {
+ssize_t vector_find(const vector_t *v, const void *data) {
   if (!v) return -1;
   if (!v->cmp) {
     fprintf(stderr, "vector find error: no comparison function\n");
@@ -136,7 +140,7 @@ ssize_t vector_find(vector_t *v, const void *data) {
   return -1;
 }
 
-void vector_foreach(vector_t *v, void (*f)(void*)) {
+void vector_foreach(const vector_t *v, void (*f)(void*)) {
   if (!v || !f)
     return;
   for (size_t i = 0; i < v->size; ++i)

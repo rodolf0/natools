@@ -31,6 +31,15 @@ void acumulate(int *x) {
   _acum_count++;
 }
 
+/* unsafe: asumes knowledge about underlying data */
+void assert_vector_internals(vector_t *v) {
+  int **data = (int**)vector_raw(v);
+  for (size_t i = vector_size(v); i < vector_capacity(v); ++i)
+    assert(data[i] == NULL);
+  for (size_t i = 0; i < vector_size(v); ++i)
+    assert(vector_get(v, i) == data[i]);
+}
+
 /**************************************************/
 vector_t * generate_test_vector(size_t size) {
   vector_t *v = vector_init(free, (cmp_func_t)intcmp);
@@ -39,16 +48,23 @@ vector_t * generate_test_vector(size_t size) {
   while (vector_size(v) < size) {
     /* flip a coin to exersice different insertion ops */
     int choice = random() % 100;
-    if (choice < 80) {
+    if (choice < 70) {
       int *e = _rint();
       int idx = random() % (1+vector_size(v));
-      idx = (choice < 40) ? -idx : idx;
+      idx = (choice < 35) ? -idx : idx;
       sum += *e; count++;
       assert(v = vector_insert(v, idx, e));
       if (idx >= 0)
         assert(vector_get(v, idx) == e);
       else
         assert(vector_get(v, vector_size(v) + idx - 1) == e);
+    } else if (choice < 80 && vector_size(v) > 0) {
+      int idx = random() % vector_size(v);
+      idx = (choice < 75) ? -idx : idx;
+      sum -= *(int*)vector_get(v, idx);
+      int *g = _rint();
+      sum += *g;
+      vector_set(v, idx, g); /* will free prev elem */
     } else if (choice < 100 && vector_size(v) > 0) {
       int idx = random() % vector_size(v);
       idx = (choice < 90) ? -idx : idx;
@@ -57,6 +73,7 @@ vector_t * generate_test_vector(size_t size) {
       assert(v = vector_remove(v, idx));
     }
   }
+  assert_vector_internals(v);
   assert(count == vector_size(v));
   assert(vector_capacity(v) >= vector_size(v));
   int totalsum = 0;
@@ -67,16 +84,27 @@ vector_t * generate_test_vector(size_t size) {
 }
 
 void test_search(vector_t *v) {
-  for (int i = 0; i < 100; ++i) {
+  int i = 100;
+  while (i >= 0) {
     int *needle = (int*)vector_get(v, random() % vector_size(v));
-    if (!needle) continue;
     ssize_t idx = vector_find(v, needle);
-    if (idx >= 0) {
-      assert(*(int*)vector_get(v, idx) == *needle);
-    }
+    /* we should always be able to deref our ints */
+    assert(*(int*)vector_get(v, idx) == *needle);
+    --i;
   }
 }
 
+void test_foreach(vector_t *v) {
+  int ctrlsum = 0, ctrlcount = 0;
+  for (size_t n = 0; n < vector_size(v); ++n) {
+    ctrlsum += *(int*)vector_get(v, n);
+    ctrlcount++;
+  }
+  _acum_count = _acum_sum = 0;
+  vector_foreach(v, (void (*)(void*))acumulate);
+  assert(_acum_count == ctrlcount);
+  assert(_acum_sum == ctrlsum);
+}
 
 #define ITERATIONS 1000
 int main(void) {
@@ -86,6 +114,7 @@ int main(void) {
     fprintf(stderr, "\rtesting size=%-6zu ... %3d%%", vs, 100 * i / ITERATIONS);
     vector_t *v = generate_test_vector(vs);
     test_search(v);
+    test_foreach(v);
     vector_destroy(v);
   }
   fprintf(stderr, "\n");

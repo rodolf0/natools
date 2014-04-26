@@ -10,12 +10,13 @@ vector_t * vector_init(free_func_t f, cmp_func_t c);
 void vector_destroy(vector_t *v);
 
 /* set free/cmp functions. return previous version */
-free_func_t vector_set_free(vector_t *l, free_func_t);
-cmp_func_t vector_set_cmp(vector_t *l, cmp_func_t);
+free_func_t vector_set_free(vector_t *v, free_func_t);
+cmp_func_t vector_set_cmp(vector_t *v, cmp_func_t);
 
 /* get vector size/capacity */
 size_t vector_size(const vector_t *v);
 size_t vector_capacity(const vector_t *v);
+void ** vector_raw(vector_t *v);
 
 /* resize to len, if bigger zeroed, if smaller freed
  * whole vector might be reallocated: use returned value */
@@ -23,7 +24,7 @@ vector_t * vector_resize(vector_t *v, const size_t len);
 
 /* previous value is freed before overwriting */
 void vector_set(vector_t *v, ssize_t idx, void *data);
-void * vector_get(vector_t *v, ssize_t idx);
+void * vector_get(const vector_t *v, ssize_t idx);
 
 /* inserting at v.size appends, negative idx counts from tail
  * vector might be moved: new vector returned
@@ -33,10 +34,10 @@ vector_t * vector_append(vector_t *v, void *data);
 vector_t * vector_remove(vector_t *v, ssize_t idx);
 
 /* retrieve the index where data is located or -1 if not found */
-ssize_t vector_find(vector_t *v, const void *data);
+ssize_t vector_find(const vector_t *v, const void *data);
 
 /* execute f for each element of v */
-void vector_foreach(vector_t *v, void (*f)(void*));
+void vector_foreach(const vector_t *v, void (*f)(void*));
 
 #endif /* _VECTOR_H_ */
 
