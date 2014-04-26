@@ -40,7 +40,7 @@ void hashtbl_destroy(hashtbl_t *h) {
   for (i = 0; i < h->bktnum; i++)
     if (h->buckets[i]) {
       if (h->free) {
-        for (j = 0; j < h->buckets[i]->size; j++) {
+        for (j = 0; j < vector_size(h->buckets[i]); j++) {
           hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[i], j);
           h->free(e->data);
         }
@@ -71,14 +71,14 @@ static void hashtbl_rehash(hashtbl_t *h) {
   size_t i, j;
   for (i = 0; i < h->bktnum; i++)
     if (h->buckets[i]) {
-      for (j = 0; j < h->buckets[i]->size; j++) {
+      for (j = 0; j < vector_size(h->buckets[i]); j++) {
         hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[i], j);
         size_t b = h->hash((unsigned char*)e->key) % bktnum;
         if (!buckets[b])
           buckets[b] = vector_init(free, (cmp_func_t)hashtbl_keycmp);
-        vector_append(buckets[b], e);
+        buckets[b] = vector_append(buckets[b], e);
       }
-      h->buckets[i]->free = NULL;
+      vector_set_free(h->buckets[i], NULL);
       vector_destroy(h->buckets[i]);
     }
   free(h->buckets);
@@ -110,7 +110,7 @@ hash_elem_t * hashtbl_insert(hashtbl_t *h, const char *key, void *data) {
     e->key = (char*)e + sizeof(hash_elem_t); /* piggyback the key */
     memmove(e->key, key, keylen);
     e->key[keylen] = '\0';
-    vector_append(h->buckets[b], e);
+    h->buckets[b] = vector_append(h->buckets[b], e);
     h->size++;
     hashtbl_rehash(h);
   }
@@ -130,7 +130,7 @@ void hashtbl_remove(hashtbl_t *h, hash_elem_t *e) {
     return;
   if (h->free)
     h->free(e->data);
-  vector_remove(h->buckets[b], idx);
+  h->buckets[b] = vector_remove(h->buckets[b], idx);
   h->size--;
   hashtbl_rehash(h);
 }
@@ -161,7 +161,7 @@ void hashtbl_delete(hashtbl_t *h, const char *key) {
   hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[b], idx);
   if (h->free)
     h->free(e->data);
-  vector_remove(h->buckets[b], idx);
+  h->buckets[b] = vector_remove(h->buckets[b], idx);
   h->size--;
   hashtbl_rehash(h);
 }
@@ -173,7 +173,7 @@ void hashtbl_foreach(hashtbl_t *h, void (*f)(void*)) {
   size_t i, j;
   for (i = 0; i < h->bktnum; i++)
     if (h->buckets[i])
-      for (j = 0; j < h->buckets[i]->size; j++)
+      for (j = 0; j < vector_size(h->buckets[i]); j++)
         f(((hash_elem_t*)vector_get(h->buckets[i], j))->data);
 }
 
@@ -185,7 +185,7 @@ hash_elem_t * hashtbl_find(hashtbl_t *h, void *data) {
   for (i = 0; i < h->bktnum; i++)
     if (h->buckets[i]) {
       vector_t *v = h->buckets[i];
-      for (j = 0; j < v->size; j++)
+      for (j = 0; j < vector_size(v); j++)
         if (h->cmp(((hash_elem_t*)vector_get(v, j))->data, data) == 0)
           return (hash_elem_t*)vector_get(v, j);
     }
@@ -202,7 +202,7 @@ size_t hashtbl_keys(hashtbl_t *h, char ***keys) {
   size_t i, j, k = 0;
   for (i = 0; i < h->bktnum; i++) {
     if (h->buckets[i])
-      for (j = 0; j < h->buckets[i]->size; j++, k++) {
+      for (j = 0; j < vector_size(h->buckets[i]); j++, k++) {
         hash_elem_t *e = (hash_elem_t*)vector_get(h->buckets[i], j);
         size_t keylen = strlen(e->key);
         (*keys)[k] = (char*)malloc(sizeof(char) * (keylen + 1));

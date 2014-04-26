@@ -34,7 +34,7 @@ int benchmark_vector_append(void) {
   vector_t *v = vector_init(NULL, (cmp_func_t)intcmp);
   gettimeofday(&tv_start, NULL);
   for (i = 0; i < TEST_SZ; i++)
-    vector_append(v, &test_data[i]);
+    v = vector_append(v, &test_data[i]);
   gettimeofday(&tv_end, NULL);
   vector_destroy(v);
   return utime_diff(&tv_start, &tv_end);

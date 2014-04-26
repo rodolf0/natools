@@ -39,7 +39,7 @@ hashtbl_t * generate_test_ht(int allow_dups) {
         size_t prev_size = h->size;
         hashtbl_insert(h, rk, e);
         if (allow_dups || h->size == prev_size + 1)
-          vector_append(v, rk); /* keep track of keys */
+          v = vector_append(v, rk); /* keep track of keys */
         else
           free(rk);
         n++; sum += *e;
@@ -47,28 +47,28 @@ hashtbl_t * generate_test_ht(int allow_dups) {
         break;
       case 3:
         if (!h->size) continue;
-        rk = (char*)vector_get(v, random() % v->size);
+        rk = (char*)vector_get(v, random() % vector_size(v));
         e = (int*)hashtbl_get(h, rk);
         assert(atoi(rk) == *e);
         break;
       case 4:
         if (!h->size) continue;
-        j = random() % v->size;
+        j = random() % vector_size(v);
         rk = (char*)vector_get(v, j);
         e = (int*)hashtbl_get(h, rk);
         n--; sum -= *e;
         hashtbl_delete(h, rk);
-        vector_remove(v, j);
+        v = vector_remove(v, j);
         break;
       case 5:
         if (!h->size) continue;
-        j = random() % v->size;
+        j = random() % vector_size(v);
         rk = (char*)vector_get(v, j);
         int k = atoi(rk);
         f = hashtbl_find(h, &k);
         n--; sum -= *(int*)f->data;
         hashtbl_remove(h, f);
-        vector_remove(v, j);
+        v = vector_remove(v, j);
         break;
     }
   }
@@ -95,7 +95,7 @@ hashtbl_t * generate_test_ht(int allow_dups) {
       rk = (char*)vector_get(v, 0);
       hashtbl_delete(h, rk);
       assert(hashtbl_find(h, rk) == NULL);
-      vector_remove(v, 0);
+      v = vector_remove(v, 0);
     }
   }
 
@@ -112,7 +112,7 @@ void check_hash_distribution(hashtbl_t *h) {
 
   for (i = 0; (size_t)i < h->bktnum; i++) {
     if (h->buckets[i]) {
-      bsz[i] = h->buckets[i]->size;
+      bsz[i] = vector_size(h->buckets[i]);
       if (bsz[i] < min || i == 0) min = bsz[i];
       if (bsz[i] > max || i == 0) max = bsz[i];
     } else
