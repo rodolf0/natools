@@ -7,6 +7,7 @@
 
 #include "baas/vector.h"
 
+/******** Some aux functions for testing ***********/
 int intcmp(const int *a, const int *b) {
   if (!a && !b)
     return 0;
@@ -14,128 +15,66 @@ int intcmp(const int *a, const int *b) {
     return 1;
   if (a && !b)
     return -1;
-
   return *a > *b ? 1 : (*a < *b ? -1 : 0);
 }
 
-/* aux test functions */
-int totalsum;
-void acumulate(int *x) {
-  if (x)
-    totalsum += *x;
+int *_rint() {
+  int *e = (int*)malloc(sizeof(int));
+  *e = random() % 123456789;
+  return e;
 }
 
+int _acum_sum = 0;
+int _acum_count = 0;
+void acumulate(int *x) {
+  _acum_sum += *x;
+  _acum_count++;
+}
 
-vector_t * generate_test_vector(void) {
+/**************************************************/
+vector_t * generate_test_vector(size_t size) {
   vector_t *v = vector_init(free, (cmp_func_t)intcmp);
-  size_t n = 0, i, idx;
-  int sum = 0, *e;
-
-  for (i = 0; i < 10000; i++) {
-    switch (random() % 20) {
-      case 0:
-      case 1:
-      case 2:
-      case 3:
-        idx = -(random() % (1+v->size));
-        e = (int*)malloc(sizeof(int)); *e = random() % 123456789;
-        n++; sum += *e;
-        vector_insert(v, idx, e);
-        break;
-      case 4:
-      case 5:
-      case 6:
-      case 7:
-        idx = random() % (1+v->size);
-        e = (int*)malloc(sizeof(int)); *e = random() % 123456789;
-        n++; sum += *e;
-        vector_insert(v, idx, e);
-        break;
-      case 8:
-      case 9:
-      case 10:
-        if (!v->size) break;
-        idx = random() % v->size;
-        e = (int*)vector_get(v, idx);
-        n--; sum -= *e;
-        vector_remove(v, idx);
-        break;
-      case 11:
-      case 12:
-      case 13:
-        if (!v->size) break;
-        idx = -(random() % (1+v->size));
-        e = (int*)vector_get(v, idx);
-        n--; sum -= *e;
-        vector_remove(v, idx);
-        break;
-      case 14:
-      case 15:
-      case 16:
-        if (!v->size) break;
-        idx = -(random() % (1+v->size));
-        e = (int*)vector_get(v, idx);
-        sum -= *e;
-        e = (int*)malloc(sizeof(int)); *e = random() % 123456789;
-        sum += *e;
-        vector_set(v, idx, e);
-        break;
-      case 17:
-      case 18:
-      case 19:
-        if (!v->size) break;
-        idx = random() % v->size;
-        e = (int*)vector_get(v, idx);
-        sum -= *e;
-        e = (int*)malloc(sizeof(int)); *e = random() % 123456789;
-        sum += *e;
-        vector_set(v, idx, e);
-        break;
+  int sum = 0;
+  size_t count = 0;
+  while (vector_size(v) < size) {
+    /* flip a coin to exersice different insertion ops */
+    int choice = random() % 100;
+    if (choice < 80) {
+      int *e = _rint();
+      int idx = random() % (1+vector_size(v));
+      idx = (choice < 40) ? -idx : idx;
+      sum += *e; count++;
+      assert(v = vector_insert(v, idx, e));
+      if (idx >= 0)
+        assert(vector_get(v, idx) == e);
+      else
+        assert(vector_get(v, vector_size(v) + idx - 1) == e);
+    } else if (choice < 100 && vector_size(v) > 0) {
+      int idx = random() % vector_size(v);
+      idx = (choice < 90) ? -idx : idx;
+      int *e = (int*)vector_get(v, idx);
+      sum -= *e; count--;
+      assert(v = vector_remove(v, idx));
     }
   }
-
-  assert(n == v->size);
-  assert(v->cap >= v->size);
-  totalsum = 0;
-  vector_foreach(v, (void(*)(void*))acumulate);
+  assert(count == vector_size(v));
+  assert(vector_capacity(v) >= vector_size(v));
+  int totalsum = 0;
+  for (size_t i = 0; i < vector_size(v); ++i)
+    totalsum += *(int*)vector_get(v, i);
   assert(totalsum == sum);
-
   return v;
 }
 
 void test_search(vector_t *v) {
-  int i;
-  for (i = 0; i < 100; i++) {
-    int *search = (int*)vector_get(v, random() % v->size);
-    if (!search) continue; /* after resize lots of null elems */
-    int *find = (int*)vector_get(v, vector_find(v, search));
-    assert(*search == *find);
+  for (int i = 0; i < 100; ++i) {
+    int *needle = (int*)vector_get(v, random() % vector_size(v));
+    if (!needle) continue;
+    ssize_t idx = vector_find(v, needle);
+    if (idx >= 0) {
+      assert(*(int*)vector_get(v, idx) == *needle);
+    }
   }
-}
-
-void test_resize(vector_t *v) {
-  size_t j, newsize = v->size * (60 + random() % 10) / 100;
-  int sum = 0;
-
-  for (j = 0; j < newsize; j++) {
-    sum += *(int*)vector_get(v, j);
-  }
-  vector_resize(v, newsize);
-
-  assert(newsize == v->size);
-  assert(v->cap >= v->size);
-  totalsum = 0;
-  vector_foreach(v, (void(*)(void*))acumulate);
-  /*fprintf(stderr, "%d, %d\n", totalsum, sum);*/
-  assert(totalsum == sum);
-
-  vector_resize(v, 2*newsize);
-
-  assert(2*newsize == v->size);
-  assert(v->cap >= v->size);
-  totalsum = 0;
-  vector_foreach(v, (void(*)(void*))acumulate);
-  assert(totalsum == sum);
 }
 
 
@@ -143,16 +82,13 @@ void test_resize(vector_t *v) {
 int main(void) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
-    fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);
-    vector_t *v = generate_test_vector();
+    size_t vs = 1 + random() % (2 * i);
+    fprintf(stderr, "\rtesting size=%-6zu ... %3d%%", vs, 100 * i / ITERATIONS);
+    vector_t *v = generate_test_vector(vs);
     test_search(v);
-    test_resize(v);
-    if (v->size > 0)
-      test_search(v);
     vector_destroy(v);
   }
   fprintf(stderr, "\n");
-
   return 0;
 }
 

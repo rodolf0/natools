@@ -1,144 +1,145 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "baas/vector.h"
 
-#define VECTOR_INIT_CAPACITY 32
+struct vector_t {
+  size_t size;
+  size_t cap;
+  free_func_t free;
+  cmp_func_t cmp;
+  void *data[];
+};
 
+#define VECTOR_INIT_CAPACITY 4
 
+/*******************************************************/
 vector_t * vector_init(free_func_t f, cmp_func_t c) {
-  vector_t *v = (vector_t*)malloc(sizeof(vector_t));
-  v->cap = VECTOR_INIT_CAPACITY;
+  vector_t *v = (vector_t*)zmalloc(sizeof(vector_t) +
+                                   sizeof(void*) * VECTOR_INIT_CAPACITY);
   v->size = 0;
-  v->data = (void**)malloc(v->cap * sizeof(void*));
+  v->cap = VECTOR_INIT_CAPACITY;
   v->free = f;
   v->cmp = c;
   return v;
 }
 
-
 void vector_destroy(vector_t *v) {
-  if (!v)
-    return;
+  if (!v) return;
   if (v->free)
     while (v->size--)
       v->free(v->data[v->size]);
-  free(v->data);
   free(v);
 }
 
+/*******************************************************/
+free_func_t vector_set_free(vector_t *v, free_func_t f) {
+  free_func_t old = v->free;
+  v->free = f;
+  return old;
+}
 
-/* automatic resize */
-static inline void vector_recapacitate(vector_t *v) {
-  if (!v)
-    return;
-  /* WARNING: if realloc fails we loose our data pointer */
-  if (v->size + 1 == v->cap) {
-    v->cap *= 2;
-    v->data = (void**)realloc(v->data, sizeof(void*) * v->cap);
-  } else if (v->size > VECTOR_INIT_CAPACITY && v->size < v->cap/3) {
-    v->cap = (v->cap/2 < VECTOR_INIT_CAPACITY ? VECTOR_INIT_CAPACITY:v->cap/2);
-    v->data = (void**)realloc(v->data, sizeof(void*) * v->cap);
+cmp_func_t vector_set_cmp(vector_t *v, cmp_func_t c) {
+  cmp_func_t old = v->cmp;
+  v->cmp = c;
+  return old;
+}
+
+/*******************************************************/
+size_t vector_size(const vector_t *v) {
+  return v ? v->size : 0;
+}
+
+size_t vector_capacity(const vector_t *v) {
+  return v ? v->cap : 0;
+}
+
+/*******************************************************/
+vector_t * vector_resize(vector_t *v, const size_t size) {
+  if (!v) return NULL;
+  if (size < v->size) {
+    if (v->free) {
+      for (size_t i = size; i < v->size; ++i)
+        v->free(v->data[i]);
+    }
+    memset(v->data + size, 0, sizeof(void*) * (v->size - size));
   }
+  if (size > v->cap ||
+      (v->cap > VECTOR_INIT_CAPACITY && size < v->cap / 2)) {
+    size_t cap = size + (size >> 3) + (size < 9 ? 3 : 6);
+    v = (vector_t*)xrealloc(v, sizeof(vector_t) + sizeof(void*) * cap);
+    if (!v) return NULL;
+    if (cap > v->cap)
+      memset(v->data + v->cap, 0, sizeof(void*) * (cap - v->cap));
+    v->cap = cap;
+  }
+  v->size = size;
+  return v;
 }
 
-ssize_t vector_append(vector_t *v, void *data) {
-  return vector_insert(v, v->size, data);
-}
-
-ssize_t vector_insert(vector_t *v, ssize_t idx, void *data) {
-  if (!v)
-    return -1;
-  if (idx < 0)
-    idx += v->size;
-  if (idx < 0 || idx > (ssize_t)v->size)
-    return -2;
-  vector_recapacitate(v);
-  /* make room for the new element */
-  if ((size_t)idx < v->size)
-    memmove(v->data + idx + 1, v->data + idx, sizeof(void*) * (v->size - idx));
-  v->data[idx] = data;
-  v->size++;
-  return idx;
-}
-
-
-void vector_remove(vector_t *v, ssize_t idx) {
-  if (!v)
-    return;
-  if (idx < 0)
-    idx += v->size;
-  if (idx < 0 || idx >= (ssize_t)v->size)
-    return;
-  if (v->free)
-    v->free(v->data[idx]);
-  /* overwrite the old element */
-  if ((size_t)idx < v->size - 1)
-    memmove(v->data + idx, v->data + idx + 1, sizeof(void*) * (v->size-idx-1));
-  v->size--;
-  vector_recapacitate(v);
-}
-
-
+/*******************************************************/
 void * vector_get(vector_t *v, ssize_t idx) {
-  if (!v)
-    return NULL;
-  if (idx < 0)
-    idx += v->size;
-  if (idx < 0 || idx >= (ssize_t)v->size)
-    return NULL;
+  if (!v) return NULL;
+  if (idx < 0) idx += v->size;
+  if (idx < 0 || (size_t)idx >= v->size) return NULL;
   return v->data[idx];
 }
 
-
 void vector_set(vector_t *v, ssize_t idx, void *data) {
-  if (!v)
-    return;
-  if (idx < 0)
-    idx += v->size;
-  if (idx < 0 || idx >= (ssize_t)v->size)
-    return;
-  if (v->free)
-    v->free(v->data[idx]);
+  if (!v) return;
+  if (idx < 0) idx += v->size;
+  if (idx < 0 || (size_t)idx >= v->size) return;
+  if (v->free) v->free(v->data[idx]);
   v->data[idx] = data;
 }
 
-
-void vector_resize(vector_t *v, const size_t len) {
-  if (!v)
-    return;
-  while (v->size > len) {
-    if (v->free)
-      v->free(v->data[v->size-1]);
-    v->size--;
-  }
-  if (len > v->cap) {
-    while (len > v->cap)
-      v->cap *= 2;
-    v->data = (void**)realloc(v->data, sizeof(void*) * v->cap);
-  }
-  if (len > v->size) {
-    memset(v->data + v->size, 0, sizeof(void*) * (len - v->size));
-    v->size = len;
-  }
+/*******************************************************/
+vector_t * vector_append(vector_t *v, void *data) {
+  return vector_insert(v, v->size, data);
 }
 
+vector_t * vector_insert(vector_t *v, ssize_t idx, void *data) {
+  if (!v) return NULL;
+  if (idx < 0) idx += v->size;
+  if (idx < 0 || (size_t)idx > v->size) return NULL;
+  v = vector_resize(v, v->size + 1);
+  if (!v) return NULL;
+  if ((size_t)idx < v->size - 1)
+    memmove(v->data + idx + 1, v->data + idx,
+            sizeof(void*) * (v->size - 1 - idx));
+  v->data[idx] = data;
+  return v;
+}
 
+vector_t * vector_remove(vector_t *v, ssize_t idx) {
+  if (!v) return NULL;
+  if (idx < 0) idx += v->size;
+  if (idx < 0 || (size_t)idx >= v->size) return NULL;
+  if (v->free) v->free(v->data[idx]);
+  if ((size_t)idx < v->size - 1)
+    memmove(v->data + idx, v->data + idx + 1,
+            sizeof(void*) * (v->size - 1 - idx));
+  v->data[v->size-1] = NULL;
+  return vector_resize(v, v->size - 1);
+}
+
+/*******************************************************/
 ssize_t vector_find(vector_t *v, const void *data) {
-  if (!v || !v->cmp)
-    return -2;
-  size_t i;
-  for (i = 0; i < v->size; i++)
+  if (!v) return -1;
+  if (!v->cmp) {
+    fprintf(stderr, "vector find error: no comparison function\n");
+    return -1;
+  }
+  for (size_t i = 0; i < v->size; ++i)
     if (v->cmp(v->data[i], data) == 0)
       return i;
   return -1;
 }
 
-
 void vector_foreach(vector_t *v, void (*f)(void*)) {
   if (!v || !f)
     return;
-  size_t i;
-  for (i = 0; i < v->size; i++)
+  for (size_t i = 0; i < v->size; ++i)
     f(v->data[i]);
 }
 
