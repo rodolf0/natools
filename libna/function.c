@@ -12,7 +12,7 @@ struct function_t {
 function_t * function_create(const char *func) {
   function_t *f = malloc(sizeof(function_t));
   f->expr = parser_compile_str(func);
-  f->vars = hashtbl_init(free, NULL, 0);
+  f->vars = hashtbl_init(free, NULL);
   return f;
 }
 

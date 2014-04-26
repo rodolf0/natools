@@ -5,7 +5,7 @@
 
 typedef int (*cmp_func_t)(const void *, const void *);
 typedef void (*free_func_t)(void *);
-typedef size_t (*hash_func_t)(const unsigned char *);
+typedef size_t (*hash_func_t)(const char *);
 
 /* error checked interface to malloc */
 void * xmalloc(size_t size);

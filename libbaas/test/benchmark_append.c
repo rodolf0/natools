@@ -75,7 +75,7 @@ int benchmark_bstree_append(void) {
 int benchmark_hashtbl_append(void) {
   struct timeval tv_start, tv_end;
   int i;
-  hashtbl_t *v = hashtbl_init(NULL, (cmp_func_t)intcmp, 1);
+  hashtbl_t *v = hashtbl_init(NULL, (cmp_func_t)intcmp);
   gettimeofday(&tv_start, NULL);
   for (i = 0; i < TEST_SZ; i++) {
     char key[32];
