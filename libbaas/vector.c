@@ -71,6 +71,12 @@ vector_t * vector_resize(vector_t *v, const size_t size) {
   if (size > v->cap ||
       (v->cap > VECTOR_INIT_CAPACITY && size < v->cap / 2)) {
     size_t cap = size + (size >> 3) + (size < 9 ? 3 : 6);
+#ifndef NDEBUG
+#ifdef _VERBOSE_
+    fprintf(stderr, "vector debug: cursize: %zu curcap: %zu newsize: %zu newcap %zu\n",
+            v->size, v->cap, size, cap);
+#endif
+#endif
     v = (vector_t*)xrealloc(v, sizeof(vector_t) + sizeof(void*) * cap);
     if (!v) return NULL;
     if (cap > v->cap)
