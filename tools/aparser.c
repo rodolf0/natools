@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  vars = hashtbl_init(free, NULL, 0);
+  vars = hashtbl_init(free, NULL);
 
   if (interactive) {
     char histfile[256], *expr = NULL;
