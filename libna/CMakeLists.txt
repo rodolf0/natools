@@ -9,6 +9,7 @@ add_library(na SHARED
   natools.c
 )
 target_link_libraries(na parser)
+set_target_properties(na PROPERTIES COMPILE_FLAGS "-DNDEBUG -O2")
 
 install(TARGETS na LIBRARY DESTINATION lib)
 install(FILES
@@ -30,6 +31,11 @@ target_link_libraries(test_calculus na)
 
 add_executable(test_combinatronics test/test_combinatronics.c)
 target_link_libraries(test_combinatronics na)
+
+set_target_properties(
+  test_calculus
+  test_combinatronics
+  PROPERTIES COMPILE_FLAGS "-DDEBUG -ggdb -O0")
 
 add_test(calculus test_calculus)
 add_test(combinatorics test_combinatronics)
