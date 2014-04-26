@@ -18,7 +18,7 @@ void generate_test_heap(void) {
     switch (random() % 3) {
       case 0:
       case 2:
-        e = malloc(sizeof(int)); *e = random() % 123456789;
+        e = zmalloc(sizeof(int)); *e = random() % 123456789;
         n++; sum += *e;
         heap_insert(h, e);
         break;
@@ -65,7 +65,7 @@ void generate_test_heap(void) {
 void test_heapify(void) {
   size_t i;
   /* initialize data */
-  int *array = malloc(sizeof(int) * LOTS_OF_INTS);
+  int *array = zmalloc(sizeof(int) * LOTS_OF_INTS);
   int sum = 0;
   for (i = 0; i < LOTS_OF_INTS; i++) {
     array[i] = random() % 123456789;

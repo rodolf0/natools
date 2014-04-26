@@ -18,7 +18,7 @@ int int_cmp(const int *a, const int *b) {
 
 /****** Data generation ********/
 int * generate_random_ints(int n) {
-  int i, *r = (int*)malloc(sizeof(int) * n);
+  int i, *r = (int*)zmalloc(sizeof(int) * n);
   for (i = 0; i < n; i++)
     r[i] = random() % 1024;
   return r;
@@ -33,10 +33,10 @@ char ** generate_random_strings(int n) {
   const char *alphanums = "abcdefghijklmnopqrstuvwxyz1234567890";
   int alphalen = strlen(alphanums);
 
-  char **r = (char**)malloc(sizeof(char*) * n);
+  char **r = (char**)zmalloc(sizeof(char*) * n);
   for (i = 0; i < n; i++) {
     int len = 1 + random() % 255;
-    r[i] = (char*)malloc(sizeof(char) * len);
+    r[i] = (char*)zmalloc(sizeof(char) * len);
     for (j = 0; j < len; j++)
       r[i][j] = alphanums[random() % alphalen];
     r[i][len-1] = '\0';

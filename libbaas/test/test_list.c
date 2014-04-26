@@ -16,7 +16,7 @@ int intcmp_r(const int *a, const int *b) {
 }
 
 int *_rint() {
-  int *e = (int*)malloc(sizeof(int));
+  int *e = (int*)zmalloc(sizeof(int));
   *e = random() % 123456789;
   return e;
 }
@@ -29,7 +29,7 @@ void acumulate(int *x) {
 }
 
 int * dupfunc(int *x) {
-  int *r = (int*)malloc(sizeof(int));
+  int *r = (int*)zmalloc(sizeof(int));
   *r = *x * 2;
   return r;
 }

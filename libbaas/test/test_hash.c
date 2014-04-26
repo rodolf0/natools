@@ -33,8 +33,8 @@ hashtbl_t * generate_test_ht(int allow_dups) {
       case 0:
       case 1:
       case 2: {
-        e = (int*)malloc(sizeof(int)); *e = random() % 124789;
-        rk = (char*)malloc(32);
+        e = (int*)zmalloc(sizeof(int)); *e = random() % 124789;
+        rk = (char*)zmalloc(32);
         sprintf(rk, "%d", *e);
         size_t prev_size = h->size;
         hashtbl_insert(h, rk, e);
@@ -106,7 +106,7 @@ hashtbl_t * generate_test_ht(int allow_dups) {
 
 void check_hash_distribution(hashtbl_t *h) {
   int i;
-  int *bsz = (int*)malloc(sizeof(int) * h->bktnum);
+  int *bsz = (int*)zmalloc(sizeof(int) * h->bktnum);
 
   int min = 0, max = 0, empty = 0;
 
@@ -140,7 +140,7 @@ void check_hash_function(hash_func_t hf, size_t maxkeylen) {
   for (i = 0; i < nbkt * 100; i++) {
     // generate a random key
     size_t keylen = 2 + random() % maxkeylen;
-    unsigned char *key = (unsigned char*)malloc(keylen+1);
+    unsigned char *key = (unsigned char*)zmalloc(keylen+1);
     for (j = 0; j < keylen; j++)
       key[j] = 1 + random() % 254;
     key[keylen] = '\0';
@@ -175,7 +175,7 @@ void rehash_test() {
   for (i = 0; i < 1000000; i++) {
     // generate a random key
     size_t keylen = 3 + random() % 16;
-    unsigned char *key = malloc(keylen+1);
+    unsigned char *key = zmalloc(keylen+1);
     for (j = 0; j < keylen; j++)
       key[j] = 1 + random() % 254;
     key[keylen] = '\0';

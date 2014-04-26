@@ -100,14 +100,14 @@ void generate_test_tree(int allow_dups) {
 #endif
       case 0:
       case 1:
-        e = (int*)malloc(sizeof(int)); *e = random() % 512;
+        e = (int*)zmalloc(sizeof(int)); *e = random() % 512;
         n++; sum += *e;
         bstree_insert(t, e);
         inserted++;
         break;
       case 2:
         /* try n find a possibly inserted number to remove it */
-        e = (int*)malloc(sizeof(int)); *e = random() % 512;
+        e = (int*)zmalloc(sizeof(int)); *e = random() % 512;
         node = bstree_find(t, e);
         if (node) {
           n--; sum -= *(int*)node->data;
@@ -119,7 +119,7 @@ void generate_test_tree(int allow_dups) {
 #ifndef _BALANCED_TREE_
       case 3:
         /* try n find a possibly inserted number to rotate it's node */
-        e = malloc(sizeof(int)); *e = random() % 512;
+        e = zmalloc(sizeof(int)); *e = random() % 512;
         node = bstree_find(t, e);
         if (node) {
           bstree_rotate_left(t, node);
@@ -129,7 +129,7 @@ void generate_test_tree(int allow_dups) {
         break;
       case 4:
         /* try n find a possibly inserted number to rotate it's node */
-        e = malloc(sizeof(int)); *e = random() % 512;
+        e = zmalloc(sizeof(int)); *e = random() % 512;
         node = bstree_find(t, e);
         if (node) {
           bstree_rotate_right(t, node);

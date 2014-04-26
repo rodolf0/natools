@@ -62,7 +62,7 @@ int benchmark_bstree_append(void) {
   bstree_t *v = bstree_init((free_func_t)free, (cmp_func_t)intcmp, 1);
   gettimeofday(&tv_start, NULL);
   for (i = 0; i < TEST_SZ; i++) {
-    item_t * d = (item_t*)malloc(sizeof(item_t));
+    item_t * d = (item_t*)zmalloc(sizeof(item_t));
     sprintf(d->key, "%d", test_data[i]);
     d->value = &test_data[i];
     bstree_insert(v, d);

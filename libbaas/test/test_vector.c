@@ -19,7 +19,7 @@ int intcmp(const int *a, const int *b) {
 }
 
 int *_rint() {
-  int *e = (int*)malloc(sizeof(int));
+  int *e = (int*)zmalloc(sizeof(int));
   *e = random() % 123456789;
   return e;
 }
