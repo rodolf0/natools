@@ -117,7 +117,7 @@ static void hashtbl_rehash(hashtbl_t *h) {
   size_t bktnum;
   if (h->size >= h->bktnum)
     bktnum = 2 * h->bktnum;
-  else if (h->size > HASHTBL_INIT_BUCKETS && h->size < h->bktnum / 3)
+  else if (h->size >= 2 * HASHTBL_INIT_BUCKETS && h->size < h->bktnum / 3)
     bktnum = h->bktnum / 2;
   else return;
 #ifndef NDEBUG
@@ -233,7 +233,8 @@ size_t hashtbl_delete(hashtbl_t *h, const char *key) {
     idx = vector_find(b, key);
   }
   h->size -= delcount;
-  hashtbl_rehash(h);
+  if (delcount > 0)
+    hashtbl_rehash(h);
   return delcount;
 }
 
@@ -248,8 +249,9 @@ hash_elem_t * hashtbl_find(const hashtbl_t *h, void *data) {
     vector_t *b = h->buckets[i];
     if (!b) continue;
     for (size_t j = 0; j < vector_size(b); ++j) {
-      if (h->cmp(((hash_elem_t*)vector_get(b, j))->data, data) == 0)
-        return (hash_elem_t*)vector_get(b, j);
+      hash_elem_t *e = (hash_elem_t*)vector_get(b, j);
+      if (h->cmp(e->data, data) == 0)
+        return e;
     }
   }
   return NULL;
@@ -271,11 +273,12 @@ size_t hashtbl_keys(const hashtbl_t *h, char ***keys) {
     *keys = NULL;
     return 0;
   }
+  size_t k = 0;
   *keys = (char**)zmalloc(sizeof(char*) * h->size);
   for (size_t i = 0; i < h->bktnum; ++i) {
     vector_t *b = h->buckets[i];
     if (!b) continue;
-    for (size_t j = 0, k = 0; j < vector_size(b); ++j) {
+    for (size_t j = 0; j < vector_size(b); ++j) {
       hash_elem_t *e = (hash_elem_t*)vector_get(b, j);
       size_t keylen = strlen(e->key);
       char *key = (char*)zmalloc(sizeof(char) * (keylen + 1));
@@ -285,6 +288,35 @@ size_t hashtbl_keys(const hashtbl_t *h, char ***keys) {
     }
   }
   return h->size;
+}
+
+/*******************************************************/
+void hashtbl_dump_stats(hashtbl_t *h) {
+#define _MAX_FREQ 100
+  size_t hist[_MAX_FREQ];
+  memset(hist, 0, sizeof(hist));
+  int min = 0, max = 0, undef = 0;
+
+  for (size_t i = 0; i < h->bktnum; ++i) {
+    vector_t *b = h->buckets[i];
+    if (b) {
+      size_t bsz = vector_size(b);
+      hist[bsz]++;
+      if ((int)bsz < min || i == 0) min = bsz;
+      if ((int)bsz > max || i == 0) max = bsz;
+    } else {
+      undef++;
+      hist[0]++;
+    }
+  }
+  for (size_t i = 0; i < _MAX_FREQ; ++i) {
+    if (hist[i] != 0)
+      fprintf(stderr, "items: %zu num-buckets: %zu\n", i, hist[i]);
+  }
+  fprintf(stderr,
+      "\nhashtbl stats: bkts %zu, undef %d, min %d, max %d, avg %f, tblsz %zu\n",
+      h->bktnum, undef, min, max, (float)h->size / (float)(h->bktnum - undef),
+      h->size);
 }
 
 /*******************************************************/

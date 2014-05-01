@@ -18,7 +18,7 @@ int intcmp(const int *a, const int *b) {
   return *a > *b ? 1 : (*a < *b ? -1 : 0);
 }
 
-int *_rint() {
+int * _rint() {
   int *e = (int*)zmalloc(sizeof(int));
   *e = random() % 123456789;
   return e;
