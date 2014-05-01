@@ -45,8 +45,11 @@ hash_elem_t * hashtbl_find(const hashtbl_t *h, void *data);
 void hashtbl_foreach(const hashtbl_t *h, void (*f)(void*));
 
 /* return the keys (and number) stored in the hashtable
- * if return is greater than 0 the user needs to free the keys */
+ * if return is greater than 0 the user needs to free each key and the array */
 size_t hashtbl_keys(const hashtbl_t *h, char ***keys);
+
+/* show hashtbl bucket info */
+void hashtbl_dump_stats(hashtbl_t *h);
 
 /* some hash functions (http://www.strchr.com/hash_functions) */
 size_t djb_hash(const char *key);

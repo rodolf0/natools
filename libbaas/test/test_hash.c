@@ -4,212 +4,140 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 
 #include "baas/hashtbl.h"
 #include "baas/vector.h"
 
+/******** Some aux functions for testing ***********/
 int intcmp(const int *a, const int *b) {
+  if (!a && !b)
+    return 0;
+  if (!a && b)
+    return 1;
+  if (a && !b)
+    return -1;
   return *a > *b ? 1 : (*a < *b ? -1 : 0);
 }
 
-int totalsum;
-void acumulate(int *x) {
-  totalsum += *x;
+int * _rint() {
+  int *e = (int*)zmalloc(sizeof(int));
+  *e = random() % 54321;
+  return e;
 }
 
+char * _intkey(int i) {
+  char *k = (char*)zmalloc(32);
+  sprintf(k, "%d", i);
+  return k;
+}
 
-hashtbl_t * generate_test_ht(int allow_dups) {
-  size_t n = 0, i, j;
-  int sum = 0, *e = NULL;
-  char *rk;
+int _acum_sum = 0;
+int _acum_count = 0;
+void acumulate(int *x) {
+  _acum_sum += *x;
+  _acum_count++;
+}
 
+/**************************************************/
+void check_keys(hashtbl_t *h, vector_t **keys) {
+  char **keyz;
+  size_t nkeys = hashtbl_keys(h, &keyz);
+  assert(nkeys == hashtbl_size(h));
+  for (size_t j = 0; j < nkeys; ++j) {
+    ssize_t found = vector_find(*keys, keyz[j]);
+    assert(found >= 0);
+    *keys = vector_remove(*keys, found);
+    int *e = (int*)hashtbl_get(h, keyz[j]);
+    assert(atoi(keyz[j]) == *e);
+    free(keyz[j]);
+  }
+  free(keyz);
+  assert(vector_size(*keys) == 0);
+}
+
+/**************************************************/
+hashtbl_t * generate_test_ht(size_t size, int allow_dups) {
   hashtbl_t *h = hashtbl_init(free, (cmp_func_t)intcmp);
   hashtbl_allow_dups(h, allow_dups);
-  vector_t *v = vector_init(free, NULL);
-  hash_elem_t *f;
+  vector_t *keys = vector_init(free, (cmp_func_t)strcmp);
+  size_t count = 0;
+  int sum = 0;
 
-  size_t q = random() % 17000;
-  for (i = 0; i < q; i++) {
-    switch (random() % 6) {
-      case 0:
-      case 1:
-      case 2: {
-        e = (int*)zmalloc(sizeof(int)); *e = random() % 124789;
-        rk = (char*)zmalloc(32);
-        sprintf(rk, "%d", *e);
-        size_t prev_size = hashtbl_size(h);
-        hashtbl_insert(h, rk, e);
-        if (allow_dups || hashtbl_size(h) == prev_size + 1)
-          v = vector_append(v, rk); /* keep track of keys */
-        else
-          free(rk);
-        n++; sum += *e;
+  while (hashtbl_size(h) < size) {
+    /* flip a coin to exersice different insertion ops */
+    int choice = random() % 100;
+    if (choice < 70) {
+      int *e = _rint();
+      char *k = _intkey(*e);
+      if (vector_find(keys, k) < 0 || allow_dups != 0) {
+        count++; sum += *e;
+        keys = vector_append(keys, k);
       }
-        break;
-      case 3:
-        if (!hashtbl_size(h)) continue;
-        rk = (char*)vector_get(v, random() % vector_size(v));
-        e = (int*)hashtbl_get(h, rk);
-        assert(atoi(rk) == *e);
-        break;
-      case 4:
-        if (!hashtbl_size(h)) continue;
-        j = random() % vector_size(v);
-        rk = (char*)vector_get(v, j);
-        e = (int*)hashtbl_get(h, rk);
-        n--; sum -= *e;
-        hashtbl_delete(h, rk);
-        v = vector_remove(v, j);
-        break;
-      case 5:
-        if (!hashtbl_size(h)) continue;
-        j = random() % vector_size(v);
-        rk = (char*)vector_get(v, j);
-        int k = atoi(rk);
-        f = hashtbl_find(h, &k);
-        n--; sum -= *(int*)hash_elem_data(f);
-        hashtbl_remove(h, f);
-        v = vector_remove(v, j);
-        break;
+      assert(hashtbl_insert(h, k, e) != NULL);
+      assert(hashtbl_size(h) == count);
+    } else if (hashtbl_size(h) > 0 && choice < 85) {
+      size_t idx = random() % vector_size(keys);
+      char *k = (char*)vector_get(keys, idx);
+      if (allow_dups == 0) {
+        count--; sum -= *(int*)hashtbl_get(h, k);
+        assert(hashtbl_delete(h, k) == 1);
+        keys = vector_remove(keys, idx);
+      } else {
+        char kk[33]; strcpy(kk, k);
+        size_t delcount = 0;
+        ssize_t f = vector_find(keys, kk);
+        while (f >= 0) {
+          count--; sum -= atoi((char*)vector_get(keys, f));
+          delcount++;
+          keys = vector_remove(keys, f);
+          f = vector_find(keys, kk);
+        }
+        size_t oldsz = hashtbl_size(h);
+        assert(hashtbl_delete(h, kk) == delcount);
+        assert(hashtbl_size(h) == oldsz - delcount);
+      }
+    } else if (hashtbl_size(h) > 0 && choice < 100) {
+      size_t idx = random() % vector_size(keys);
+      char *k = (char*)vector_get(keys, idx);
+      int ik = atoi(k);
+      hash_elem_t *e = hashtbl_find(h, &ik);
+      count--; sum -= *(int*)hash_elem_data(e);
+      size_t oldsz = hashtbl_size(h);
+      hashtbl_remove(h, e);
+      assert(hashtbl_size(h) == oldsz - 1);
+      keys = vector_remove(keys, idx);
     }
   }
 
+  _acum_sum = 0;
+  _acum_count = 0;
+  hashtbl_foreach(h, (void(*)(void*))acumulate);
+  assert(_acum_sum == sum);
+  assert(_acum_count == (int)count);
 
-  char **keys;
-  size_t num_keys = hashtbl_keys(h, &keys);
-  if (allow_dups)
-    assert(num_keys == hashtbl_size(h));
-  for (j = 0; j < num_keys; j++) {
-    e = (int*)hashtbl_get(h, keys[j]);
-    assert(atoi(keys[j]) == *e);
-    free(keys[j]);
-  }
-  free(keys);
-
-  if (allow_dups) {
-    assert(n == hashtbl_size(h));
-    totalsum = 0;
-    hashtbl_foreach(h, (void(*)(void*))acumulate);
-    assert(sum == totalsum);
-  } else {
-    while (hashtbl_size(h)) {
-      rk = (char*)vector_get(v, 0);
-      hashtbl_delete(h, rk);
-      assert(hashtbl_find(h, rk) == NULL);
-      v = vector_remove(v, 0);
-    }
-  }
-
-  vector_destroy(v);
+  check_keys(h, &keys);
+  vector_destroy(keys);
   return h;
 }
 
 
-#if 0
-void check_hash_distribution(hashtbl_t *h) {
-  int i;
-  int *bsz = (int*)zmalloc(sizeof(int) * hashtbl_numbkt(h));
-
-  int min = 0, max = 0, empty = 0;
-
-  for (i = 0; (size_t)i < hashtbl_numbkt(h); i++) {
-    if (h->buckets[i]) {
-      bsz[i] = vector_size(h->buckets[i]);
-      if (bsz[i] < min || i == 0) min = bsz[i];
-      if (bsz[i] > max || i == 0) max = bsz[i];
-    } else
-      empty++;
-  }
-#ifdef _DEBUG_
-  fprintf(stderr,
-      " bucket stats: n %lu, empty %d, min %d, max %d, total %lu, avg %f\n",
-      h->bktnum, empty, min, max, hashtbl_size(h),
-      (float)hashtbl_size(h) / (float)(h->bktnum - empty));
-#endif
-
-  free(bsz);
-}
-#endif
-
-void check_hash_function(hash_func_t hf, size_t maxkeylen) {
-  size_t buckets[4096];
-  const size_t nbkt = sizeof(buckets) / sizeof(size_t);
-  size_t i, j;
-
-  for (i = 0; i < nbkt; i++)
-    buckets[i] = 0;
-
-  for (i = 0; i < nbkt * 100; i++) {
-    // generate a random key
-    size_t keylen = 2 + random() % maxkeylen;
-    char *key = (char*)zmalloc(keylen+1);
-    for (j = 0; j < keylen; j++)
-      key[j] = 1 + random() % 254;
-    key[keylen] = '\0';
-    // hash into bucket
-    buckets[hf(key) % nbkt]++;
-    free(key);
-  }
-
-  size_t min = 0, max = 0, empty = 0;
-  for (i = 0; i < nbkt; i++) {
-    if (buckets[i] < min || i == 0) min = buckets[i];
-    if (buckets[i] > max || i == 0) max = buckets[i];
-    if (buckets[i] == 0) empty++;
-  }
-
-#ifdef _DEBUG_
-  fprintf(stderr,
-      " bucket stats: n %lu, empty %lu, min %lu, max %lu, total %lu, avg %f\n",
-      nbkt, empty, min, max, 100 * nbkt,
-      (float)(100 * nbkt) / (float)(nbkt - empty));
-#endif
-
-  assert(max - min < 10 * 100*nbkt / (nbkt - empty));
-  assert(empty == 0 || 100*nbkt < 10 * nbkt);
-}
-
-
-#ifdef _DEBUG_
-void rehash_test() {
-  hashtbl_t *h = hashtbl_init(NULL, NULL);
-  hashtbl_allow_dups(h, 1);
-  size_t i, j;
-  for (i = 0; i < 1000000; i++) {
-    // generate a random key
-    size_t keylen = 3 + random() % 16;
-    unsigned char *key = zmalloc(keylen+1);
-    for (j = 0; j < keylen; j++)
-      key[j] = 1 + random() % 254;
-    key[keylen] = '\0';
-    hashtbl_insert(h, (char*)key, NULL);
-    free(key);
-    if (i%1000)
-      fprintf(stderr, "\rinserting ... %lu%%\t\t\t", 100*i/1000000);
-  }
-  hashtbl_destroy(h);
-}
-#endif
-
-#define ITERATIONS 60
+#define ITERATIONS 1000
 int main(void) {
   int i;
   for (i = 1; i <= ITERATIONS; i++) {
-    fprintf(stderr, "\rtesting ... %d%%", 100*i/ITERATIONS);
-    hashtbl_t *h = generate_test_ht(i % 2);
-#ifdef _DEBUG_
-    check_hash_distribution(h);
-#endif
-    switch (i % 20) {
-      case 0: check_hash_function(djb_hash, i); break;
-      case 1: check_hash_function(sbox_hash, i); break;
-      default: break;
+    size_t vs = 1 + random() % (2 * i);
+    fprintf(stderr, "\rtesting size=%-6zu ... %3d%%", vs, 100 * i / ITERATIONS);
+    hashtbl_t *h = generate_test_ht(vs, i % 2);
+#ifdef _VERBOSE_
+    if (i % 100 == 0) {
+      fprintf(stderr, "\n");
+      hashtbl_dump_stats(h);
+      fprintf(stderr, "\n");
     }
+#endif
     hashtbl_destroy(h);
   }
-#ifdef _DEBUG_
-  rehash_test();
-#endif
   fprintf(stderr, "\n");
   return 0;
 }
