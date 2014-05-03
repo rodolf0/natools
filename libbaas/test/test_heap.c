@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-
 #include "baas/heap.h"
 
 int intcmp(const int *a, const int *b) {
@@ -29,28 +28,28 @@ void generate_test_heap(void) {
     }
 
     /* check propper auto resize */
-    assert(h->bufsz >= h->size);
-    for (j = 0; j < h->size; j++) {
+    assert(heap_capacity(h) >= heap_size(h));
+    for (j = 0; j < heap_size(h); j++) {
       size_t left = heap_child_l(j);
       size_t right = heap_child_r(j);
       size_t greatest = heap_greatest_child(h, j);
 
       /* check for heap order is preserved and greatest child is correct */
-      if (h->size > right) {
-        assert(*(int*)h->data[j] >= *(int*)h->data[right]);
-        assert(*(int*)h->data[greatest] >= *(int*)h->data[right]);
+      if (heap_size(h) > right) {
+        assert(*(int*)heap_get(h, j) >= *(int*)heap_get(h, right));
+        assert(*(int*)heap_get(h, greatest) >= *(int*)heap_get(h, right));
       }
-      if (h->size > left) {
-        assert(*(int*)h->data[j] >= *(int*)h->data[left]);
-        assert(*(int*)h->data[greatest] >= *(int*)h->data[left]);
+      if (heap_size(h) > left) {
+        assert(*(int*)heap_get(h, j) >= *(int*)heap_get(h, left));
+        assert(*(int*)heap_get(h, greatest) >= *(int*)heap_get(h, left));
       }
     }
   }
 
-  assert(h->size == n);
+  assert(heap_size(h) == n);
   int ctrlsum = 0, maxctrl;
-  if (h->size) maxctrl = *(int*)h->data[0];
-  while (h->size) {
+  if (heap_size(h)) maxctrl = *(int*)heap_get(h, 0);
+  while (heap_size(h)) {
     e = heap_pop(h); ctrlsum += *e;
     /* check that elements are in heap order */
     assert(*e <= maxctrl); maxctrl = *e;
@@ -76,11 +75,11 @@ void test_heapify(void) {
   heap_t *h = heap_heapify(array, LOTS_OF_INTS, sizeof(int),
                            NULL, (cmp_func_t)intcmp);
 
-  assert(h->size == LOTS_OF_INTS);
+  assert(heap_size(h) == LOTS_OF_INTS);
   int ctrlsum = 0, maxctrl, *e;
   /* peek head */
-  if (h->size) maxctrl = *(int*)h->data[0];
-  while (h->size) {
+  if (heap_size(h)) maxctrl = *(int*)heap_get(h, 0);
+  while (heap_size(h)) {
     e = heap_pop(h); ctrlsum += *e;
     /* check that elements are in heap order */
     assert(*e <= maxctrl); maxctrl = *e;
