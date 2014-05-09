@@ -1,7 +1,5 @@
 #include <string.h>
-#ifdef _VERBOSE_
 #include <stdio.h>
-#endif
 
 #include "parser/scanner.h"
 #include "parser/lexer.h"
@@ -54,9 +52,7 @@ static statefn integer(scanner_t *s) {
 /* identify the fractional part of a number */
 static statefn fractional(scanner_t *s) {
   if (!is_num(scanner_peek(s))) {
-#ifdef _VERBOSE_
     fprintf(stderr, "lexer error: expected fractional part\n");
-#endif
     return error;
   }
 
@@ -78,9 +74,7 @@ static statefn exponent(scanner_t *s) {
     scanner_advance(s);
 
   if (!is_num(scanner_peek(s))) {
-#ifdef _VERBOSE_
     fprintf(stderr, "lexer error: expected exponent\n");
-#endif
     return error;
   }
 

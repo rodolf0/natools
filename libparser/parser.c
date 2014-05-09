@@ -134,9 +134,6 @@ token_t * adjust_token(token_t *t, token_t *prev) {
 
 expr_t * parser_compile(lexer_t *l) {
   if (!l) {
-#ifdef _VERBOSE_
-    fprintf(stderr, "parser: Invalid lexer\n");
-#endif
     return NULL;
   }
 
@@ -168,30 +165,20 @@ expr_t * parser_compile(lexer_t *l) {
       case E0:
         error = -1; break; /* parsing finished */
       case E3:
-#ifdef _VERBOSE_
         fprintf(stderr, "syntactic error: expected binary operator or eol\n");
-#endif
         error = 3; break;
       case E4:
-#ifdef _VERBOSE_
         fprintf(stderr, "syntactic error: unbalanced open parenthesis\n");
-#endif
         error = 4; break;
       case E5:
-#ifdef _VERBOSE_
         fprintf(stderr, "syntactic error: comma only allowed bt function arguments\n");
-#endif
         error = 5; break;
       case E6:
-#ifdef _VERBOSE_
         fprintf(stderr, "syntactic error: unbalanced closing parenthesis\n");
-#endif
         error = 6; break;
       case E8:
-#ifdef _VERBOSE_
         fprintf(stderr, "syntactic error: stack [%d:%s], buffer [%d:%s]\n",
                 st->lexcomp, st->lexem, bf->lexcomp, bf->lexem);
-#endif
         error = 8; break;
     }
   }

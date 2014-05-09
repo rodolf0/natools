@@ -75,7 +75,7 @@ void check_operators(void) {
 }
 
 void check_functions(void) {
-  long double *a = (long double*)malloc(sizeof(long double));
+  long double *a = (long double*)zmalloc(sizeof(long double));
   *a = 46;
   hashtbl_insert(vars, "a", a);
 
@@ -129,7 +129,7 @@ void check_precedence(void) {
 
 void check_longer(void) {
   ASSERT_EQ(evaluate("5.23e+3**4**-2 + avg(34>>2, phi < pi, max(phi, pi, 3.2))"), 5.774346129827);
-  long double *x = (long double*)malloc(sizeof(long double));
+  long double *x = (long double*)zmalloc(sizeof(long double));
   hashtbl_insert(vars, "x", x);
   *x = 3.0;
   ASSERT_EQ(evaluate("e**tan(x)/(1+x**2)*sin((1+log(x)**2)**0.5)"), 0.0864000589547301);

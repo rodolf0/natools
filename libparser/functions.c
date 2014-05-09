@@ -127,16 +127,16 @@ void register_functions(hashtbl_t *h) {
 
 void register_constants(hashtbl_t *h) {
   long double *x;
-  x = (long double*)malloc(sizeof(long double)); *x = M_PI;
+  x = (long double*)zmalloc(sizeof(long double)); *x = M_PI;
   hashtbl_insert(h, "pi", x);
 
-  x = (long double*)malloc(sizeof(long double)); *x = M_E;
+  x = (long double*)zmalloc(sizeof(long double)); *x = M_E;
   hashtbl_insert(h, "e", x);
 
-  x = (long double*)malloc(sizeof(long double)); *x = (1.0 + sqrtl(5)) / 2.0;
+  x = (long double*)zmalloc(sizeof(long double)); *x = (1.0 + sqrtl(5)) / 2.0;
   hashtbl_insert(h, "phi", x);
 
-  x = (long double*)malloc(sizeof(long double)); *x = 27021984;
+  x = (long double*)zmalloc(sizeof(long double)); *x = 27021984;
   hashtbl_insert(h, "_stashed", x);
 }
 

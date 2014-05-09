@@ -7,7 +7,7 @@ add_library(parser SHARED
 )
 target_link_libraries(parser baas m)
 # let the parser complain on errors
-set_target_properties(parser PROPERTIES COMPILE_FLAGS "-DNDEBUG -O2 -D_VERBOSE_")
+set_target_properties(parser PROPERTIES COMPILE_FLAGS "-DNDEBUG -O2")
 
 install(TARGETS parser LIBRARY DESTINATION lib)
 install(FILES
@@ -34,7 +34,7 @@ set_target_properties(
   test_scanner
   test_lexer
   test_parser
-  PROPERTIES COMPILE_FLAGS "-DDEBUG -ggdb -O0 -D_VERBOSE_")
+  PROPERTIES COMPILE_FLAGS "-DDEBUG -ggdb -O0")
 
 
 add_test(NAME scanner

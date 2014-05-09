@@ -30,7 +30,7 @@ int is_white(char x) {
 
 
 static token_t * tok_maker(const char *base, size_t n) {
-  token_t *t = (token_t*)malloc(sizeof(token_t) + n + 1);
+  token_t *t = (token_t*)zmalloc(sizeof(token_t) + n + 1);
   t->lexem = (char*)t + sizeof(token_t); /* piggyback lexem */
   memmove(t->lexem, base, n);
   t->lexem[n] = '\0';
@@ -98,7 +98,7 @@ token_t * lexer_nextitem(scanner_t *s) {
 lexer_t * lexer_init(scanner_t *s) {
   if (!s)
     return NULL;
-  lexer_t *l = (lexer_t*)malloc(sizeof(lexer_t));
+  lexer_t *l = (lexer_t*)zmalloc(sizeof(lexer_t));
   l->s = s;
   l->tokenized = list_init((free_func_t)token_destroy, NULL);
   l->curtok = NULL;

@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "parser/scanner.h"
+#include "baas/common.h"
 
 #define SCANNER_BUF_SZ 1024
 
@@ -26,12 +27,12 @@ scanner_t * scanner_init_file(const char *file) {
 scanner_t * scanner_init_fp(FILE *fp) {
   if (!fp)
     return NULL;
-  scanner_t *s = (scanner_t*)malloc(sizeof(scanner_t));
+  scanner_t *s = (scanner_t*)zmalloc(sizeof(scanner_t));
   memset(s, 0, sizeof(scanner_t));
   s->fp = fp;
   s->length = s->start = 0;
   s->buf_cap = SCANNER_BUF_SZ;
-  s->buffer = (char*)malloc(s->buf_cap);
+  s->buffer = (char*)zmalloc(s->buf_cap);
   /* initial buffer fill */
   int r = fread(s->buffer, 1, s->buf_cap, s->fp);
   if (r < 0) {
@@ -43,11 +44,11 @@ scanner_t * scanner_init_fp(FILE *fp) {
 }
 
 scanner_t *scanner_init(const char *buffer) {
-  scanner_t *s = (scanner_t*)malloc(sizeof(scanner_t));
+  scanner_t *s = (scanner_t*)zmalloc(sizeof(scanner_t));
   memset(s, 0, sizeof(scanner_t));
   s->length = s->start = 0;
   s->buf_cap = s->buf_sz = strlen(buffer);
-  s->buffer = (char*)malloc(s->buf_cap + 1);
+  s->buffer = (char*)zmalloc(s->buf_cap + 1);
   /* initial buffer fill */
   memmove(s->buffer, buffer, s->buf_sz);
   s->buffer[s->buf_cap] = 0;

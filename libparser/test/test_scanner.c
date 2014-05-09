@@ -4,9 +4,10 @@
 #include <stdio.h>
 
 #include "parser/scanner.h"
+#include "baas/common.h"
 
 char * test_accept_fn(char *start, size_t len) {
-  char *r = (char*)malloc(sizeof(char) * len + 1);
+  char *r = (char*)zmalloc(sizeof(char) * len + 1);
   memcpy(r, start, len);
   r[len] = '\0';
   return r;

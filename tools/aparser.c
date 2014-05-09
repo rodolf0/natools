@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "baas/common.h"
 #include "baas/xstring.h"
 #include "baas/hashtbl.h"
 #include "parser/scanner.h"
@@ -35,7 +36,7 @@ int parse_asignment(char *var, lexer_t *l) {
   expr_t *e = parser_compile(l);
   if (!e)
     return 1;
-  long double *r = malloc(sizeof(long double));
+  long double *r = zmalloc(sizeof(long double));
   int err = parser_eval(e, r, vars);
   parser_destroy_expr(e);
   if (err)
