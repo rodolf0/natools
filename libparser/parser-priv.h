@@ -10,6 +10,7 @@ typedef enum {
   EQ = 0,
   GT = 1,
   E0, /* empty buffer and stack, end of parsing */
+  E2, /* no associativity */
   E3, /* expected binary operator or eol */
   E4, /* unbalanced open parenthesis */
   E5, /* comma only allowed between function arguments */

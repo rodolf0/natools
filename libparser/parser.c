@@ -61,22 +61,22 @@ op_prec_t parser_precedence(lexcomp_t op1, lexcomp_t op2) {
   /* rows: element on the stack, cols: elements from the buffer */
   static const op_prec_t _precedence[28][28] = {
          /*  +   -   -u  *   /   %   **  >>  <<  &   |   ^   ~   !   &&  ||  ==  !=  >   <   >=  <=  (   )   ,   id  f   $  */
-   /*  + */ {GT, GT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /*  - */ {GT, GT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /* -u */ {GT, GT, LT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /*  * */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /*  / */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /*  % */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /* ** */ {GT, GT, LT, GT, GT, GT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /* >> */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /* << */ {LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /*  & */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
-   /*  | */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, LT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
-   /*  ^ */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
-   /*  ~ */ {GT, GT, LT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /*  ! */ {GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
-   /* && */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
-   /* || */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /*  + */ {GT, GT, LT, LT, LT, LT, LT, E2, E2, E2, E2, E2, E2, E2, E2, E2, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  - */ {GT, GT, LT, LT, LT, LT, LT, E2, E2, E2, E2, E2, E2, E2, E2, E2, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* -u */ {GT, GT, LT, GT, GT, GT, GT, E2, E2, E2, E2, E2, E2, E2, E2, E2, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  * */ {GT, GT, LT, GT, GT, GT, LT, E2, E2, E2, E2, E2, E2, E2, E2, E2, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  / */ {GT, GT, LT, GT, GT, GT, LT, E2, E2, E2, E2, E2, E2, E2, E2, E2, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  % */ {GT, GT, LT, GT, GT, GT, LT, E2, E2, E2, E2, E2, E2, E2, E2, E2, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* ** */ {GT, GT, LT, GT, GT, GT, LT, E2, E2, E2, E2, E2, E2, E2, E2, E2, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* >> */ {E2, E2, E2, E2, E2, E2, E2, GT, GT, GT, GT, GT, LT, E2, E2, E2, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* << */ {E2, E2, E2, E2, E2, E2, E2, GT, GT, GT, GT, GT, LT, E2, E2, E2, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  & */ {E2, E2, E2, E2, E2, E2, E2, LT, LT, GT, GT, GT, LT, E2, E2, E2, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /*  | */ {E2, E2, E2, E2, E2, E2, E2, LT, LT, LT, GT, LT, LT, E2, E2, E2, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /*  ^ */ {E2, E2, E2, E2, E2, E2, E2, LT, LT, LT, GT, GT, LT, E2, E2, E2, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /*  ~ */ {E2, E2, E2, E2, E2, E2, E2, GT, GT, GT, GT, GT, LT, E2, E2, E2, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /*  ! */ {E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
+   /* && */ {E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, LT, GT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
+   /* || */ {E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, E2, LT, LT, GT, LT, LT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
    /* == */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, GT, GT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
    /* != */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, GT, GT, LT, LT, LT, LT, LT, GT, GT, LT, LT, GT},
    /*  > */ {LT, LT, LT, LT, LT, LT, LT, LT, LT, GT, GT, GT, LT, LT, GT, GT, GT, GT, GT, GT, GT, GT, LT, GT, GT, LT, LT, GT},
@@ -164,6 +164,9 @@ expr_t * parser_compile(lexer_t *l) {
 
       case E0:
         error = -1; break; /* parsing finished */
+      case E2:
+        fprintf(stderr, "syntactic error: no associativity\n");
+        error = 2; break;
       case E3:
         fprintf(stderr, "syntactic error: expected binary operator or eol\n");
         error = 3; break;
