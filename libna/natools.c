@@ -3,7 +3,7 @@
 #include "na/natools.h"
 
 interval_t *interval_create(long double x0, long double x1) {
-  interval_t *i = (interval_t*)malloc(sizeof(interval_t));
+  interval_t *i = (interval_t*)zmalloc(sizeof(interval_t));
   i->x0 = x0;
   i->x1 = x1;
   return i;
@@ -21,7 +21,7 @@ void interval_swap(interval_t *i) {
 }
 
 stop_cond_t *stop_cond_create(long double e, int max_i) {
-  stop_cond_t *s = (stop_cond_t*)malloc(sizeof(stop_cond_t));
+  stop_cond_t *s = (stop_cond_t*)zmalloc(sizeof(stop_cond_t));
   s->epsilon = e;
   s->max_iterations = max_i;
   return s;
@@ -37,8 +37,8 @@ long double *vector_at(vector_t *v, size_t n) {
 }
 
 matrix_t *matrix_create(size_t r, size_t c) {
-  matrix_t *m = (matrix_t*)malloc(sizeof(matrix_t));
-  m->a = (long double*)malloc(sizeof(long double) * r * c);
+  matrix_t *m = (matrix_t*)zmalloc(sizeof(matrix_t));
+  m->a = (long double*)zmalloc(sizeof(long double) * r * c);
   m->r = r;
   m->c = c;
   return m;

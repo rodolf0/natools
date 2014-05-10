@@ -10,7 +10,7 @@ struct function_t {
 };
 
 function_t * function_create(const char *func) {
-  function_t *f = malloc(sizeof(function_t));
+  function_t *f = zmalloc(sizeof(function_t));
   f->expr = parser_compile_str(func);
   f->vars = hashtbl_init(free, NULL);
   return f;
@@ -27,7 +27,7 @@ void function_destroy(function_t *f) {
 long double function_eval(function_t *f, long double x0) {
   long double *x = hashtbl_get(f->vars, "x");
   if (!x) {
-    x = malloc(sizeof(long double));
+    x = zmalloc(sizeof(long double));
     *x = x0;
     hashtbl_insert(f->vars, "x", x);
   } else
