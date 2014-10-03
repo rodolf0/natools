@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "baas/common.h"
 #include "na/natools.h"
 
 interval_t *interval_create(long double x0, long double x1) {
