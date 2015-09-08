@@ -30,7 +30,7 @@ int root_secant(function_t *f, interval_t *i, stop_cond_t *s, long double *r) {
     /* calculate next aproximation */
     d = f1 * (i->x1 - i->x0) / (f1 - f0);
     /* check stop condition */
-    if (fabs(d) < s->epsilon) break;
+    if (fabsl(d) < s->epsilon) break;
 
     /* update secant points */
     i->x0 = i->x1; f0 = f1;
@@ -56,7 +56,7 @@ int root_newton(function_t *f, long double x0, stop_cond_t *s, long double *r) {
     /* evaluate f'(x) at x0 */
     df0_dx = derivate_1(f, x0);
     /* check stop condition */
-    if (fabs(d = f0 / df0_dx) < s->epsilon) break;
+    if (fabsl(d = f0 / df0_dx) < s->epsilon) break;
 
     x0 -= d;
 
@@ -95,7 +95,7 @@ int root_bisection(function_t *f, interval_t *i, stop_cond_t *s, long double *r)
     fm = function_eval(f, m);
     /* check stop conditions */
     if (i->x0 == m || i->x1 == m ||
-        fabs(i->x0 - i->x1) < s->epsilon) break;
+        fabsl(i->x0 - i->x1) < s->epsilon) break;
 
     /* update endpoints */
     if (fm < 0.0) {
@@ -141,7 +141,7 @@ int root_regulafalsi(function_t *f, interval_t *i, stop_cond_t *s, long double *
     /* get the root of the secant */
     m = (f1 * i->x0 - f0 * i->x1) / (f1 - f0);
     /* check stop conditions */
-    if (fabs(i->x0 - i->x1) < s->epsilon * fabs(i->x0 + i->x1))
+    if (fabsl(i->x0 - i->x1) < s->epsilon * fabsl(i->x0 + i->x1))
       break;
 
     fm = function_eval(f, m);
