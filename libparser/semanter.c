@@ -152,6 +152,7 @@ int parser_eval(const expr_t *e, long double *r, hashtbl_t *vars) {
           list_destroy(args);
           return 1;
         }
+        /*FALLTHROUGH*/
       case stUniOperator:
         /* lhs operand, don't pop it... use it to store the result too */
         if (!(d = (long double*)list_peek_head(args))) {
