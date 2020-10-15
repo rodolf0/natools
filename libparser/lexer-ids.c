@@ -86,20 +86,20 @@ static statefn exponent(scanner_t *s) {
 
 
 /* check if the current string is a reserved word */
-static int cmp_true(char *start, size_t len) {
-  return strncmp(start, "true", len < 4 ? 4 : len);
+static void * cmp_true(char *start, size_t len) {
+  return (void*)(long int)strncmp(start, "true", len < 4 ? 4 : len);
 }
-static int cmp_false(char *start, size_t len) {
-  return strncmp(start, "false", len < 5 ? 5 : len);
+static void * cmp_false(char *start, size_t len) {
+  return (void*)(long int)strncmp(start, "false", len < 5 ? 5 : len);
 }
-static int cmp_and(char *start, size_t len) {
-  return strncmp(start, "and", len < 3 ? 3 : len);
+static void * cmp_and(char *start, size_t len) {
+  return (void*)(long int)strncmp(start, "and", len < 3 ? 3 : len);
 }
-static int cmp_not(char *start, size_t len) {
-  return strncmp(start, "not", len < 3 ? 3 : len);
+static void * cmp_not(char *start, size_t len) {
+  return (void*)(long int)strncmp(start, "not", len < 3 ? 3 : len);
 }
-static int cmp_or(char *start, size_t len) {
-  return strncmp(start, "or", len < 2 ? 2 : len);
+static void * cmp_or(char *start, size_t len) {
+  return (void*)(long int)strncmp(start, "or", len < 2 ? 2 : len);
 }
 
 static lexcomp_t reserved_word(scanner_t *s) {

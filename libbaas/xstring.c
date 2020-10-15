@@ -37,10 +37,10 @@ size_t strrep(char *dest, const char *source,
 
   while ((off_found = strstr(off_found, what))) {
     /* copy prefix */
-    strncpy(off_dest, off_source, off_found - off_source);
+    memcpy(off_dest, off_source, off_found - off_source);
     off_dest += off_found - off_source;
     /* copy replacement */
-    strncpy(off_dest, with, len_with);
+    memcpy(off_dest, with, len_with);
     off_dest += len_with;
 
     /* advance start copy  & search pointers */
@@ -52,7 +52,7 @@ size_t strrep(char *dest, const char *source,
 
   /* copy suffix */
   n = strlen(off_source);
-  strncpy(off_dest, off_source, n);
+  memcpy(off_dest, off_source, n);
   off_dest[n] = '\0';
 
   return count;
